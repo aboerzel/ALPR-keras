@@ -1,6 +1,9 @@
 # Under construction...
 
 
+https://hackernoon.com/latest-deep-learning-ocr-with-keras-and-supervisely-in-15-minutes-34aecd630ed8
+
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/aboerzel/ANPR-keras/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
