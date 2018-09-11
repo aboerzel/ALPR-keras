@@ -19,92 +19,84 @@ from keras.optimizers import SGD
 print('Keras version:', keras.__version__)
 
 
-def get_counter(dirpath, tag):
-    dirname = os.path.basename(dirpath)
-    ann_dirpath = join(dirpath, 'ann')
-    letters = ''
-    lens = []
-    for filename in os.listdir(ann_dirpath):
-        json_filepath = join(ann_dirpath, filename)
-        ann = json.load(open(json_filepath, 'r'))
-        tags = ann['tags']
-        if tag in tags:
-            description = ann['description']
-            lens.append(len(description))
-            letters += description
-    print('Max plate length in "%s":' % dirname, max(Counter(lens).keys()))
-    return Counter(letters)
+# def get_counter(dirpath, tag):
+#     dirname = os.path.basename(dirpath)
+#     ann_dirpath = join(dirpath, 'ann')
+#     letters = ''
+#     lens = []
+#     for filename in os.listdir(ann_dirpath):
+#         json_filepath = join(ann_dirpath, filename)
+#         ann = json.load(open(json_filepath, 'r'))
+#         tags = ann['tags']
+#         if tag in tags:
+#             description = ann['description']
+#             lens.append(len(description))
+#             letters += description
+#     print('Max plate length in "%s":' % dirname, max(Counter(lens).keys()))
+#     return Counter(letters)
 
 
-c_val = get_counter('/data/anpr_ocr__train', 'val')
-c_train = get_counter('/data/anpr_ocr__train', 'train')
-letters_train = set(c_train.keys())
-letters_val = set(c_val.keys())
-if letters_train == letters_val:
-    print('Letters in train and val do match')
-else:
-    raise Exception()
+#c_val = get_counter('/data/anpr_ocr__train', 'val')
+#c_train = get_counter('/data/anpr_ocr__train', 'train')
+#letters_train = set(c_train.keys())
+#letters_val = set(c_val.keys())
+#if letters_train == letters_val:
+#    print('Letters in train and val do match')
+#else:
+#    raise Exception()
 # print(len(letters_train), len(letters_val), len(letters_val | letters_train))
-letters = sorted(list(letters_train))
-print('Letters:', ' '.join(letters))
+letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789"))
+#print('Letters:', ' '.join(letters))
 
 
-def labels_to_text(labels):
-    return ''.join(list(map(lambda x: letters[int(x)], labels)))
+#def labels_to_text(labels):
+#    return ''.join(list(map(lambda x: letters[int(x)], labels)))
 
 
 def text_to_labels(text):
     return list(map(lambda x: letters.index(x), text))
 
 
-def is_valid_str(s):
-    for ch in s:
-        if not ch in letters:
-            return False
-    return True
+#def is_valid_str(s):
+#    for ch in s:
+#        if not ch in letters:
+#            return False
+#    return True
 
 
 class TextImageGenerator:
 
     def __init__(self,
-                 dirpath,
-                 tag,
+                 img_dirpath,
                  img_w, img_h,
                  batch_size,
                  downsample_factor,
-                 max_text_len=8):
+                 max_text_len=9):
 
         self.img_h = img_h
         self.img_w = img_w
         self.batch_size = batch_size
         self.max_text_len = max_text_len
         self.downsample_factor = downsample_factor
-
-        img_dirpath = join(dirpath, 'img')
-        ann_dirpath = join(dirpath, 'ann')
         self.samples = []
         for filename in os.listdir(img_dirpath):
             name, ext = os.path.splitext(filename)
-            if ext in ['.png', '.jpg']:
-                img_filepath = join(img_dirpath, filename)
-                json_filepath = join(ann_dirpath, name + '.json')
-                ann = json.load(open(json_filepath, 'r'))
-                description = ann['description']
-                tags = ann['tags']
-                if tag not in tags:
-                    continue
-                if is_valid_str(description):
-                    self.samples.append([img_filepath, description])
+            img_filepath = join(img_dirpath, filename)
+            self.samples.append([img_filepath.encode('utf-8'), name.replace("-", "")])
 
         self.n = len(self.samples)
         self.indexes = list(range(self.n))
         self.cur_index = 0
 
+
     def build_data(self):
         self.imgs = np.zeros((self.n, self.img_h, self.img_w))
         self.texts = []
         for i, (img_filepath, text) in enumerate(self.samples):
-            img = cv2.imread(img_filepath)
+            stream = open(img_filepath, "rb")
+            bytes = bytearray(stream.read())
+            numpyarray = np.asarray(bytes, dtype=np.uint8)
+            img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = cv2.resize(img, (self.img_w, self.img_h))
             img = img.astype(np.float32)
@@ -114,7 +106,8 @@ class TextImageGenerator:
             self.imgs[i, :, :] = img
             self.texts.append(text)
 
-    def get_output_size(self):
+    @staticmethod
+    def get_output_size():
         return len(letters) + 1
 
     def next_sample(self):
@@ -186,9 +179,9 @@ def train(img_w, load=False):
 
     batch_size = 32
     downsample_factor = pool_size ** 2
-    tiger_train = TextImageGenerator('/data/anpr_ocr__train', 'train', img_w, img_h, batch_size, downsample_factor)
+    tiger_train = TextImageGenerator('D:/development/train', img_w, img_h, batch_size, downsample_factor)
     tiger_train.build_data()
-    tiger_val = TextImageGenerator('/data/anpr_ocr__train', 'val', img_w, img_h, batch_size, downsample_factor)
+    tiger_val = TextImageGenerator('D:/development/test', img_w, img_h, batch_size, downsample_factor)
     tiger_val.build_data()
 
     act = 'relu'
@@ -244,17 +237,18 @@ def train(img_w, load=False):
 
     if not load:
         # captures output of softmax so we can decode the output during visualization
-        test_func = K.function([input_data], [y_pred])
+        #test_func = K.function([input_data], [y_pred])
 
-        model.fit_generator(generator=tiger_train.next_batch(),
+        try:
+           model.fit_generator(generator=tiger_train.next_batch(),
                             steps_per_epoch=tiger_train.n,
-                            epochs=1,
+                            epochs=20,
                             validation_data=tiger_val.next_batch(),
                             validation_steps=tiger_val.n)
+        except:
+            print("errer")
 
     return model
 
 
 model = train(128, load=False)
-
-
