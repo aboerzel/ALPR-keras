@@ -5,6 +5,7 @@ import random
 import time
 import numpy as np
 import cv2
+import os.path
 
 
 class LicensePlateDatasetGenerator:
@@ -26,13 +27,16 @@ class LicensePlateDatasetGenerator:
         license_number += "-"
 
         ident_char_len = random.randint(1, 2)
-        ident_number_len = random.randint(1, 4)
+        ident_number_len = random.randint(5, 8)
 
         for n in range(ident_char_len):
             license_number += self.charset[random.randint(0, len(self.charset) - 1)]
 
-        for n in range(ident_number_len):
+        while len(license_number) < (ident_number_len + 1):
             license_number += str(random.randint(0, 9))
+
+        # for n in range(ident_number_len):
+        #     license_number += str(random.randint(0, 9))
 
         return license_number
 
@@ -43,10 +47,15 @@ class LicensePlateDatasetGenerator:
         return image.shape[:2]
 
     def _create_license_plate_picture(self, license_number):
-        create_image_url = self.create_image_url % license_number.replace("-", "%3A")
+        file_path = self.output + '/%s.png' % license_number
+        if os.path.exists(file_path):
+            return
+        create_image_url = self.create_image_url % license_number.replace("-", "%3A").replace("Ä", "%C4")\
+            .replace("Ö", "%D6").replace("Ü", "%DC")
         r = requests.get(create_image_url)
         if r.status_code == 200:
-            id = re.compile('<id>(.*?)</id>', re.DOTALL | re.IGNORECASE).findall(r.content.decode("utf-8"))[0]
+            id = re.compile('<id>(.*?)</id>', re.DOTALL | re.IGNORECASE).findall(
+                r.content.decode("utf-8"))[0]
             print(id)
             status_url = 'http://nummernschild.heisnbrg.net/fe/task?action=status&id=%s' % id
             time.sleep(.200)
@@ -57,10 +66,10 @@ class LicensePlateDatasetGenerator:
                 time.sleep(.200)
                 r = requests.get(show_image_url)
                 if r.status_code == 200:
-                    f = open(self.output + '/%s.png' % license_number, 'wb')
+                    f = open(file_path, 'wb')
                     f.write(r.content)
                     f.close()
-                    print(self._get_image_size(r.content))
+                    # print(self._get_image_size(r.content))
 
     def create(self, items):
         for n in range(items):
@@ -69,5 +78,5 @@ class LicensePlateDatasetGenerator:
             time.sleep(.200)
 
 
-lpdg = LicensePlateDatasetGenerator("D:/development/test")
-lpdg.create(100)
+lpdg = LicensePlateDatasetGenerator("D:/development/train")
+lpdg.create(5000)
