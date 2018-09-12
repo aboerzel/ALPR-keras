@@ -26,7 +26,7 @@ def decode(out):
 sess = tf.Session()
 K.set_session(sess)
 
-model = load_model('weights.h5', compile=False)
+model = load_model('license_number_model.h5', compile=False)
 
 # clipnorm seems to speeds up convergence
 sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)

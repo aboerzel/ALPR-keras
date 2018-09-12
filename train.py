@@ -266,6 +266,6 @@ def train(img_w, load=False):
 
 model = train(128, load=False)
 
-model.save("weights.h5")
+model.save("license_number_model.h5")
 
 
