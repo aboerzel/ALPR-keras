@@ -41,7 +41,8 @@ net_out = model.get_layer(name='softmax').output
 
 letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789 "))
 
-img_filepath = 'dataset/test/IS-E5772.png'
+img_filepath = 'dataset/test/WEB-ZT713.png'
+label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
 bytes = bytearray(stream.read())
@@ -62,7 +63,6 @@ X_data = [img]
 
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
 pred_texts = decode_batch(net_out_value)
-label = "ISE5772"
 fig = plt.figure(figsize=(10, 10))
 outer = gridspec.GridSpec(2, 1, wspace=10, hspace=0.1)
 ax1 = plt.Subplot(fig, outer[0])
@@ -84,3 +84,4 @@ for h in np.arange(-0.5, len(letters) + 1 + 0.5, 1):
     ax2.axhline(h, linestyle='-', color='k', alpha=0.5, linewidth=1)
 
 plt.show()
+cv2.waitKey(0)
