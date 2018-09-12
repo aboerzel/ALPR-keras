@@ -12,8 +12,7 @@ from keras.optimizers import SGD
 # For a real OCR application, this should be beam search with a dictionary
 # and language model.  For this example, best path is sufficient.
 
-def decode_batch(out):
-    ret = []
+def decode(out):
     for j in range(out.shape[0]):
         out_best = list(np.argmax(out[j, 2:], 1))
         out_best = [k for k, g in itertools.groupby(out_best)]
@@ -21,8 +20,7 @@ def decode_batch(out):
         for c in out_best:
             if c < len(letters):
                 outstr += letters[c]
-        ret.append(outstr)
-    return ret
+        return outstr
 
 
 sess = tf.Session()
@@ -41,7 +39,7 @@ net_out = model.get_layer(name='softmax').output
 
 letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789 "))
 
-img_filepath = 'dataset/test/WEB-ZT713.png'
+img_filepath = 'dataset/validation/HÜN-P43.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
@@ -60,16 +58,15 @@ else:
     img = np.expand_dims(img, -1)
 X_data = [img]
 
-
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
-pred_texts = decode_batch(net_out_value)
+pred_text = decode(net_out_value)
 fig = plt.figure(figsize=(10, 10))
 outer = gridspec.GridSpec(2, 1, wspace=10, hspace=0.1)
 ax1 = plt.Subplot(fig, outer[0])
 fig.add_subplot(ax1)
 ax2 = plt.Subplot(fig, outer[1])
 fig.add_subplot(ax2)
-print('Predicted: %s\nTrue: %s' % (pred_texts, label))
+print('Predicted: %s\nTrue: %s' % (pred_text, label))
 img = X_data[0][:, :, 0].T
 ax1.set_title('Input img')
 ax1.imshow(img, cmap='gray')
@@ -84,4 +81,3 @@ for h in np.arange(-0.5, len(letters) + 1 + 0.5, 1):
     ax2.axhline(h, linestyle='-', color='k', alpha=0.5, linewidth=1)
 
 plt.show()
-cv2.waitKey(0)

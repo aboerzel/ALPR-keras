@@ -78,5 +78,5 @@ class LicensePlateDatasetGenerator:
             time.sleep(.200)
 
 
-lpdg = LicensePlateDatasetGenerator("D:/development/train")
+lpdg = LicensePlateDatasetGenerator("dataset/validation")
 lpdg.create(5000)
