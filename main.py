@@ -18,7 +18,6 @@ from keras.optimizers import SGD
 
 print('Keras version:', keras.__version__)
 
-
 # def get_counter(dirpath, tag):
 #     dirname = os.path.basename(dirpath)
 #     ann_dirpath = join(dirpath, 'ann')
@@ -36,20 +35,22 @@ print('Keras version:', keras.__version__)
 #     return Counter(letters)
 
 
-#c_val = get_counter('/data/anpr_ocr__train', 'val')
-#c_train = get_counter('/data/anpr_ocr__train', 'train')
-#letters_train = set(c_train.keys())
-#letters_val = set(c_val.keys())
-#if letters_train == letters_val:
+# c_val = get_counter('/data/anpr_ocr__train', 'val')
+# c_train = get_counter('/data/anpr_ocr__train', 'train')
+# letters_train = set(c_train.keys())
+# letters_val = set(c_val.keys())
+# if letters_train == letters_val:
 #    print('Letters in train and val do match')
-#else:
+# else:
 #    raise Exception()
 # print(len(letters_train), len(letters_val), len(letters_val | letters_train))
-letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789"))
-#print('Letters:', ' '.join(letters))
+letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789 "))
 
 
-#def labels_to_text(labels):
+# print('Letters:', ' '.join(letters))
+
+
+# def labels_to_text(labels):
 #    return ''.join(list(map(lambda x: letters[int(x)], labels)))
 
 
@@ -57,7 +58,7 @@ def text_to_labels(text):
     return list(map(lambda x: letters.index(x), text))
 
 
-#def is_valid_str(s):
+# def is_valid_str(s):
 #    for ch in s:
 #        if not ch in letters:
 #            return False
@@ -71,7 +72,7 @@ class TextImageGenerator:
                  img_w, img_h,
                  batch_size,
                  downsample_factor,
-                 max_text_len=9):
+                 max_text_len=8):
 
         self.img_h = img_h
         self.img_w = img_w
@@ -81,30 +82,42 @@ class TextImageGenerator:
         self.samples = []
         for filename in os.listdir(img_dirpath):
             name, ext = os.path.splitext(filename)
-            img_filepath = join(img_dirpath, filename)
-            self.samples.append([img_filepath.encode('utf-8'), name.replace("-", "")])
+            img_filepath = img_dirpath + "/" + filename
+            self.samples.append([img_filepath, name.replace("-", "")])
 
         self.n = len(self.samples)
         self.indexes = list(range(self.n))
         self.cur_index = 0
 
-
     def build_data(self):
         self.imgs = np.zeros((self.n, self.img_h, self.img_w))
         self.texts = []
         for i, (img_filepath, text) in enumerate(self.samples):
-            stream = open(img_filepath, "rb")
-            bytes = bytearray(stream.read())
-            numpyarray = np.asarray(bytes, dtype=np.uint8)
-            img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            img = cv2.resize(img, (self.img_w, self.img_h))
-            img = img.astype(np.float32)
-            img /= 255
-            # width and height are backwards from typical Keras convention
-            # because width is the time dimension when it gets fed into the RNN
-            self.imgs[i, :, :] = img
-            self.texts.append(text)
+
+            # stream = open(img_filepath, "rb")
+            # bytes = bytearray(stream.read())
+            # numpyarray = np.asarray(bytes, dtype=np.uint8)
+            # img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
+            try:
+                stream = open(img_filepath, "rb")
+                bytes = bytearray(stream.read())
+                numpyarray = np.asarray(bytes, dtype=np.uint8)
+                img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
+                # img = cv2.imread(os.getcwd() + "/" + img_filepath)
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                img = cv2.resize(img, (self.img_w, self.img_h))
+                img = img.astype(np.float32)
+                img /= 255
+                # width and height are backwards from typical Keras convention
+                # because width is the time dimension when it gets fed into the RNN
+                self.imgs[i, :, :] = img
+
+                while len(text) < 8:
+                    text += " "
+
+                self.texts.append(text)
+            except:
+                continue
 
     @staticmethod
     def get_output_size():
@@ -179,9 +192,9 @@ def train(img_w, load=False):
 
     batch_size = 32
     downsample_factor = pool_size ** 2
-    tiger_train = TextImageGenerator('D:/development/train', img_w, img_h, batch_size, downsample_factor)
+    tiger_train = TextImageGenerator('dataset/train', img_w, img_h, batch_size, downsample_factor)
     tiger_train.build_data()
-    tiger_val = TextImageGenerator('D:/development/test', img_w, img_h, batch_size, downsample_factor)
+    tiger_val = TextImageGenerator('dataset/test', img_w, img_h, batch_size, downsample_factor)
     tiger_val.build_data()
 
     act = 'relu'
@@ -237,18 +250,22 @@ def train(img_w, load=False):
 
     if not load:
         # captures output of softmax so we can decode the output during visualization
-        #test_func = K.function([input_data], [y_pred])
+        # test_func = K.function([input_data], [y_pred])
 
         try:
-           model.fit_generator(generator=tiger_train.next_batch(),
-                            steps_per_epoch=tiger_train.n,
-                            epochs=20,
-                            validation_data=tiger_val.next_batch(),
-                            validation_steps=tiger_val.n)
-        except:
-            print("errer")
+            model.fit_generator(generator=tiger_train.next_batch(),
+                                steps_per_epoch=tiger_train.n,
+                                epochs=3,
+                                validation_data=tiger_val.next_batch(),
+                                validation_steps=tiger_val.n)
+        except Exception as e:
+            print(e)
 
     return model
 
 
 model = train(128, load=False)
+
+model.save("weights.h5")
+
+
