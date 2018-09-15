@@ -38,12 +38,12 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 
 
 
-net_inp = model.get_layer(name='the_input').input
+net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
 letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789 "))
 
-img_filepath = 'dataset/validation/HÜN-P43.png'
+img_filepath = 'data/validation/HÜN-P43.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")

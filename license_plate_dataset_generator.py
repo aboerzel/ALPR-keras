@@ -89,7 +89,7 @@ class LicensePlateDatasetGenerator:
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--outputdir",
-                default="dataset/validation",
+                default="data/validation",
                 help="output directory")
 ap.add_argument("-i", "--items",
                 default="100",
