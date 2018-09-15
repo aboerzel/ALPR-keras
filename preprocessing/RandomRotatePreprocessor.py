@@ -38,4 +38,5 @@ class RandomRotatePreprocessor:
         M[1, 2] += (nH / 2) - cY
 
         # perform the actual rotation and return the image
-        return cv2.warpAffine(image, M, (nW, nH), borderMode=cv2.BORDER_TRANSPARENT)
+        # return cv2.warpAffine(image, M, (nW, nH), borderMode=cv2.BORDER_TRANSPARENT)
+        return cv2.warpAffine(image, M, (nW, nH))

@@ -51,7 +51,7 @@ class LicensePlateDatasetLoader:
                 # add original image
                 self.samples.append([image, text])
 
-                # data augmentation
+                #data augmentation
                 for p in self.preprocessors:
                     for n in range(3):
                         image = p.preprocess(image)

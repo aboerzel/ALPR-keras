@@ -11,7 +11,7 @@ from callbacks import CustomModelCheckpoint, CustomTensorBoard
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default="license_number_model.h5", help="model file")
 ap.add_argument("-d", "--data", default="data", help="data directory")
-ap.add_argument("-e", "--epochs", type=float, default=2, help="# of epochs")
+ap.add_argument("-e", "--epochs", type=float, default=10, help="# of epochs")
 ap.add_argument("-b", "--batch-size", type=int, default=128, help="size of batches")
 ap.add_argument("-t", "--tensorboard-dir", default="logs", help="tensorboard log directory")
 args = vars(ap.parse_args())
@@ -25,7 +25,7 @@ epochs = args["epochs"]
 
 print("[INFO] loading data...")
 preprocessors = [
-    RandomRotatePreprocessor(-10, 10, img_w, img_h),
+    RandomRotatePreprocessor(-5, 5, img_w, img_h),
     RandomGaussianNoisePreprocessor(15)]
 
 train_dataset = LicensePlateDatasetLoader(img_w, img_h, pool_size, batch_size, preprocessors)
