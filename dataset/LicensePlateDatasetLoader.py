@@ -29,7 +29,7 @@ class LicensePlateDatasetLoader:
 
     def load(self, imagedir):
         filepaths = list(os.listdir(imagedir))
-        self.max_text_len = max(len(os.path.splitext(f)[0]) for f in filepaths) - 1
+        self.max_text_len = max(len(os.path.splitext(f)[0]) for f in filepaths)
 
         for i, filename in enumerate(filepaths):
             text, ext = os.path.splitext(filename)
