@@ -3,7 +3,7 @@ import argparse
 from nn import OCR
 from dataset.LicensePlateDatasetLoader import LicensePlateDatasetLoader
 from preprocessing import RandomRotatePreprocessor
-from preprocessing import GaussianNoisePreprocessor
+from preprocessing import RandomGaussianNoisePreprocessor
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default="license_number_model.h5", help="model file")
@@ -21,8 +21,8 @@ epochs = args["epochs"]
 
 print("[INFO] loading data...")
 preprocessors = [
-    RandomRotatePreprocessor(-20, 20, img_w, img_h),
-    GaussianNoisePreprocessor(35)]
+    RandomRotatePreprocessor(-10, 10, img_w, img_h),
+    RandomGaussianNoisePreprocessor(25)]
 
 train_dataset = LicensePlateDatasetLoader(img_w, img_h, pool_size, batch_size, preprocessors)
 train_dataset.load(args["data"] + '/train')
