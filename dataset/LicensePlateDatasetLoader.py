@@ -66,6 +66,9 @@ class LicensePlateDatasetLoader:
     def get_data_size(self):
         return len(self.samples)
 
+    def get_max_text_len(self):
+        return self.max_text_len
+
     def _next_sample(self):
         if self.cur_index >= len(self.indexes):
             self.cur_index = 0

@@ -12,7 +12,7 @@ import argparse
 class LicensePlateDatasetGenerator:
     def __init__(self, output):
         self.output = output
-        self.county_marks = json.loads(open('county_marks.json').read())
+        self.county_marks = open(json.loads(os.path.join() 'county_marks.json')).read())
         self.charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
         self.generator_webservice_url = 'http://nummernschild.heisnbrg.net/fe/task?action=startTask&kennzeichen=%s&kennzeichenZeile2=&engschrift=false&pixelHoehe=100&breiteInMM=520&breiteInMMFest=false&sonder=FE&dd=01&mm=01&yy=00&kreis=LEER_GRAU&kreisName=&humm=08&huyy=17&sonderKreis=LEER&mm1=01&mm2=01&farbe=SCHWARZ&effekt=KEIN&tgaDownload=false'
         random.seed()
