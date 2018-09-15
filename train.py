@@ -11,14 +11,14 @@ from callbacks import CustomModelCheckpoint, CustomTensorBoard
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default="license_number_model.h5", help="model file")
 ap.add_argument("-d", "--data", default="data", help="data directory")
-ap.add_argument("-e", "--epochs", type=float, default=3, help="# of epochs")
-ap.add_argument("-b", "--batch-size", type=int, default=32, help="size of batches")
+ap.add_argument("-e", "--epochs", type=float, default=2, help="# of epochs")
+ap.add_argument("-b", "--batch-size", type=int, default=128, help="size of batches")
 ap.add_argument("-t", "--tensorboard-dir", default="logs", help="tensorboard log directory")
 args = vars(ap.parse_args())
 
 # train parameters
-img_w = 128
-img_h = 64
+img_w = 160
+img_h = 32
 pool_size = 2
 batch_size = args["batch_size"]
 epochs = args["epochs"]
@@ -26,7 +26,7 @@ epochs = args["epochs"]
 print("[INFO] loading data...")
 preprocessors = [
     RandomRotatePreprocessor(-10, 10, img_w, img_h),
-    RandomGaussianNoisePreprocessor(25)]
+    RandomGaussianNoisePreprocessor(15)]
 
 train_dataset = LicensePlateDatasetLoader(img_w, img_h, pool_size, batch_size, preprocessors)
 train_dataset.load(args["data"] + '/train')
@@ -73,7 +73,7 @@ def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
 
 
 # clipnorm seems to speeds up convergence
-sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+sgd = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 
 model = OCR.build(img_w, img_h, pool_size, train_dataset.get_output_size(), train_dataset.get_max_text_len())
 

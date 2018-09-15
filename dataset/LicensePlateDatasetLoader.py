@@ -29,7 +29,7 @@ class LicensePlateDatasetLoader:
 
     def load(self, imagedir):
         filepaths = list(os.listdir(imagedir))
-        self.max_text_len = max(len(os.path.splitext(f)[0]) for f in filepaths)
+        self.max_text_len = max(len(os.path.splitext(f)[0]) for f in filepaths) - 1
 
         for i, filename in enumerate(filepaths):
             text, ext = os.path.splitext(filename)
@@ -45,13 +45,17 @@ class LicensePlateDatasetLoader:
                 image = image.astype(np.float32)
                 image /= 255
 
-                for p in self.preprocessors:
-                    image = p.preprocess(image)
-
                 while len(text) < self.max_text_len:
                     text += " "
 
+                # add original image
                 self.samples.append([image, text])
+
+                # data augmentation
+                for p in self.preprocessors:
+                    for n in range(3):
+                        image = p.preprocess(image)
+                        self.samples.append([image, text])
             except:
                 continue  # skip corrupt files
 

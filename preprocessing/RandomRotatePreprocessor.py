@@ -14,7 +14,7 @@ class RandomRotatePreprocessor:
     def preprocess(self, image):
         angle = random.randint(self.min, self.max)
         rotated = self.rotate_bound(image, angle)
-        return cv2.resize(rotated, (self.width, self.height), interpolation=self.inter)
+        return  cv2.resize(rotated, (self.width, self.height), interpolation=self.inter)
 
     def rotate_bound(self, image, angle):
         # grab the dimensions of the image and then determine the
@@ -38,4 +38,4 @@ class RandomRotatePreprocessor:
         M[1, 2] += (nH / 2) - cY
 
         # perform the actual rotation and return the image
-        return cv2.warpAffine(image, M, (nW, nH))
+        return cv2.warpAffine(image, M, (nW, nH), borderMode=cv2.BORDER_TRANSPARENT)

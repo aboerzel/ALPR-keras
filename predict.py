@@ -37,9 +37,9 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789 "))
+letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "))
 
-img_filepath = 'data/validation/HÜN-P43.png'
+img_filepath = 'data/validation/K-W824.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
@@ -58,7 +58,7 @@ else:
     img = np.expand_dims(img, -1)
 X_data = [img]
 
-batch_output = model.predict(X_data)
+#batch_output = model.predict(X_data)
 
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
 pred_text = decode(net_out_value)
