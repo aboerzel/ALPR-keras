@@ -4,11 +4,11 @@ import random
 
 
 class RandomRotatePreprocessor:
-    def __init__(self, width, height, min_angle, max_angle, inter=cv2.INTER_AREA):
-        self.width = width
-        self.height = height
+    def __init__(self, min_angle, max_angle, width, height, inter=cv2.INTER_AREA):
         self.min = min_angle
         self.max = max_angle
+        self.width = width
+        self.height = height
         self.inter = inter
 
     def preprocess(self, image):

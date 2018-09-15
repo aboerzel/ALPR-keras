@@ -12,7 +12,7 @@ import argparse
 class LicensePlateDatasetGenerator:
     def __init__(self, output):
         self.output = output
-        self.county_marks = open(json.loads(os.path.join() 'county_marks.json')).read())
+        self.county_marks = json.loads(open('german_county_marks.json').read())
         self.charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
         self.generator_webservice_url = 'http://nummernschild.heisnbrg.net/fe/task?action=startTask&kennzeichen=%s&kennzeichenZeile2=&engschrift=false&pixelHoehe=100&breiteInMM=520&breiteInMMFest=false&sonder=FE&dd=01&mm=01&yy=00&kreis=LEER_GRAU&kreisName=&humm=08&huyy=17&sonderKreis=LEER&mm1=01&mm2=01&farbe=SCHWARZ&effekt=KEIN&tgaDownload=false'
         random.seed()
@@ -52,7 +52,7 @@ class LicensePlateDatasetGenerator:
 
         id = re.compile('<id>(.*?)</id>', re.DOTALL | re.IGNORECASE).findall(
             r.content.decode("utf-8"))[0]
-        print(id)
+
         status_url = 'http://nummernschild.heisnbrg.net/fe/task?action=status&id=%s' % id
         time.sleep(.200)
         r = requests.get(status_url)
@@ -75,9 +75,10 @@ class LicensePlateDatasetGenerator:
         f = open(file_path, 'wb')
         f.write(r.content)
         f.close()
+        print(file_path)
         return True
 
-    def create(self, items):
+    def generate(self, items):
         for n in range(items):
             while True:
                 license_number = self._generate_license_number()
@@ -89,7 +90,7 @@ class LicensePlateDatasetGenerator:
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--outputdir",
-                default="data/validation",
+                default="../data/validation",
                 help="output directory")
 ap.add_argument("-i", "--items",
                 default="100",
@@ -97,4 +98,4 @@ ap.add_argument("-i", "--items",
 args = vars(ap.parse_args())
 
 lpdg = LicensePlateDatasetGenerator(args["outputdir"])
-lpdg.create(int(args["items"]))
+lpdg.generate(int(args["items"]))

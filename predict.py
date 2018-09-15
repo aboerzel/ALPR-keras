@@ -34,10 +34,6 @@ sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
 model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 
-
-
-
-
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
@@ -63,7 +59,6 @@ else:
 X_data = [img]
 
 batch_output = model.predict(X_data)
-
 
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
 pred_text = decode(net_out_value)

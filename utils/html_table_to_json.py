@@ -17,6 +17,6 @@ for row in rows:
     item["DESCR"] = cells[1].text.replace("\r\n", "").replace(" ", "")
     data.append(item)
 
-with open('county_marks.json', 'w', encoding='utf8') as f:
+with open('german_county_marks.json', 'w', encoding='utf8') as f:
     json.dump(data, f, ensure_ascii=False, indent=4)
 
