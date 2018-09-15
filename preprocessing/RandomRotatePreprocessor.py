@@ -1,5 +1,6 @@
 import cv2
 import random
+import numpy as np
 
 
 class RandomRotatePreprocessor:
@@ -13,9 +14,9 @@ class RandomRotatePreprocessor:
     def preprocess(self, image):
         angle = random.randint(self.min, self.max)
         rotated = self.rotate_bound(image, angle)
-        return  cv2.resize(rotated, (self.width, self.height), interpolation=self.inter)
+        return cv2.resize(rotated, (self.width, self.height), interpolation=self.inter)
 
-    def rotate_bound(image, angle):
+    def rotate_bound(self, image, angle):
         # grab the dimensions of the image and then determine the
         # center
         (h, w) = image.shape[:2]
