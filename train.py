@@ -16,7 +16,7 @@ args = vars(ap.parse_args())
 img_w = 128
 img_h = 64
 pool_size = 2
-batch_size = args["batch-size"]
+batch_size = args["batch_size"]
 epochs = args["epochs"]
 
 print("[INFO] loading data...")
