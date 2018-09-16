@@ -25,7 +25,7 @@ epochs = args["epochs"]
 
 print("[INFO] loading data...")
 preprocessors = [
-    RandomRotatePreprocessor(-5, 5, img_w, img_h),
+    RandomRotatePreprocessor(-10, 10, img_w, img_h),
     RandomGaussianNoisePreprocessor(15)]
 
 train_dataset = LicensePlateDatasetLoader(img_w, img_h, pool_size, batch_size, preprocessors)

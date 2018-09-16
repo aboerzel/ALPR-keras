@@ -40,6 +40,7 @@ class LicensePlateDatasetLoader:
         for i, filename in enumerate(filepaths):
             text, ext = os.path.splitext(filename)
 
+            # skip not valid labeltexts
             if not self._is_valid(text):
                 continue
 
@@ -50,7 +51,7 @@ class LicensePlateDatasetLoader:
                 bytes = bytearray(stream.read())
                 numpyarray = np.asarray(bytes, dtype=np.uint8)
                 image = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                #image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 image = cv2.resize(image, (self.img_w, self.img_h))
                 image = image.astype(np.float32)
                 image /= 255
@@ -63,7 +64,7 @@ class LicensePlateDatasetLoader:
 
                 # data augmentation
                 for p in self.preprocessors:
-                    for n in range(3):
+                    for n in range(10):
                         image = p.preprocess(image)
                         self.samples.append([image, text])
             except:
