@@ -7,12 +7,13 @@ import cv2
 import os.path
 import json
 import argparse
+from PIL import Image
 
 
 class LicensePlateDatasetGenerator:
     def __init__(self, output):
         self.output = output
-        self.county_marks = json.loads(open('german_county_marks.json').read())
+        self.county_marks = json.loads(open('german_county_marks.json', encoding='utf-8').read())
         self.charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
         self.generator_webservice_url = 'http://nummernschild.heisnbrg.net/fe/task?action=startTask&kennzeichen=%s&kennzeichenZeile2=&engschrift=false&pixelHoehe=100&breiteInMM=520&breiteInMMFest=false&sonder=FE&dd=01&mm=01&yy=00&kreis=LEER_GRAU&kreisName=&humm=08&huyy=17&sonderKreis=LEER&mm1=01&mm2=01&farbe=SCHWARZ&effekt=KEIN&tgaDownload=false'
         random.seed()
@@ -34,10 +35,12 @@ class LicensePlateDatasetGenerator:
         return license_number
 
     @staticmethod
-    def _get_image_size(image_string):
+    def _preprocess_image(image_string):
         image = np.fromstring(image_string, np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        return image.shape[:2]
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.resize(image, None, fx=0.3, fy=0.3)  # downscale image
+        return image
 
     def _create_license_plate_picture(self, license_number):
         file_path = self.output + '/%s.png' % license_number
@@ -68,15 +71,12 @@ class LicensePlateDatasetGenerator:
 
         # sometimes the web service returns a corrupted image, check the image by getting the size and skip if corrupted
         try:
-            self._get_image_size(r.content)
+            image = self._preprocess_image(r.content)
+            im = Image.fromarray(image)  # don't use cv2.imwrite() because there is a bug wirh utf-8 filepaths
+            im.save(file_path)
+            return True
         except:
             return False
-
-        f = open(file_path, 'wb')
-        f.write(r.content)
-        f.close()
-        print(file_path)
-        return True
 
     def generate(self, items):
         for n in range(items):

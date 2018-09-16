@@ -27,12 +27,22 @@ class LicensePlateDatasetLoader:
         if self.preprocessors is None:
             self.preprocessors = []
 
+    def _is_valid(self, text):
+        for c in text:
+            if c not in self.letters:
+                return False
+        return True
+
     def load(self, imagedir):
         filepaths = list(os.listdir(imagedir))
         self.max_text_len = max(len(os.path.splitext(f)[0]) for f in filepaths)
 
         for i, filename in enumerate(filepaths):
             text, ext = os.path.splitext(filename)
+
+            if not self._is_valid(text):
+                continue
+
             filepath = os.path.join(imagedir, filename)
 
             try:
@@ -51,7 +61,7 @@ class LicensePlateDatasetLoader:
                 # add original image
                 self.samples.append([image, text])
 
-                #data augmentation
+                # data augmentation
                 for p in self.preprocessors:
                     for n in range(3):
                         image = p.preprocess(image)

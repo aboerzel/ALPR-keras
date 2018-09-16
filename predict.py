@@ -39,7 +39,7 @@ net_out = model.get_layer(name='softmax').output
 
 letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "))
 
-img_filepath = 'data/validation/K-W824.png'
+img_filepath = 'images/test11.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
@@ -47,7 +47,7 @@ bytes = bytearray(stream.read())
 numpyarray = np.asarray(bytes, dtype=np.uint8)
 img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-img = cv2.resize(img, (128, 64))
+img = cv2.resize(img, (160, 32))
 img = img.astype(np.float32)
 img /= 255
 
