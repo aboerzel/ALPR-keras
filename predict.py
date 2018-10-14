@@ -39,14 +39,14 @@ net_out = model.get_layer(name='softmax').output
 
 letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "))
 
-img_filepath = 'images/test11.png'
+img_filepath = 'data/test/ERK-VX01.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
 bytes = bytearray(stream.read())
 numpyarray = np.asarray(bytes, dtype=np.uint8)
 img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
-img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 img = cv2.resize(img, (160, 32))
 img = img.astype(np.float32)
 img /= 255
@@ -58,7 +58,7 @@ else:
     img = np.expand_dims(img, -1)
 X_data = [img]
 
-#batch_output = model.predict(X_data)
+# batch_output = model.predict(X_data)
 
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
 pred_text = decode(net_out_value)
