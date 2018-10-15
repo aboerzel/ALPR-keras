@@ -32,11 +32,11 @@ means = json.loads(open(config.DATASET_MEAN).read())
 # initialize the image preprocessors
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 # mp = MeanPreprocessor(means["R"], means["G"], means["B"])
-iap = ImageToArrayPreprocessor()
+# iap = ImageToArrayPreprocessor()
 
 # initialize the training and validation images generators
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap], aug=aug)
-valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap])
+trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp])
 
 # clipnorm seems to speeds up convergence
 optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
@@ -57,7 +57,7 @@ model.fit_generator(
     trainGen.generator(),
     steps_per_epoch=trainGen.numImages // config.BATCH_SIZE,
     validation_data=valGen.generator(),
-    validation_steps=valGen.numImages // config.BATCH_SIZE,
+    validation_steps=valGen.numImages,
     epochs=config.NUM_EPOCHS,
     max_queue_size=10,
     callbacks=callbacks, verbose=1)

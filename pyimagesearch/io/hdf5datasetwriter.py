@@ -4,7 +4,7 @@ import h5py
 
 
 class HDF5DatasetWriter:
-    def __init__(self, dims, max_text_len, outputPath, dataKey="images", bufSize=1000):
+    def __init__(self, dims, outputPath, dataKey="images", bufSize=1000):
         # check to see if the output path exists, and if so, raise
         # an exception
         if os.path.exists(outputPath):
@@ -20,8 +20,8 @@ class HDF5DatasetWriter:
         # one to store the images/features and another to store the
         # class labels
         self.db = h5py.File(outputPath, "w")
-        self.data = self.db.create_dataset(dataKey, dims, dtype="float")
-        self.labels = self.db.create_dataset("labels", (dims[0], max_text_len), dtype="int32")
+        self.data = self.db.create_dataset(dataKey, dims, dtype="uint8")
+        self.labels = self.db.create_dataset("labels", (dims[0],), dtype=h5py.special_dtype(vlen=str))
 
         # store the buffer size, then initialize the buffer itself
         # along with the index into the floyd
@@ -45,13 +45,6 @@ class HDF5DatasetWriter:
         self.labels[self.idx:i] = self.buffer["labels"]
         self.idx = i
         self.buffer = {"data": [], "labels": []}
-
-    def storeClassLabels(self, classLabels):
-        # create a images to store the actual class label names,
-        # then store the class labels
-        dt = h5py.special_dtype(vlen=str)  # `vlen=unicode` for Py2.7
-        labelSet = self.db.create_dataset("label_names", (len(classLabels),), dtype=dt)
-        labelSet[:] = classLabels
 
     def close(self):
         # check to see if there are any other entries in the buffer

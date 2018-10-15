@@ -38,8 +38,8 @@ class GermanLicensePlateImagesGenerator:
     @staticmethod
     def _preprocess_image(image_string):
         image = np.fromstring(image_string, np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         image = cv2.resize(image, None, fx=0.3, fy=0.3)  # downscale image
         return image
 
@@ -72,9 +72,9 @@ class GermanLicensePlateImagesGenerator:
 
         # sometimes the web service returns a corrupted image, check the image by getting the size and skip if corrupted
         try:
-            image = self._preprocess_image(r.content)
-            im = Image.fromarray(image)  # don't use cv2.imwrite() because there is a bug with utf-8 filepaths
-            im.save(file_path)
+            numpyarray = np.fromstring(r.content, np.uint8)
+            image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
+            cv2.imwrite(file_path, image)
             print(file_path)
             return True
         except:

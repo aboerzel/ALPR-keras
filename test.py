@@ -1,35 +1,28 @@
-from keras.preprocessing.image import ImageDataGenerator
-from sklearn.model_selection import train_test_split
-from pyimagesearch.datasets.LicensePlateDatasetLoader import LicensePlateDatasetLoader
-from pyimagesearch.preprocessing import RandomRotatePreprocessor
-from pyimagesearch.preprocessing import RandomGaussianNoisePreprocessor
+import cv2
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
-img_w = 169
-img_h = 32
-batch_size = 32
-pool_size = 2
+from config import anpr_config as config
 
-preprocessors = [
-    RandomRotatePreprocessor(-5, 5, img_w, img_h),
-    RandomGaussianNoisePreprocessor(15)]
+db = h5py.File(config.TRAIN_HDF5)
+images = db["images"]
+labels = db["labels"]
 
-train_dataset = LicensePlateDatasetLoader(img_w, img_h, pool_size, batch_size)
-train_dataset.load("data/train")
-
-data = np.array(train_dataset.samples);
-
-(trainX, testX, trainY, testY) = train_test_split(data[0], data[1],
-                                                  test_size=0.25, random_state=42)
-
-aug = ImageDataGenerator(rotation_range=30, width_shift_range=0.1,
-                         height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
-                         horizontal_flip=True, fill_mode="nearest")
-
-data = aug.flow(trainX, trainY, batch_size=32)
+image = images[0]
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+cv2.imwrite("D:/development/cv/datasets/anpr/test.png", image)
+#img = cv2.imread("D:/development/cv/datasets/anpr/train/ED-KS5784.png")
+#image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT), interpolation=cv2.INTER_AREA)
 
 plt.axis("off")
-# plt.imshow(data[0], cmap='gray')
-plt.imshow(data[0])
+#plt.imshow(image, cmap='gray')
+#plt.imshow(image)
+plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+#plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
 plt.show()
+# plt.axis("off")
+# plt.imshow(cv2.cvtColor(image1, cv2.COLOR_BGR2RGB))
+# #plt.imshow(image1, cmap='gray')
+# plt.show()
