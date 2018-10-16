@@ -2,6 +2,7 @@
 
 import h5py
 import numpy as np
+from config import anpr_config as config
 
 
 class HDF5DatasetGenerator:
@@ -32,13 +33,14 @@ class HDF5DatasetGenerator:
         while epochs < passes:
 
             data_length = np.ones((self.batch_size, 1)) * (self.img_w // self.downsample_factor - 2)
-            label_length = np.ones((self.batch_size, 1)) * self.max_text_len
+            label_length = np.ones((self.batch_size, 1))
+            labels = np.ones([self.batch_size, self.max_text_len])
 
             # loop over the HDF5 images
             for i in np.arange(0, self.numImages, self.batch_size):
                 # extract the images and labels from the HDF images
                 images = self.db["images"][i: i + self.batch_size]
-                labels = self.db["labels"][i: i + self.batch_size]
+                numbers = self.db["labels"][i: i + self.batch_size]
 
                 # check to see if our preprocessors are not None
                 if self.preprocessors is not None:
@@ -46,7 +48,7 @@ class HDF5DatasetGenerator:
                     procImages = []
 
                     # loop over the images
-                    for image in images:
+                    for j, image in enumerate(images):
                         # loop over the preprocessors and apply each
                         # to the image
                         for p in self.preprocessors:
@@ -54,6 +56,9 @@ class HDF5DatasetGenerator:
 
                         # update the list of processed images
                         procImages.append(image)
+                        number = numbers[j]
+                        labels[j] = self.text_to_labels(number) + self.fill_blanks(len(numbers[j]))
+                        label_length[j] = len(number)
 
                     # update the images array to be the processed
                     # images
@@ -80,3 +85,13 @@ class HDF5DatasetGenerator:
     def close(self):
         # close the database
         self.db.close()
+
+    @staticmethod
+    def text_to_labels(text):
+        return list(map(lambda x: config.LETTERS.index(x), text))
+
+    def fill_blanks(self, text_len):
+        text = []
+        for n in range(self.max_text_len - text_len):
+            text.append(config.LETTERS.index(" "))
+        return text

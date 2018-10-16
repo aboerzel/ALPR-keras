@@ -48,9 +48,9 @@ model = OCR.build(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE, len
 model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 
 # construct the set of callbacks
-callbacks = [
-    EpochCheckpoint(config.CHECKPOINTS, every=5, startAt=config.START_EPOCH),
-    TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
+callbacks = []
+   # EpochCheckpoint(config.CHECKPOINTS, every=5, startAt=config.START_EPOCH),
+  #  TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
 
 print("[INFO] training...")
 model.fit_generator(
@@ -60,7 +60,7 @@ model.fit_generator(
     validation_steps=valGen.numImages,
     epochs=config.NUM_EPOCHS,
     max_queue_size=10,
-    callbacks=callbacks, verbose=1)
+    callbacks=callbacks, verbose=0)
 
 print("[INFO] saving model...")
 model.save(config.MODEL_PATH)

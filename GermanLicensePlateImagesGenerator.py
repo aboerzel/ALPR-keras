@@ -74,7 +74,9 @@ class GermanLicensePlateImagesGenerator:
         try:
             numpyarray = np.fromstring(r.content, np.uint8)
             image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
-            cv2.imwrite(file_path, image)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            im = Image.fromarray(image)  # don't use cv2.imwrite() because there is a bug with utf-8 filepaths
+            im.save(file_path)
             print(file_path)
             return True
         except:

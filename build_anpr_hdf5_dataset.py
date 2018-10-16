@@ -7,11 +7,9 @@ import progressbar
 from imutils import paths
 from sklearn.model_selection import train_test_split
 
-# import the necessary packages
 from config import anpr_config as config
 from pyimagesearch.io import HDF5DatasetWriter
 
-# grab the paths to the images
 trainPaths = list(paths.list_images(config.TRAIN_IMAGES))
 trainLabels = [p.split(os.path.sep)[-1].split(".")[0] for p in trainPaths]
 
@@ -20,7 +18,7 @@ trainLabels = [p.split(os.path.sep)[-1].split(".")[0] for p in trainPaths]
 split = train_test_split(trainPaths, trainLabels, test_size=0.4, random_state=42)
 (trainPaths, testPaths, trainLabels, testLabels) = split
 
-# perform another stratified sampling, this time to build the
+# perform another stratified sampling, this time to build t
 # validation data
 split = train_test_split(trainPaths, trainLabels, test_size=0.25, random_state=42)
 (trainPaths, valPaths, trainLabels, valLabels) = split
@@ -37,7 +35,7 @@ datasets = [
 (R, G, B) = ([], [], [])
 
 # original size of generated license pate images
-IMAGE_WIDTH = 152
+IMAGE_WIDTH = 142
 IMAGE_HEIGHT = 30
 
 # loop over the images tuples
@@ -58,6 +56,7 @@ for (dType, paths, labels, outputPath) in datasets:
         bytes = bytearray(stream.read())
         numpyarray = np.asarray(bytes, dtype=np.uint8)
         image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
+        #image = cv2.resize(image, (0, 0), fx=0.3, fy=0.3)
         image = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
