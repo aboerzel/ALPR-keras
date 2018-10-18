@@ -15,18 +15,18 @@ class LabelEncoder:
     def fill_blanks(self, text_len):
         text = []
         for n in range(self.max_text_len - text_len):
-            text.append(config.LETTERS.index(" "))
+            text.append(config.ALPHABET.index(" "))
         return text
 
     @staticmethod
     def text_to_labels(text):
-        return list(map(lambda x: config.LETTERS.index(x), text))
+        return list(map(lambda x: config.ALPHABET.index(x), text))
 
     @staticmethod
     def labels_to_text(labels):
         outstr = ''
         for c in labels:
-            outstr += config.LETTERS[c]
+            outstr += config.ALPHABET[c]
         return outstr
 
 # letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "))

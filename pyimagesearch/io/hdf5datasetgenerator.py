@@ -1,4 +1,5 @@
 # import the necessary packages
+import cv2
 
 import h5py
 import numpy as np
@@ -32,12 +33,13 @@ class HDF5DatasetGenerator:
         # reach the desired number of epochs
         while epochs < passes:
 
-            data_length = np.ones((self.batch_size, 1)) * (self.img_w // self.downsample_factor - 2)
-            label_length = np.ones((self.batch_size, 1))
-            labels = np.ones([self.batch_size, self.max_text_len])
-
             # loop over the HDF5 images
             for i in np.arange(0, self.numImages, self.batch_size):
+                data_length = np.zeros((self.batch_size, 1)) * (self.img_w // self.downsample_factor - 2)
+                label_length = np.zeros((self.batch_size, 1))
+
+                labels = np.ones([self.batch_size, self.max_text_len]) * -1
+
                 # extract the images and labels from the HDF images
                 images = self.db["images"][i: i + self.batch_size]
                 numbers = self.db["labels"][i: i + self.batch_size]
@@ -54,11 +56,15 @@ class HDF5DatasetGenerator:
                         for p in self.preprocessors:
                             image = p.preprocess(image)
 
+                        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                        image = image.reshape(self.img_w, self.img_h, 1) # cv2.resize(image, (self.img_w, self.img_h))
+
                         # update the list of processed images
                         procImages.append(image)
                         number = numbers[j]
-                        labels[j] = self.text_to_labels(number) + self.fill_blanks(len(numbers[j]))
-                        label_length[j] = len(number)
+                        text_length = len(number)
+                        labels[i, 0:text_length] = self.number_to_labels(number)
+                        label_length[j] = text_length
 
                     # update the images array to be the processed
                     # images
@@ -87,11 +93,22 @@ class HDF5DatasetGenerator:
         self.db.close()
 
     @staticmethod
-    def text_to_labels(text):
-        return list(map(lambda x: config.LETTERS.index(x), text))
+    def get_output_size():
+        return len(config.ALPHABET) + 1
 
-    def fill_blanks(self, text_len):
-        text = []
-        for n in range(self.max_text_len - text_len):
-            text.append(config.LETTERS.index(" "))
+    # Translation of characters to unique integer values
+    @staticmethod
+    def number_to_labels(text):
+        return list(map(lambda c: config.ALPHABET.index(c), text))
         return text
+
+    # Reverse translation of numerical classes back to characters
+    @staticmethod
+    def labels_to_number(labels):
+        ret = []
+        for c in labels:
+            if c == len(config.ALPHABET):  # CTC Blank
+                ret.append("")
+            else:
+                ret.append(config.ALPHABET[c])
+        return "".join(ret)
