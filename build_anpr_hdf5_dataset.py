@@ -18,14 +18,12 @@ trainLabels = [p.split(os.path.sep)[-1].split(".")[0] for p in trainPaths]
 split = train_test_split(trainPaths, trainLabels, test_size=0.4, random_state=42)
 (trainPaths, testPaths, trainLabels, testLabels) = split
 
-# perform another stratified sampling, this time to build t
-# validation data
+# perform another stratified sampling, this time to build the validation data
 split = train_test_split(trainPaths, trainLabels, test_size=0.25, random_state=42)
 (trainPaths, valPaths, trainLabels, valLabels) = split
 
 # construct a list pairing the training, validation, and testing
-# image paths along with their corresponding labels and output HDF5
-# files
+# image paths along with their corresponding labels and output HDF5 files
 datasets = [
     ("train", trainPaths, trainLabels, config.TRAIN_HDF5),
     ("val", valPaths, valLabels, config.VAL_HDF5),
@@ -34,9 +32,9 @@ datasets = [
 # average
 (R, G, B) = ([], [], [])
 
-# original size of generated license pate images
-IMAGE_WIDTH = 142
-IMAGE_HEIGHT = 30
+# original size of generated license plate images
+IMAGE_WIDTH = 473
+IMAGE_HEIGHT = 100
 
 # loop over the images tuples
 for (dType, paths, labels, outputPath) in datasets:
@@ -56,13 +54,15 @@ for (dType, paths, labels, outputPath) in datasets:
         bytes = bytearray(stream.read())
         numpyarray = np.asarray(bytes, dtype=np.uint8)
         image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
-        #image = cv2.resize(image, (0, 0), fx=0.3, fy=0.3)
-        image = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
+        # check image size
+        if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH, 3):
+            print("image with wrong size: %s" % path)
+            continue
+
         # if we are building the training images, then compute the
-        # mean of each channel in the image, then update the
-        # respective lists
+        # mean of each channel in the image, then update the respective lists
         if dType == "train":
             (b, g, r) = cv2.mean(image)[:3]
             R.append(r)

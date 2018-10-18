@@ -3,7 +3,6 @@ from os import path
 
 IMAGE_WIDTH = 160
 IMAGE_HEIGHT = 32
-IMAGE_DEPTH = 1
 
 # initialize the batch size and number of epochs for training
 BATCH_SIZE = 128

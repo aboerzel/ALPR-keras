@@ -16,10 +16,11 @@ class GermanLicensePlateImagesGenerator:
         self.output = output
         self.county_marks = json.loads(open(config.GERMAN_COUNTY_MARKS, encoding='utf-8').read())
         self.charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
-        self.generator_webservice_url = 'http://nummernschild.heisnbrg.net/fe/task?action=startTask&kennzeichen=%s&kennzeichenZeile2=&engschrift=false&pixelHoehe=100&breiteInMM=520&breiteInMMFest=false&sonder=FE&dd=01&mm=01&yy=00&kreis=LEER_GRAU&kreisName=&humm=08&huyy=17&sonderKreis=LEER&mm1=01&mm2=01&farbe=SCHWARZ&effekt=KEIN&tgaDownload=false'
+        # self.generator_webservice_url = 'http://nummernschild.heisnbrg.net/fe/task?action=startTask&kennzeichen=%s&kennzeichenZeile2=&engschrift=false&pixelHoehe=100&breiteInMM=520&breiteInMMFest=false&sonder=FE&dd=01&mm=01&yy=00&kreis=LEER_GRAU&kreisName=&humm=08&huyy=17&sonderKreis=LEER&mm1=01&mm2=01&farbe=SCHWARZ&effekt=KEIN&tgaDownload=false'
+        self.generator_webservice_url = "http://nummernschild.heisnbrg.net/fe/task?action=startTask&kennzeichen=%s&kennzeichenZeile2=&engschrift=false&pixelHoehe=100&breiteInMM=520&breiteInMMFest=true&sonder=FE&dd=01&mm=01&yy=00&kreis=LEER&kreisName=&humm=&huyy=&sonderKreis=LEER&mm1=01&mm2=01&farbe=SCHWARZ&effekt=KEIN&tgaDownload=false"
         random.seed()
 
-    def _generate_license_number(self):
+    def __generate_license_number(self):
         country_mark_index = random.randint(0, len(self.county_marks) - 1)
         license_number = self.county_marks[country_mark_index]["CM"]
         license_number += "-"
@@ -35,15 +36,7 @@ class GermanLicensePlateImagesGenerator:
 
         return license_number
 
-    @staticmethod
-    def _preprocess_image(image_string):
-        image = np.fromstring(image_string, np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image = cv2.resize(image, None, fx=0.3, fy=0.3)  # downscale image
-        return image
-
-    def _create_license_plate_picture(self, license_number):
+    def __create_license_plate_picture(self, license_number):
         file_path = self.output + '/%s.png' % license_number
         if os.path.exists(file_path):
             return False
@@ -75,7 +68,7 @@ class GermanLicensePlateImagesGenerator:
             numpyarray = np.fromstring(r.content, np.uint8)
             image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            im = Image.fromarray(image)  # don't use cv2.imwrite() because there is a bug with utf-8 filepaths
+            im = Image.fromarray(image)  # don't use cv2.imwrite() because there is a bug with utf-8 encoded filepaths
             im.save(file_path)
             print(file_path)
             return True
@@ -85,8 +78,8 @@ class GermanLicensePlateImagesGenerator:
     def generate(self, items):
         for n in range(items):
             while True:
-                license_number = self._generate_license_number()
-                if self._create_license_plate_picture(license_number):
+                license_number = self.__generate_license_number()
+                if self.__create_license_plate_picture(license_number):
                     time.sleep(.200)
                     break
                 time.sleep(.200)
@@ -94,7 +87,7 @@ class GermanLicensePlateImagesGenerator:
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--items",
-                default="10000",
+                default="3000",
                 help="number of items to generate")
 args = vars(ap.parse_args())
 

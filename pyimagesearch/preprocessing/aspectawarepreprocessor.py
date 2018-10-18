@@ -23,16 +23,14 @@ class AspectAwarePreprocessor:
         # update the deltas to crop the height to the desired
         # dimension
         if w < h:
-            image = imutils.resize(image, width=self.width,
-                                   inter=self.inter)
+            image = imutils.resize(image, width=self.width, inter=self.inter)
             dH = int((image.shape[0] - self.height) / 2.0)
 
         # otherwise, the height is smaller than the width so
         # resize along the height and then update the deltas
         # crop along the width
         else:
-            image = imutils.resize(image, height=self.height,
-                                   inter=self.inter)
+            image = imutils.resize(image, height=self.height, inter=self.inter)
             dW = int((image.shape[1] - self.width) / 2.0)
 
         # now that our images have been resized, we need to
@@ -44,5 +42,4 @@ class AspectAwarePreprocessor:
         # finally, resize the image to the provided spatial
         # dimensions to ensure our output image is always a fixed
         # size
-        return cv2.resize(image, (self.width, self.height),
-                          interpolation=self.inter)
+        return cv2.resize(image, (self.width, self.height), interpolation=self.inter)
