@@ -31,11 +31,11 @@ class HDF5DatasetGenerator:
 
         # keep looping infinitely -- the model will stop once we have
         # reach the desired number of epochs
-        while epochs < passes:
+        while True:   # epochs < passes:
 
-            # loop over the HDF5 images
             for i in np.arange(0, self.numImages, self.batch_size):
-                data_length = np.zeros((self.batch_size, 1)) * (self.img_w // self.downsample_factor - 2)
+                data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
+                data_length = np.zeros((self.batch_size, 1))
                 label_length = np.zeros((self.batch_size, 1))
 
                 labels = np.ones([self.batch_size, self.max_text_len]) * -1
@@ -44,31 +44,29 @@ class HDF5DatasetGenerator:
                 images = self.db["images"][i: i + self.batch_size]
                 numbers = self.db["labels"][i: i + self.batch_size]
 
-                # check to see if our preprocessors are not None
-                if self.preprocessors is not None:
-                    # initialize the list of processed images
-                    procImages = []
+                # initialize the list of processed images
+                #procImages = []
 
-                    # loop over the images
-                    for j, image in enumerate(images):
-                        # loop over the preprocessors and apply each
-                        # to the image
+                # loop over the images
+                for j, image in enumerate(images):
+
+                    if self.preprocessors is not None:
                         for p in self.preprocessors:
                             image = p.preprocess(image)
 
-                        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                        image = image.reshape(self.img_w, self.img_h, 1) # cv2.resize(image, (self.img_w, self.img_h))
+                    image = image.reshape(self.img_w, self.img_h, 1)
 
-                        # update the list of processed images
-                        procImages.append(image)
-                        number = numbers[j]
-                        text_length = len(number)
-                        labels[i, 0:text_length] = self.number_to_labels(number)
-                        label_length[j] = text_length
+                    # update the list of processed images
+                    #procImages.append(image)
+                    number = numbers[j]
+                    text_length = len(number)
+                    labels[j, 0:text_length] = self.number_to_labels(number)
+                    label_length[j] = text_length
+                    data[j] = image
+                    data_length[j] = self.img_w // self.downsample_factor - 2
 
-                    # update the images array to be the processed
-                    # images
-                    images = np.array(procImages)
+                # update the images array to be the processed images
+                #images = np.array(procImages)
 
                 # if the data augmenator exists, apply it
                 # if self.aug is not None:
@@ -76,7 +74,7 @@ class HDF5DatasetGenerator:
                 #                                           labels, batch_size=self.batch_size))
 
                 inputs = {
-                    'data': images,
+                    'data': data,
                     'labels': labels,
                     'data_length': data_length,
                     'label_length': label_length
@@ -98,9 +96,8 @@ class HDF5DatasetGenerator:
 
     # Translation of characters to unique integer values
     @staticmethod
-    def number_to_labels(text):
-        return list(map(lambda c: config.ALPHABET.index(c), text))
-        return text
+    def number_to_labels(number):
+        return list(map(lambda c: config.ALPHABET.index(c), number))
 
     # Reverse translation of numerical classes back to characters
     @staticmethod

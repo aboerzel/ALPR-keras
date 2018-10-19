@@ -26,17 +26,17 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
                          width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
                          horizontal_flip=True, fill_mode="nearest")
 
-# load the RGB means for the training set
-means = json.loads(open(config.DATASET_MEAN).read())
+# # load the RGB means for the training set
+# means = json.loads(open(config.DATASET_MEAN).read())
 
 # initialize the image preprocessors
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-mp = MeanPreprocessor(means["R"], means["G"], means["B"])
+#mp = MeanPreprocessor(means["R"], means["G"], means["B"])
 iap = ImageToArrayPreprocessor()
 
 # initialize the training and validation images generators
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp, mp, iap], aug=aug)
-valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp, mp, iap])
+trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap], aug=aug)
+valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap])
 
 # clipnorm seems to speeds up convergence
 optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
@@ -46,7 +46,7 @@ model = OCR.build(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE, tra
                   config.MAX_TEXT_LEN)
 
 # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
-model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, metrics=["accuracy"])
+model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, metrics=['accuracy'])
 
 
 # construct the set of callbacks
@@ -55,7 +55,9 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, 
 #     TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
 
 def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
-    os.makedirs(tensorboard_logs)
+
+    if not os.path.exists(tensorboard_logs):
+        os.makedirs(tensorboard_logs)
 
     early_stop = EarlyStopping(
         monitor='loss',
@@ -91,7 +93,9 @@ def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
     return [early_stop, checkpoint, reduce_on_plateau, tensorboard]
 
 
-callbacks = create_callbacks(config.MODEL_FILENAME, config.TENSORBOARD_PATH, model)
+#callbacks = create_callbacks(config.MODEL_FILENAME, config.TENSORBOARD_PATH, model)
+callbacks = []
+
 
 print("[INFO] training...")
 model.fit_generator(
@@ -101,7 +105,7 @@ model.fit_generator(
     validation_steps=valGen.numImages // config.BATCH_SIZE,
     epochs=config.NUM_EPOCHS,
     max_queue_size=10,
-    callbacks=callbacks, verbose=1)
+    callbacks=callbacks, verbose=0)
 
 print("[INFO] saving model...")
 model.save(config.MODEL_PATH)

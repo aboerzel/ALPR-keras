@@ -29,18 +29,19 @@ datasets = [
     ("val", valPaths, valLabels, config.VAL_HDF5),
     ("test", testPaths, testLabels, config.TEST_HDF5)]
 
-# average
-(R, G, B) = ([], [], [])
+# # average
+# (R, G, B) = ([], [], [])
 
 # original size of generated license plate images
 IMAGE_WIDTH = 473
 IMAGE_HEIGHT = 100
+IMAGE_DEPTH = 1
 
 # loop over the images tuples
 for (dType, paths, labels, outputPath) in datasets:
     # create HDF5 writer
     print("[INFO] building {}...".format(outputPath))
-    writer = HDF5DatasetWriter((len(paths), IMAGE_HEIGHT, IMAGE_WIDTH, 3), outputPath)
+    writer = HDF5DatasetWriter((len(paths), IMAGE_HEIGHT, IMAGE_WIDTH), outputPath)
 
     # initialize the progress bar
     widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
@@ -54,20 +55,20 @@ for (dType, paths, labels, outputPath) in datasets:
         bytes = bytearray(stream.read())
         numpyarray = np.asarray(bytes, dtype=np.uint8)
         image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         # check image size
-        if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH, 3):
+        if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH):
             print("image with wrong size: %s" % path)
             continue
-
-        # if we are building the training images, then compute the
-        # mean of each channel in the image, then update the respective lists
-        if dType == "train":
-            (b, g, r) = cv2.mean(image)[:3]
-            R.append(r)
-            G.append(g)
-            B.append(b)
+        #
+        # # if we are building the training images, then compute the
+        # # mean of each channel in the image, then update the respective lists
+        # if dType == "train":
+        #     (b, g, r) = cv2.mean(image)[:3]
+        #     R.append(r)
+        #     G.append(g)
+        #     B.append(b)
 
         # add the image and label # to the HDF5 images
         writer.add([image], [label])
@@ -77,9 +78,9 @@ for (dType, paths, labels, outputPath) in datasets:
     pbar.finish()
     writer.close()
 
-# construct a dictionary of averages, then serialize the mean to a JSON file
-print("[INFO] serializing means...")
-D = {"R": np.mean(R), "G": np.mean(G), "B": np.mean(B)}
-f = open(config.DATASET_MEAN, "w")
-f.write(json.dumps(D))
-f.close()
+# # construct a dictionary of averages, then serialize the mean to a JSON file
+# print("[INFO] serializing means...")
+# D = {"R": np.mean(R), "G": np.mean(G), "B": np.mean(B)}
+# f = open(config.DATASET_MEAN, "w")
+# f.write(json.dumps(D))
+# f.close()
