@@ -6,10 +6,11 @@ from config import anpr_config as config
 
 
 class HDF5DatasetGenerator:
-    def __init__(self, dbPath, batch_size, preprocessors=None, aug=None):
-        # store the batch size, preprocessors, and data augmentor,
-        # whether or not the labels should be binarized, along with
-        # the total number of classes
+    def __init__(self, dbPath, img_w, img_h, max_text_len, batch_size, preprocessors=None, aug=None):
+
+        self.img_w = img_w
+        self.img_h = img_h
+        self.max_text_len = max_text_len
         self.batch_size = batch_size
         self.preprocessors = preprocessors
         self.aug = aug
@@ -19,10 +20,7 @@ class HDF5DatasetGenerator:
         self.db = h5py.File(dbPath)
         self.numImages = self.db["labels"].shape[0]
 
-        self.img_w = 160
-        self.img_h = 32
         self.downsample_factor = 2
-        self.max_text_len = 9
 
         self.indexes = list(range(self.numImages))
         random.shuffle(self.indexes)

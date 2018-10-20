@@ -16,7 +16,8 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
                          horizontal_flip=True, fill_mode="nearest")
 
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.MAX_TEXT_LEN,
+                                config.BATCH_SIZE, preprocessors=[sp], aug=aug)
 
 inputs, outputs = trainGen.generator().__next__()
 trainGen.close()
@@ -31,7 +32,7 @@ for r in range(rows):
         image = inputs["data"][image_index].reshape(32, 160)
         axarr[r, c].axis("off")
         axarr[r, c].imshow(image, cmap='Greys_r')
-        #axarr[r, c].imshow(image, cmap='gray')
+        # axarr[r, c].imshow(image, cmap='gray')
         image_index += 1
 
 plt.show()

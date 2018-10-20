@@ -27,8 +27,11 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 
 # initialize the training and validation images generators
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
-valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp])
+trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.MAX_TEXT_LEN,
+                                config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+
+valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.MAX_TEXT_LEN,
+                              config.BATCH_SIZE, preprocessors=[sp])
 
 # clipnorm seems to speeds up convergence
 optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
