@@ -10,7 +10,6 @@ from config import anpr_config as config
 from pyimagesearch.callbacks import CustomTensorBoard, CustomModelCheckpoint
 from pyimagesearch.io import HDF5DatasetGenerator
 from pyimagesearch.nn.conv import OCR
-from pyimagesearch.preprocessing import ImageToArrayPreprocessor
 from pyimagesearch.preprocessing import SimplePreprocessor
 
 ap = argparse.ArgumentParser()
@@ -26,11 +25,10 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
 
 # initialize the image preprocessors
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-iap = I
 
 # initialize the training and validation images generators
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap], aug=aug)
-valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap])
+trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.BATCH_SIZE, preprocessors=[sp])
 
 # clipnorm seems to speeds up convergence
 optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)

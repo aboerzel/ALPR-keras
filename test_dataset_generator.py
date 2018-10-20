@@ -21,15 +21,17 @@ trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocess
 inputs, outputs = trainGen.generator().__next__()
 trainGen.close()
 
-cols = 8
+cols = 6
 rows = len(inputs["data"]) // cols
 
-f, axarr = plt.subplots(rows, cols, figsize=(15, 32))
+image_index = 0
+f, axarr = plt.subplots(rows, cols, figsize=(10, 32))
 for r in range(rows):
     for c in range(cols):
-        image = inputs["data"][r + c].reshape(32, 160)
+        image = inputs["data"][image_index].reshape(32, 160)
         axarr[r, c].axis("off")
-        # axarr[r, c].imshow(image, cmap='Greys_r')
-        axarr[r, c].imshow(image, cmap='gray')
+        axarr[r, c].imshow(image, cmap='Greys_r')
+        #axarr[r, c].imshow(image, cmap='gray')
+        image_index += 1
 
 plt.show()
