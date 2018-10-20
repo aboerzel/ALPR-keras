@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -12,7 +11,6 @@ from pyimagesearch.callbacks import CustomTensorBoard, CustomModelCheckpoint
 from pyimagesearch.io import HDF5DatasetGenerator
 from pyimagesearch.nn.conv import OCR
 from pyimagesearch.preprocessing import ImageToArrayPreprocessor
-from pyimagesearch.preprocessing import MeanPreprocessor
 from pyimagesearch.preprocessing import SimplePreprocessor
 
 ap = argparse.ArgumentParser()
@@ -26,13 +24,9 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
                          width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
                          horizontal_flip=True, fill_mode="nearest")
 
-# # load the RGB means for the training set
-# means = json.loads(open(config.DATASET_MEAN).read())
-
 # initialize the image preprocessors
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-#mp = MeanPreprocessor(means["R"], means["G"], means["B"])
-iap = ImageToArrayPreprocessor()
+iap = I
 
 # initialize the training and validation images generators
 trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.BATCH_SIZE, preprocessors=[sp, iap], aug=aug)
@@ -55,7 +49,6 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, 
 #     TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
 
 def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
-
     if not os.path.exists(tensorboard_logs):
         os.makedirs(tensorboard_logs)
 
@@ -93,9 +86,8 @@ def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
     return [early_stop, checkpoint, reduce_on_plateau, tensorboard]
 
 
-#callbacks = create_callbacks(config.MODEL_FILENAME, config.TENSORBOARD_PATH, model)
+# callbacks = create_callbacks(config.MODEL_FILENAME, config.TENSORBOARD_PATH, model)
 callbacks = []
-
 
 print("[INFO] training...")
 model.fit_generator(

@@ -1,6 +1,5 @@
 # import the necessary packages
-import cv2
-
+import random
 import h5py
 import numpy as np
 from config import anpr_config as config
@@ -25,63 +24,67 @@ class HDF5DatasetGenerator:
         self.downsample_factor = 2
         self.max_text_len = 9
 
+        self.indexes = list(range(self.numImages))
+        random.shuffle(self.indexes)
+        self.cur_index = 0
+
+    def next_sample(self):
+        self.cur_index += 1
+
+        if self.cur_index >= self.numImages:
+            self.cur_index = 0
+            random.shuffle(self.indexes)
+
+        return self.db["images"][self.indexes[self.cur_index]], self.db["labels"][self.indexes[self.cur_index]]
+
     def generator(self, passes=np.inf):
         # initialize the epoch count
         epochs = 0
 
         # keep looping infinitely -- the model will stop once we have
         # reach the desired number of epochs
-        while True:   # epochs < passes:
+        while epochs < passes:
 
-            for i in np.arange(0, self.numImages, self.batch_size):
-                data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
-                data_length = np.zeros((self.batch_size, 1))
-                label_length = np.zeros((self.batch_size, 1))
+            data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
+            labels = np.ones([self.batch_size, self.max_text_len]) * -1
+            data_length = np.zeros((self.batch_size, 1))
+            label_length = np.zeros((self.batch_size, 1))
 
-                labels = np.ones([self.batch_size, self.max_text_len]) * -1
+            # extract the images and labels from the HDF images
+            #images = self.db["images"][i: i + self.batch_size]
+            # numbers = self.db["labels"][i: i + self.batch_size]
 
-                # extract the images and labels from the HDF images
-                images = self.db["images"][i: i + self.batch_size]
-                numbers = self.db["labels"][i: i + self.batch_size]
+            for i in range(self.batch_size):
 
-                # initialize the list of processed images
-                #procImages = []
+                image, number = self.next_sample()
 
-                # loop over the images
-                for j, image in enumerate(images):
+                if self.preprocessors is not None:
+                    for p in self.preprocessors:
+                        image = p.preprocess(image)
 
-                    if self.preprocessors is not None:
-                        for p in self.preprocessors:
-                            image = p.preprocess(image)
+                image = image.reshape(self.img_w, self.img_h, 1)
 
-                    image = image.reshape(self.img_w, self.img_h, 1)
+                text_length = len(number)
+                labels[i, 0:text_length] = self.number_to_labels(number)
+                label_length[i] = text_length
+                data[i] = image
+                data_length[i] = self.img_w // self.downsample_factor - 2
 
-                    # update the list of processed images
-                    #procImages.append(image)
-                    number = numbers[j]
-                    text_length = len(number)
-                    labels[j, 0:text_length] = self.number_to_labels(number)
-                    label_length[j] = text_length
-                    data[j] = image
-                    data_length[j] = self.img_w // self.downsample_factor - 2
+            # if the data augmenator exists, apply it
+            # if self.aug is not None:
+            #     (images, labels) = next(self.aug.flow(images,
+            #                                           labels, batch_size=self.batch_size))
 
-                # update the images array to be the processed images
-                #images = np.array(procImages)
+            data = data.astype("float") / 255.0
 
-                # if the data augmenator exists, apply it
-                # if self.aug is not None:
-                #     (images, labels) = next(self.aug.flow(images,
-                #                                           labels, batch_size=self.batch_size))
-
-                inputs = {
-                    'data': data,
-                    'labels': labels,
-                    'data_length': data_length,
-                    'label_length': label_length
-                }
-                outputs = {'ctc': np.zeros([self.batch_size])}
-                # yield a tuple of images and labels
-                yield (inputs, outputs)
+            inputs = {
+                'data': data,
+                'labels': labels,
+                'data_length': data_length,
+                'label_length': label_length
+            }
+            outputs = {'ctc': np.zeros([self.batch_size])}
+            yield (inputs, outputs)
 
             # increment the total number of epochs
             epochs += 1
