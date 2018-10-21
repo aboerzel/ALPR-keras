@@ -2,6 +2,13 @@ from keras import backend as K, Input, Model
 from keras.layers import Conv2D, MaxPooling2D, Reshape, Dense, GRU, add, concatenate, Activation, Lambda
 
 
+def ctc_lambda_func(args):
+    y_pred, labels, data_length, label_length = args
+    # the 2 is critical here since the first couple outputs of the RNN tend to be garbage:
+    y_pred = y_pred[:, 2:, :]
+    return K.ctc_batch_cost(labels, y_pred, data_length, label_length)
+
+
 class OCR:
     @staticmethod
     def build(width, height, pool_size, output_size, max_text_len):
@@ -33,12 +40,12 @@ class OCR:
         # Two layers of bidirecitonal GRUs
         # GRU seems to work as well, if not better than LSTM:
         gru_1 = GRU(rnn_size, return_sequences=True, kernel_initializer='he_normal', name='gru1')(inner)
-        gru_1b = GRU(rnn_size, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru1_b')(
-            inner)
+        gru_1b = GRU(rnn_size, return_sequences=True, go_backwards=True, kernel_initializer='he_normal',
+                     name='gru1_b')(inner)
         gru1_merged = add([gru_1, gru_1b])
         gru_2 = GRU(rnn_size, return_sequences=True, kernel_initializer='he_normal', name='gru2')(gru1_merged)
-        gru_2b = GRU(rnn_size, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru2_b')(
-            gru1_merged)
+        gru_2b = GRU(rnn_size, return_sequences=True, go_backwards=True, kernel_initializer='he_normal',
+                     name='gru2_b')(gru1_merged)
 
         # transforms RNN output to character activations:
         inner = Dense(output_size, kernel_initializer='he_normal', name='dense2')(concatenate([gru_2, gru_2b]))
@@ -53,13 +60,4 @@ class OCR:
         # so CTC loss is implemented in a lambda layer
         loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([y_pred, labels, data_length, label_length])
 
-        # return Model(inputs=[input_data, labels, data_length, label_length], outputs=loss_out)
         return Model(inputs=[input_data, labels, data_length, label_length], outputs=loss_out)
-
-
-def ctc_lambda_func(args):
-    y_pred, labels, data_length, label_length = args
-    # the 2 is critical here since the first couple outputs of the RNN
-    # tend to be garbage:
-    y_pred = y_pred[:, 2:, :]
-    return K.ctc_batch_cost(labels, y_pred, data_length, label_length)

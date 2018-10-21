@@ -12,6 +12,7 @@ from pyimagesearch.io import HDF5DatasetGenerator
 from pyimagesearch.nn.conv import OCR
 from pyimagesearch.preprocessing import SimplePreprocessor
 
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
 args = vars(ap.parse_args())
@@ -34,14 +35,14 @@ valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_
                               config.BATCH_SIZE, preprocessors=[sp])
 
 # clipnorm seems to speeds up convergence
-optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+#optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 # optimizer = Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
 
 model = OCR.build(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE, trainGen.get_output_size(),
                   config.MAX_TEXT_LEN)
 
 # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
-model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, metrics=['accuracy'])
+#model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, metrics=['accuracy'])
 
 
 # construct the set of callbacks

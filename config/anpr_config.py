@@ -5,7 +5,7 @@ IMAGE_WIDTH = 160
 IMAGE_HEIGHT = 32
 
 # initialize the batch size and number of epochs for training
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 POOL_SIZE = 2
 NUM_EPOCHS = 10
 START_EPOCH = 0

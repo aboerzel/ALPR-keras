@@ -45,7 +45,7 @@ class HDF5DatasetGenerator:
 
             data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
             labels = np.ones([self.batch_size, self.max_text_len]) * -1
-            data_length = np.zeros((self.batch_size, 1))
+            data_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
             label_length = np.zeros((self.batch_size, 1))
 
             # extract the images and labels from the HDF images
@@ -62,11 +62,11 @@ class HDF5DatasetGenerator:
 
                 image = image.reshape(self.img_w, self.img_h, 1)
 
+                data[i] = image
                 text_length = len(number)
                 labels[i, 0:text_length] = self.number_to_labels(number)
                 label_length[i] = text_length
-                data[i] = image
-                data_length[i] = self.img_w // self.downsample_factor - 2
+
 
             # if the data augmenator exists, apply it
             # if self.aug is not None:
