@@ -41,7 +41,7 @@ model = OCR.build(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE, tra
                   config.MAX_TEXT_LEN)
 
 # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
-model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer, metrics=['accuracy'])
+model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 
 
 # construct the set of callbacks
@@ -84,11 +84,10 @@ def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
         write_graph=True,
         write_images=True,
     )
-    return [early_stop, checkpoint, reduce_on_plateau, tensorboard]
+    return [early_stop, checkpoint, reduce_on_plateau]
 
 
-# callbacks = create_callbacks(config.MODEL_FILENAME, config.TENSORBOARD_PATH, model)
-callbacks = []
+callbacks = create_callbacks(config.MODEL_FILENAME, config.TENSORBOARD_PATH, model)
 
 print("[INFO] training...")
 model.fit_generator(
@@ -98,7 +97,7 @@ model.fit_generator(
     validation_steps=valGen.numImages // config.BATCH_SIZE,
     epochs=config.NUM_EPOCHS,
     max_queue_size=10,
-    callbacks=callbacks, verbose=0)
+    callbacks=callbacks, verbose=1)
 
 print("[INFO] saving model...")
 model.save(config.MODEL_PATH)
