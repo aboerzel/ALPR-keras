@@ -9,10 +9,10 @@ ap.add_argument("-m", "--model", default="license_number_model.h5", help="model 
 args = vars(ap.parse_args())
 
 trainGen = DatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                            config.BATCH_SIZE)
+                            config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
 valGen = DatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                          config.BATCH_SIZE)
+                          config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
 # clipnorm seems to speeds up convergence
 sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)

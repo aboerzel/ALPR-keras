@@ -6,7 +6,7 @@ from config import anpr_config as config
 
 
 class HDF5DatasetGenerator:
-    def __init__(self, dbPath, img_w, img_h, max_text_len, batch_size, preprocessors=None, aug=None):
+    def __init__(self, dbPath, img_w, img_h, pool_size, max_text_len, batch_size, preprocessors=None, aug=None):
 
         self.img_w = img_w
         self.img_h = img_h
@@ -14,13 +14,12 @@ class HDF5DatasetGenerator:
         self.batch_size = batch_size
         self.preprocessors = preprocessors
         self.aug = aug
+        self.downsample_factor = pool_size ** 2
 
         # open the HDF5 database for reading and determine the total
         # number of entries in the database
         self.db = h5py.File(dbPath)
         self.numImages = self.db["labels"].shape[0]
-
-        self.downsample_factor = 2
 
         self.indexes = list(range(self.numImages))
         random.shuffle(self.indexes)
@@ -44,13 +43,9 @@ class HDF5DatasetGenerator:
         while epochs < passes:
 
             data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
-            labels = np.ones([self.batch_size, self.max_text_len]) * -1
+            labels = np.ones([self.batch_size, self.max_text_len])
             data_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
             label_length = np.zeros((self.batch_size, 1))
-
-            # extract the images and labels from the HDF images
-            #images = self.db["images"][i: i + self.batch_size]
-            # numbers = self.db["labels"][i: i + self.batch_size]
 
             for i in range(self.batch_size):
 
@@ -60,6 +55,11 @@ class HDF5DatasetGenerator:
                     for p in self.preprocessors:
                         image = p.preprocess(image)
 
+                # if the data augmenator exists, apply it
+                # if self.aug is not None:
+                #     (images, labels) = next(self.aug.flow(images,
+                #                                           labels, batch_size=self.batch_size))
+
                 image = image.reshape(self.img_w, self.img_h, 1)
 
                 data[i] = image
@@ -67,11 +67,6 @@ class HDF5DatasetGenerator:
                 labels[i, 0:text_length] = self.number_to_labels(number)
                 label_length[i] = text_length
 
-
-            # if the data augmenator exists, apply it
-            # if self.aug is not None:
-            #     (images, labels) = next(self.aug.flow(images,
-            #                                           labels, batch_size=self.batch_size))
 
             data = data.astype("float") / 255.0
 

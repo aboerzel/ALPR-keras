@@ -4,16 +4,12 @@ import cv2
 import h5py
 import numpy as np
 
-letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "))
+# letters = sorted(list("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "))
+letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
 
 class DatasetGenerator:
-    def __init__(self,
-                 dbPath,
-                 img_w, img_h,
-                 pool_size,
-                 batch_size,
-                 max_text_len=9):
+    def __init__(self, dbPath, img_w, img_h, pool_size, max_text_len, batch_size):
 
         self.img_h = img_h
         self.img_w = img_w
@@ -39,8 +35,8 @@ class DatasetGenerator:
 
     def next_batch(self):
         while True:
-            X_data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
-            Y_data = np.ones([self.batch_size, self.max_text_len])
+            data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
+            labels = np.ones([self.batch_size, self.max_text_len])
             input_length = np.ones((self.batch_size, 1)) * (self.img_w // self.downsample_factor - 2)
             label_length = np.zeros((self.batch_size, 1))
 
@@ -49,17 +45,16 @@ class DatasetGenerator:
                 image = cv2.resize(image, (self.img_w, self.img_h))
                 image = image.reshape(self.img_w, self.img_h, 1)
 
-                X_data[i] = image
+                data[i] = image
                 text_length = len(number)
-                Y_data[i, 0:text_length] = self.text_to_labels(number)
+                labels[i, 0:text_length] = self.text_to_labels(number)
                 label_length[i] = len(number)
 
             inputs = {
-                'data': X_data,
-                'labels': Y_data,
+                'data': data,
+                'labels': labels,
                 'data_length': input_length,
-                'label_length': label_length,
-                # 'source_str': source_str
+                'label_length': label_length
             }
             outputs = {'ctc': np.zeros([self.batch_size])}
             yield (inputs, outputs)
