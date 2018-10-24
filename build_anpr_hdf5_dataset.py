@@ -29,9 +29,6 @@ datasets = [
     ("val", valPaths, valLabels, config.VAL_HDF5),
     ("test", testPaths, testLabels, config.TEST_HDF5)]
 
-# # average
-# (R, G, B) = ([], [], [])
-
 # original size of generated license plate images
 IMAGE_WIDTH = 473
 IMAGE_HEIGHT = 100
@@ -61,14 +58,6 @@ for (dType, paths, labels, outputPath) in datasets:
         if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH):
             print("image with wrong size: %s" % path)
             continue
-        #
-        # # if we are building the training images, then compute the
-        # # mean of each channel in the image, then update the respective lists
-        # if dType == "train":
-        #     (b, g, r) = cv2.mean(image)[:3]
-        #     R.append(r)
-        #     G.append(g)
-        #     B.append(b)
 
         # add the image and label # to the HDF5 images
         writer.add([image], [label])
@@ -77,10 +66,3 @@ for (dType, paths, labels, outputPath) in datasets:
     # close the HDF5 writer
     pbar.finish()
     writer.close()
-
-# # construct a dictionary of averages, then serialize the mean to a JSON file
-# print("[INFO] serializing means...")
-# D = {"R": np.mean(R), "G": np.mean(G), "B": np.mean(B)}
-# f = open(config.DATASET_MEAN, "w")
-# f.write(json.dumps(D))
-# f.close()

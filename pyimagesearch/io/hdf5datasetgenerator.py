@@ -60,13 +60,13 @@ class HDF5DatasetGenerator:
                 #     (images, labels) = next(self.aug.flow(images,
                 #                                           labels, batch_size=self.batch_size))
 
-                image = image.reshape(self.img_w, self.img_h, 1)
-
+                # image = image.reshape(self.img_w, self.img_h, 1)
+                image = image.T
+                image = np.expand_dims(image, -1)
                 data[i] = image
                 text_length = len(number)
                 labels[i, 0:text_length] = self.number_to_labels(number)
                 label_length[i] = text_length
-
 
             data = data.astype("float") / 255.0
 
