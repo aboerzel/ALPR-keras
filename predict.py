@@ -38,7 +38,7 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-img_filepath = 'D:/development/cv/datasets/anpr/images/ABI-RB971.png'
+img_filepath = 'D:/development/cv/datasets/anpr/test/ROL-L716.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
@@ -50,8 +50,8 @@ img = cv2.resize(img, (160, 32))
 img = img.astype(np.float32)
 img /= 255
 
-plt.imshow(img, cmap='gray')
-plt.show()
+#plt.imshow(img, cmap='gray')
+#plt.show()
 
 img = np.expand_dims(img.T, -1)
 X_data = [img]
