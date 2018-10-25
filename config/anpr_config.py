@@ -7,11 +7,11 @@ IMAGE_HEIGHT = 32
 # initialize the batch size and number of epochs for training
 BATCH_SIZE = 32
 POOL_SIZE = 2
-NUM_EPOCHS = 10
+NUM_EPOCHS = 50
 START_EPOCH = 0
 
 MAX_TEXT_LEN = 9
-ALPHABET = u"ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
 MODEL_FILENAME = "anpr.model.hdf5"
 
@@ -20,8 +20,8 @@ GERMAN_COUNTY_MARKS = "./config/german_county_marks.json"
 
 DATASET_PATH = "../datasets"
 # define the paths to the training and validation directories
-TRAIN_IMAGES = path.sep.join([DATASET_PATH, "anpr/train"])
-VAL_IMAGES = path.sep.join([DATASET_PATH, "anpr/val/images"])
+TRAIN_IMAGES = path.sep.join([DATASET_PATH, "anpr/images"])
+VAL_IMAGES = path.sep.join([DATASET_PATH, "anpr/val"])
 
 # define the path to the output training, validation, and testing HDF5 files
 TRAIN_HDF5 = path.sep.join([DATASET_PATH, "anpr/hdf5/train.hdf5"])
@@ -33,8 +33,6 @@ TEST_HDF5 = path.sep.join([DATASET_PATH, "anpr/hdf5/test.hdf5"])
 OUTPUT_PATH = "output"
 # path to the output model file
 MODEL_PATH = path.sep.join([OUTPUT_PATH, MODEL_FILENAME])
-# define the path to the images mean
-DATASET_MEAN = path.sep.join([OUTPUT_PATH, "anpr-mean.json"])
 FIG_PATH = path.sep.join([OUTPUT_PATH, "anpr.png"])
 JSON_PATH = path.sep.join([OUTPUT_PATH, "anpr.json"])
 CHECKPOINTS_PATH = path.sep.join([OUTPUT_PATH, "checkpoints"])

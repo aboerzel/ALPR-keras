@@ -44,7 +44,7 @@ class HDF5DatasetGenerator:
 
             data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
             labels = np.ones([self.batch_size, self.max_text_len])
-            data_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
+            input_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
             label_length = np.zeros((self.batch_size, 1))
 
             for i in range(self.batch_size):
@@ -60,7 +60,6 @@ class HDF5DatasetGenerator:
                 #     (images, labels) = next(self.aug.flow(images,
                 #                                           labels, batch_size=self.batch_size))
 
-                # image = image.reshape(self.img_w, self.img_h, 1)
                 image = image.T
                 image = np.expand_dims(image, -1)
                 data[i] = image
@@ -71,9 +70,9 @@ class HDF5DatasetGenerator:
             data = data.astype("float") / 255.0
 
             inputs = {
-                'data': data,
+                'input': data,
                 'labels': labels,
-                'data_length': data_length,
+                'input_length': input_length,
                 'label_length': label_length
             }
             outputs = {'ctc': np.zeros([self.batch_size])}

@@ -60,31 +60,24 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
                          width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
                          horizontal_flip=True, fill_mode="nearest")
 
-# load the RGB means for the training set
-means = json.loads(open(config.DATASET_MEAN).read())
-
 # initialize the image preprocessors
 sp = SimplePreprocessor(64, 64)
-mp = MeanPreprocessor(means["R"], means["G"], means["B"])
 iap = ImageToArrayPreprocessor()
 
 # initialize the training and validation images generators
 trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, 64, aug=aug,
-                                preprocessors=[sp, mp, iap], classes=config.NUM_CLASSES)
+                                preprocessors=[sp, iap], classes=config.NUM_CLASSES)
 valGen = HDF5DatasetGenerator(config.VAL_HDF5, 64,
-                              preprocessors=[sp, mp, iap], classes=config.NUM_CLASSES)
+                              preprocessors=[sp, iap], classes=config.NUM_CLASSES)
 
 # TODO:
 # Change `figPath` and `jsonPath` to correctly use the `FIG_PATH`
 # and `JSON_PATH` in the `tiny_imagenet_config`?
 
 # construct the set of callbacks
-figPath = os.path.sep.join([args["output"], "{}.png".format(
-    os.getpid())])
-jsonPath = os.path.sep.join([args["output"], "{}.json".format(
-    os.getpid())])
-callbacks = [TrainingMonitor(figPath, jsonPath=jsonPath),
-             LearningRateScheduler(poly_decay)]
+figPath = os.path.sep.join([args["output"], "{}.png".format(os.getpid())])
+jsonPath = os.path.sep.join([args["output"], "{}.json".format(os.getpid())])
+callbacks = [TrainingMonitor(figPath, jsonPath=jsonPath), LearningRateScheduler(poly_decay)]
 
 # initialize the optimizer and model (ResNet-56)
 print("[INFO] compiling model...")

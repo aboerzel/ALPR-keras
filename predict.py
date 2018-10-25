@@ -19,8 +19,8 @@ def decode(out):
         out_best = [k for k, g in itertools.groupby(out_best)]
         outstr = ''
         for c in out_best:
-            if c < len(letters):
-                outstr += letters[c]
+            if c < len(config.ALPHABET):
+                outstr += config.ALPHABET[c]
         return outstr
 
 
@@ -35,34 +35,28 @@ sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
 model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 
-net_inp = model.get_layer(name='data').input
+net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
-
-img_filepath = 'D:/development/cv/datasets/anpr/test/AB-BD47.png'
+img_filepath = 'D:/development/cv/datasets/anpr/images/ABI-RB971.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
 bytes = bytearray(stream.read())
 numpyarray = np.asarray(bytes, dtype=np.uint8)
 img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 img = cv2.resize(img, (160, 32))
-#img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
 img = img.astype(np.float32)
 img /= 255
 
 plt.imshow(img, cmap='gray')
-
-#img = np.expand_dims(img, -1)
-img = img.reshape(160, 32, 1)
-
 plt.show()
+
+img = np.expand_dims(img.T, -1)
 X_data = [img]
 
 # batch_output = model.predict(X_data)
-
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
 pred_text = decode(net_out_value)
 fig = plt.figure(figsize=(10, 10))
@@ -79,10 +73,10 @@ ax1.set_xticks([])
 ax1.set_yticks([])
 ax2.set_title('Activations')
 ax2.imshow(net_out_value[0].T, cmap='binary', interpolation='nearest')
-ax2.set_yticks(list(range(len(letters) + 1)))
-ax2.set_yticklabels(letters) # + ['blank'])
+ax2.set_yticks(list(range(len(config.ALPHABET) + 1)))
+ax2.set_yticklabels(config.ALPHABET) # + ['blank'])
 ax2.grid(False)
-for h in np.arange(-0.5, len(letters) + 1 + 0.5, 1):
+for h in np.arange(-0.5, len(config.ALPHABET) + 1 + 0.5, 1):
     ax2.axhline(h, linestyle='-', color='k', alpha=0.5, linewidth=1)
 
 plt.show()

@@ -1,8 +1,6 @@
 # Under construction...
 
 
-https://hackernoon.com/latest-deep-learning-ocr-with-keras-and-supervisely-in-15-minutes-34aecd630ed8
-
 
 ## Welcome to GitHub Pages
 

@@ -62,7 +62,7 @@ def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
     )
     checkpoint = CustomModelCheckpoint(
         model_to_save=model_to_save,
-        filepath=saved_weights_name,  # + '{epoch:02d}.h5',
+        filepath=saved_weights_name + '{epoch:02d}.h5',
         monitor='loss',
         verbose=1,
         save_best_only=True,
