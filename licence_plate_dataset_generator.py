@@ -5,7 +5,7 @@ import numpy as np
 from config import anpr_config as config
 
 
-class HDF5DatasetGenerator:
+class LicensePlateDatasetGenerator:
     def __init__(self, dbPath, img_w, img_h, pool_size, max_text_len, batch_size, preprocessors=None, aug=None):
 
         self.img_w = img_w

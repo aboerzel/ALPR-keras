@@ -13,6 +13,8 @@ START_EPOCH = 0
 MAX_TEXT_LEN = 9
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
+PROJECT_ROOT_PATH = "D:/development/cv/ANPR-keras"
+
 MODEL_NAME = "anpr.model"
 
 # json file with the list of german county marks

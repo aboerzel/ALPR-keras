@@ -9,7 +9,6 @@ from keras.models import load_model
 from keras.optimizers import SGD
 from config import anpr_config as config
 
-
 # For a real OCR application, this should be beam search with a dictionary
 # and language model.  For this example, best path is sufficient.
 

@@ -6,8 +6,8 @@ from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 
 from config import anpr_config as config
+from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.callbacks import CustomModelCheckpoint
-from pyimagesearch.io import HDF5DatasetGenerator
 from pyimagesearch.nn.conv import OCR
 from pyimagesearch.preprocessing import SimplePreprocessor
 
@@ -26,10 +26,10 @@ aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 
 # initialize the training and validation images generators
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
+trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
                                 config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
 
-valGen = HDF5DatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
+valGen = LicensePlateDatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
                               config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
 
 # define optimizer

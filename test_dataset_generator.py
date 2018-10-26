@@ -4,22 +4,22 @@ import matplotlib.pyplot as plt
 from keras.preprocessing.image import ImageDataGenerator
 
 from config import anpr_config as config
-from pyimagesearch.io import HDF5DatasetGenerator
+from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.preprocessing import SimplePreprocessor
 
 ia.seed(1)
 
-os.chdir(os.path.join("D:/development/cv/ANPR-keras"))
+os.chdir(os.path.join(config.PROJECT_ROOT_PATH))
 
 aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
                          width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
                          horizontal_flip=True, fill_mode="nearest")
 
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-trainGen = HDF5DatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                                config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
+                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
 
-inputs, outputs = trainGen.generator().__next__()
+inputs, outputs = next(trainGen.generator())
 trainGen.close()
 
 cols = 6
@@ -29,7 +29,7 @@ image_index = 0
 f, axarr = plt.subplots(rows, cols, figsize=(10, 32))
 for r in range(rows):
     for c in range(cols):
-        image = inputs["input"][image_index].T.reshape(32, 160)
+        image = inputs["input"][image_index].T.reshape(config.IMAGE_HEIGHT, config.IMAGE_WIDTH)
         axarr[r, c].axis("off")
         axarr[r, c].imshow(image, cmap='Greys_r')
         # axarr[r, c].imshow(image, cmap='gray')
