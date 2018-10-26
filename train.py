@@ -1,5 +1,4 @@
 import argparse
-import os
 
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import SGD
@@ -48,32 +47,11 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 #     TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
 
 callbacks = [
-    EarlyStopping(
-        monitor='loss',
-        min_delta=0.01,
-        patience=5,
-        mode='min',
-        verbose=1
-    ),
-    CustomModelCheckpoint(
-        model_to_save=model,
-        filepath=config.MODEL_CHECKPOINT_PATH,
-        monitor='loss',
-        verbose=1,
-        save_best_only=True,
-        mode='min',
-        period=1
-    ),
-    ReduceLROnPlateau(
-        monitor='loss',
-        factor=0.1,
-        patience=2,
-        verbose=1,
-        mode='min',
-        min_delta=0.01,
-        cooldown=0,
-        min_lr=0
-    )]
+    EarlyStopping(monitor='loss', min_delta=0.01, patience=5, mode='min', verbose=1),
+    CustomModelCheckpoint(model_to_save=model, filepath=config.MODEL_CHECKPOINT_PATH,
+                          monitor='loss', verbose=1, save_best_only=True, mode='min', period=1),
+    ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01,
+                      cooldown=0, min_lr=0)]
 
 print("[INFO] training...")
 model.fit_generator(
