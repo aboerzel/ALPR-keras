@@ -38,7 +38,7 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-img_filepath = 'D:/development/cv/datasets/anpr/test/ROL-L716.png'
+img_filepath = 'D:/development/cv/datasets/anpr/test/BRV-JN97.png'
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")

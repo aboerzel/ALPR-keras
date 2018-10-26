@@ -27,8 +27,7 @@ class TrainingMonitor(BaseLogger):
                 # check to see if a starting epoch was supplied
                 if self.startAt > 0:
                     # loop over the entries in the history log and
-                    # trim any entries that are past the starting
-                    # epoch
+                    # trim any entries that are past the starting epoch
                     for k in self.H.keys():
                         self.H[k] = self.H[k][:self.startAt]
 
@@ -40,15 +39,13 @@ class TrainingMonitor(BaseLogger):
             l.append(v)
             self.H[k] = l
 
-        # check to see if the training history should be serialized
-        # to file
+        # check to see if the training history should be serialized to file
         if self.jsonPath is not None:
             f = open(self.jsonPath, "w")
             f.write(json.dumps(self.H))
             f.close()
 
-        # ensure at least two epochs have passed before plotting
-        # (epoch starts at zero)
+        # ensure at least two epochs have passed before plotting (epoch starts at zero)
         if len(self.H["loss"]) > 1:
             # plot the training loss and accuracy
             N = np.arange(0, len(self.H["loss"]))
@@ -58,8 +55,7 @@ class TrainingMonitor(BaseLogger):
             plt.plot(N, self.H["val_loss"], label="val_loss")
             plt.plot(N, self.H["acc"], label="train_acc")
             plt.plot(N, self.H["val_acc"], label="val_acc")
-            plt.title("Training Loss and Accuracy [Epoch {}]".format(
-                len(self.H["loss"])))
+            plt.title("Training Loss and Accuracy [Epoch {}]".format(len(self.H["loss"])))
             plt.xlabel("Epoch #")
             plt.ylabel("Loss/Accuracy")
             plt.legend()
