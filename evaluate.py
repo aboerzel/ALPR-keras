@@ -44,6 +44,7 @@ images = np.array(validationData["images"])
 labels = np.array(validationData["labels"])
 validationData.close()
 
+# normalize image data
 images = images.astype("float") / 255.0
 
 # shuffle images and lables
@@ -52,9 +53,11 @@ np.random.shuffle(randomize)
 images = images[randomize]
 labels = labels[randomize]
 
+# reduce number of test-images
 images = images[:args["number"]]
 labels = labels[:args["number"]]
 
+# predictions for accuracy measurement
 y_true = np.full(len(images), True, dtype=bool)
 y_pred = np.full(len(images), False, dtype=bool)
 
@@ -70,4 +73,4 @@ for i, (image, label) in enumerate(zip(images, labels)):
 
 print()
 accuracy = accuracy_score(y_true, y_pred)
-print("accuracy: %s" % accuracy)
+print("Accuracy: %s" % accuracy)

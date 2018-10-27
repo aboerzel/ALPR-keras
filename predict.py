@@ -1,6 +1,6 @@
 import itertools
 import cv2
-import os
+import argparse
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,6 +9,16 @@ from keras import backend as K
 from keras.models import load_model
 from keras.optimizers import SGD
 from config import alpr_config as config
+
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--image", default="../../datasets/alpr/test/TS-U9235.png", type=str, help="image to predict")
+ap.add_argument("-l", "--label", default="TS-U9235", type=str, help="true label")
+args = vars(ap.parse_args())
+
+img_filepath = args["image"]
+
+if not args["label"] == "":
+    label = img_filepath.split('/')[-1].split('.')[0]
 
 
 def decode(out):
@@ -34,9 +44,6 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-img_filepath = os.path.join(config.DATASET_ROOT_PATH, "test", "BRV-JN97.png")
-label = img_filepath.split('/')[-1].split('.')[0]
-
 stream = open(img_filepath, "rb")
 bytes = bytearray(stream.read())
 numpyarray = np.asarray(bytes, dtype=np.uint8)
@@ -61,7 +68,7 @@ ax1 = plt.Subplot(fig, outer[0])
 fig.add_subplot(ax1)
 ax2 = plt.Subplot(fig, outer[1])
 fig.add_subplot(ax2)
-print('Predicted: %s\nTrue:      %s' % (pred_text, label))
+print('Predicted: %9s\nTrue:      %9s\n=> %s' % (pred_text, label, pred_text == label))
 img = X_data[0][:, :, 0].T
 ax1.set_title('Input img')
 ax1.imshow(img, cmap='gray')
