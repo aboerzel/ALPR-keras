@@ -3,7 +3,7 @@ import imgaug as ia
 import matplotlib.pyplot as plt
 from keras.preprocessing.image import ImageDataGenerator
 
-from config import anpr_config as config
+from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.preprocessing import SimplePreprocessor
 

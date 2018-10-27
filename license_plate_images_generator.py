@@ -8,7 +8,7 @@ import os.path
 import json
 import argparse
 from PIL import Image
-from config import anpr_config as config
+from config import alpr_config as config
 
 
 class GermanLicensePlateImagesGenerator:

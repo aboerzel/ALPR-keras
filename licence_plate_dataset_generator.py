@@ -2,7 +2,7 @@
 import random
 import h5py
 import numpy as np
-from config import anpr_config as config
+from config import alpr_config as config
 
 
 class LicensePlateDatasetGenerator:

@@ -5,7 +5,7 @@ import pylab
 import matplotlib.pyplot as plt
 import numpy as np
 from keras import backend as K
-from config import anpr_config as config
+from config import alpr_config as config
 
 
 class VizCallback(keras.callbacks.Callback):

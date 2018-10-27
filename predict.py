@@ -1,5 +1,6 @@
 import itertools
 import cv2
+import os
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,7 +8,8 @@ import tensorflow as tf
 from keras import backend as K
 from keras.models import load_model
 from keras.optimizers import SGD
-from config import anpr_config as config
+from config import alpr_config as config
+
 
 # For a real OCR application, this should be beam search with a dictionary
 # and language model.  For this example, best path is sufficient.
@@ -37,7 +39,7 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-img_filepath = 'D:/development/cv/datasets/anpr/test/BRV-JN97.png'
+img_filepath = os.path.join(config.DATASET_PATH, "test", "BRV-JN97.png")
 label = img_filepath.split('/')[-1].split('.')[0]
 
 stream = open(img_filepath, "rb")
@@ -49,8 +51,8 @@ img = cv2.resize(img, (160, 32))
 img = img.astype(np.float32)
 img /= 255
 
-#plt.imshow(img, cmap='gray')
-#plt.show()
+# plt.imshow(img, cmap='gray')
+# plt.show()
 
 img = np.expand_dims(img.T, -1)
 X_data = [img]
@@ -73,10 +75,9 @@ ax1.set_yticks([])
 ax2.set_title('Activations')
 ax2.imshow(net_out_value[0].T, cmap='binary', interpolation='nearest')
 ax2.set_yticks(list(range(len(config.ALPHABET) + 1)))
-ax2.set_yticklabels(config.ALPHABET) # + ['blank'])
+ax2.set_yticklabels(config.ALPHABET)  # + ['blank'])
 ax2.grid(False)
 for h in np.arange(-0.5, len(config.ALPHABET) + 1 + 0.5, 1):
     ax2.axhline(h, linestyle='-', color='k', alpha=0.5, linewidth=1)
 
 plt.show()
-

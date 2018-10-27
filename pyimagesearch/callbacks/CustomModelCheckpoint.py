@@ -24,8 +24,7 @@ class CustomModelCheckpoint(ModelCheckpoint):
                         if self.verbose > 0:
                             print('\nEpoch %05d: %s improved from %0.5f to %0.5f,'
                                   ' saving model to %s'
-                                  % (epoch + 1, self.monitor, self.best,
-                                     current, filepath))
+                                  % (epoch + 1, self.monitor, self.best, current, filepath))
                         self.best = current
                         if self.save_weights_only:
                             self.model_to_save.save_weights(filepath, overwrite=True)

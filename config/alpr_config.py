@@ -15,28 +15,28 @@ ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
 PROJECT_ROOT_PATH = "D:/development/cv/ANPR-keras"
 
-MODEL_NAME = "anpr.model"
+MODEL_NAME = "alpr.model"
 
 # json file with the list of german county marks
 GERMAN_COUNTY_MARKS = "./config/german_county_marks.json"
 
-DATASET_PATH = "../datasets"
+DATASET_PATH = "D:/development/datasets/alpr"
 # define the paths to the training and validation directories
-TRAIN_IMAGES = path.sep.join([DATASET_PATH, "anpr/images"])
-VAL_IMAGES = path.sep.join([DATASET_PATH, "anpr/val"])
+TRAIN_IMAGES = path.sep.join([DATASET_PATH, "images"])
+VAL_IMAGES = path.sep.join([DATASET_PATH, "val"])
 
 # define the path to the output training, validation, and testing HDF5 files
-TRAIN_HDF5 = path.sep.join([DATASET_PATH, "anpr/hdf5/train.h5"])
-VAL_HDF5 = path.sep.join([DATASET_PATH, "anpr/hdf5/val.h5"])
-TEST_HDF5 = path.sep.join([DATASET_PATH, "anpr/hdf5/test.h5"])
+TRAIN_HDF5 = path.sep.join([DATASET_PATH, "hdf5/train.h5"])
+VAL_HDF5 = path.sep.join([DATASET_PATH, "hdf5/val.h5"])
+TEST_HDF5 = path.sep.join([DATASET_PATH, "hdf5/test.h5"])
 
 # define the path to the output directory used for storing plots,
 # classification reports, etc.
 OUTPUT_PATH = "output"
 # path to the output model file
 MODEL_PATH = path.sep.join([OUTPUT_PATH, MODEL_NAME]) + ".h5"
-MODEL_CHECKPOINT_PATH = path.sep.join([OUTPUT_PATH, MODEL_NAME]) + '.{epoch:02d}.h5'
-FIG_PATH = path.sep.join([OUTPUT_PATH, "anpr.png"])
-JSON_PATH = path.sep.join([OUTPUT_PATH, "anpr.json"])
+MODEL_CHECKPOINT_PATH = path.sep.join([OUTPUT_PATH, MODEL_NAME]) + '.{epoch:02d}.hdf5'
+FIG_PATH = path.sep.join([OUTPUT_PATH, "alpr.png"])
+JSON_PATH = path.sep.join([OUTPUT_PATH, "alpr.json"])
 CHECKPOINTS_PATH = path.sep.join([OUTPUT_PATH, "checkpoints"])
 TENSORBOARD_PATH = path.sep.join([OUTPUT_PATH, "tensorboard"])

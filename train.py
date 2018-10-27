@@ -5,7 +5,7 @@ from keras.optimizers import SGD
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 
-from config import anpr_config as config
+from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.callbacks import CustomModelCheckpoint
 from pyimagesearch.nn.conv import OCR

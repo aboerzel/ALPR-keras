@@ -7,7 +7,7 @@ import progressbar
 from imutils import paths
 from sklearn.model_selection import train_test_split
 
-from config import anpr_config as config
+from config import alpr_config as config
 from pyimagesearch.io import HDF5DatasetWriter
 
 trainPaths = list(paths.list_images(config.TRAIN_IMAGES))
