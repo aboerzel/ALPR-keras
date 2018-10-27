@@ -23,6 +23,7 @@ bg = cv2.imread('D:/development/datasets/SUN397/c/campus/sun_akgyyhdnnpenxrwv.jp
 plate = cv2.imread('D:/development/datasets/alpr/images/AA-KC7866.png')
 
 OUTPUT_SHAPE = 192, 512
+
 x = random.randint(0, bg.shape[1] - OUTPUT_SHAPE[1])
 y = random.randint(0, bg.shape[0] - OUTPUT_SHAPE[0])
 bg = bg[y:y + OUTPUT_SHAPE[0], x:x + OUTPUT_SHAPE[1]]
@@ -36,12 +37,12 @@ plate = cv2.bitwise_and(plate, plate, mask=mask)
 black_image = np.zeros(plate.shape, np.uint8)
 
 # Put logo in ROI and modify the main image
-dst = cv2.add(black_image, plate)
+plate = cv2.add(black_image, plate)
 
 x = (bg.shape[0] - plate.shape[0]) // 2
 y = (bg.shape[1] - plate.shape[1]) // 2
 rows, cols, channels = plate.shape
-bg[x:x + rows, y:y + cols] = dst
+bg[x:x + rows, y:y + cols] = plate
 
 image = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
 label = "Test"
