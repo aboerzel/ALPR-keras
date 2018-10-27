@@ -9,8 +9,7 @@ class SimpleDatasetLoader:
         # store the image preprocessor
         self.preprocessors = preprocessors
 
-        # if the preprocessors are None, initialize them as an
-        # empty list
+        # if the preprocessors are None, initialize them as an empty list
         if self.preprocessors is None:
             self.preprocessors = []
 
@@ -29,8 +28,7 @@ class SimpleDatasetLoader:
 
             # check to see if our preprocessors are not None
             if self.preprocessors is not None:
-                # loop over the preprocessors and apply each to
-                # the image
+                # loop over the preprocessors and apply each to the image
                 for p in self.preprocessors:
                     image = p.preprocess(image)
 
@@ -45,4 +43,4 @@ class SimpleDatasetLoader:
                                                       len(imagePaths)))
 
         # return a tuple of the data and labels
-        return (np.array(data), np.array(labels))
+        return np.array(data), np.array(labels)

@@ -6,7 +6,7 @@ from config import alpr_config as config
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, dbPath, img_w, img_h, pool_size, max_text_len, batch_size, preprocessors=None, aug=None):
+    def __init__(self, db_path, img_w, img_h, pool_size, max_text_len, batch_size, preprocessors=None, aug=None):
 
         self.img_w = img_w
         self.img_h = img_h
@@ -16,9 +16,8 @@ class LicensePlateDatasetGenerator:
         self.aug = aug
         self.downsample_factor = pool_size ** 2
 
-        # open the HDF5 database for reading and determine the total
-        # number of entries in the database
-        self.db = h5py.File(dbPath)
+        # open the HDF5 database for reading and determine the total number of entries in the database
+        self.db = h5py.File(db_path)
         self.numImages = self.db["labels"].shape[0]
 
         self.indexes = list(range(self.numImages))
@@ -89,7 +88,7 @@ class LicensePlateDatasetGenerator:
     def get_output_size():
         return len(config.ALPHABET) + 1
 
-    # Translation of characters to unique integer values
+    # Translation of characters to unique numerical classes
     @staticmethod
     def number_to_labels(number):
         return list(map(lambda c: config.ALPHABET.index(c), number))

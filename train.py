@@ -27,10 +27,10 @@ sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 
 # initialize the training and validation images generators
 trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                                config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
 
 valGen = LicensePlateDatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                              config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
+                                      config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
 
 # define optimizer
 optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)

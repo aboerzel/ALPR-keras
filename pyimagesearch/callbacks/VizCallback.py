@@ -1,11 +1,14 @@
 import itertools
 import os
+
+import editdistance
 import keras.callbacks
 import pylab
 import matplotlib.pyplot as plt
 import numpy as np
 from keras import backend as K
 from config import alpr_config as config
+from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 
 
 class VizCallback(keras.callbacks.Callback):
@@ -67,6 +70,6 @@ class VizCallback(keras.callbacks.Callback):
         for j in range(out.shape[0]):
             out_best = list(np.argmax(out[j, 2:], 1))
             out_best = [k for k, g in itertools.groupby(out_best)]
-            #outstr = labels_to_text(out_best)
+            outstr = LicensePlateDatasetGenerator.labels_to_number(out_best)
             ret.append(outstr)
         return ret
