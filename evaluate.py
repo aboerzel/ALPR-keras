@@ -1,12 +1,18 @@
 import itertools
 import cv2
 import h5py
+import argparse
 import numpy as np
 import tensorflow as tf
 from keras import backend as K
 from keras.models import load_model
 from keras.optimizers import SGD
 from config import alpr_config as config
+from sklearn.metrics import accuracy_score
+
+ap = argparse.ArgumentParser()
+ap.add_argument("-n", "--number", default=100, type=int, help="number of images to test")
+args = vars(ap.parse_args())
 
 
 def decode(out):
@@ -38,17 +44,30 @@ images = np.array(validationData["images"])
 labels = np.array(validationData["labels"])
 validationData.close()
 
+images = images.astype("float") / 255.0
+
 # shuffle images and lables
 randomize = np.arange(len(images))
 np.random.shuffle(randomize)
 images = images[randomize]
 labels = labels[randomize]
 
-for image, label in zip(images, labels):
+images = images[:args["number"]]
+labels = labels[:args["number"]]
+
+y_true = np.full(len(images), True, dtype=bool)
+y_pred = np.full(len(images), False, dtype=bool)
+
+for i, (image, label) in enumerate(zip(images, labels)):
     image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT))
-    image = image.astype("float") / 255.0
+    ##image = image.astype("float") / 255.0
     image = np.expand_dims(image.T, -1)
     X_data = [image]
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
     pred_text = decode(net_out_value)
-    print('Predicted: %s - True: %s - %s' % (pred_text, label, pred_text == label))
+    y_pred[i] = pred_text == label
+    print('%6s - Predicted: %-9s - True: %-9s - %s' % (i + 1, pred_text, label, y_pred[i]))
+
+print()
+accuracy = accuracy_score(y_true, y_pred)
+print("accuracy: %s" % accuracy)
