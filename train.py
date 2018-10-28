@@ -17,17 +17,12 @@ args = vars(ap.parse_args())
 
 print("[INFO] loading data...")
 
-# construct the training image generator for data augmentation
-aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
-                         width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
-                         horizontal_flip=True, fill_mode="nearest")
-
 # initialize the image preprocessors
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 
 # initialize the training and validation images generators
 trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
 
 valGen = LicensePlateDatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
                                       config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
@@ -61,7 +56,8 @@ model.fit_generator(
     validation_steps=valGen.numImages // config.BATCH_SIZE,
     epochs=config.NUM_EPOCHS,
     max_queue_size=10,
-    callbacks=callbacks, verbose=1)
+    callbacks=callbacks,
+    verbose=1)
 
 print("[INFO] saving model...")
 model.save(config.MODEL_PATH)

@@ -32,7 +32,6 @@ datasets = [
 # original size of generated license plate images
 IMAGE_WIDTH = 473
 IMAGE_HEIGHT = 100
-IMAGE_DEPTH = 1
 
 # loop over the images tuples
 for (dType, paths, labels, outputPath) in datasets:

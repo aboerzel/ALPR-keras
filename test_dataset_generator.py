@@ -1,7 +1,6 @@
 import os
 import imgaug as ia
 import matplotlib.pyplot as plt
-from keras.preprocessing.image import ImageDataGenerator
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
@@ -11,13 +10,9 @@ ia.seed(1)
 
 os.chdir(os.path.join(config.PROJECT_ROOT_PATH))
 
-aug = ImageDataGenerator(rotation_range=18, zoom_range=0.15,
-                         width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
-                         horizontal_flip=True, fill_mode="nearest")
-
 sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp], aug=aug)
+                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
 
 inputs, outputs = next(trainGen.generator())
 trainGen.close()

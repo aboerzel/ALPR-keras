@@ -7,7 +7,7 @@ DATASET_ROOT_PATH = "D:/development/datasets/alpr"
 
 # network image size
 IMAGE_WIDTH = 160
-IMAGE_HEIGHT = 32
+IMAGE_HEIGHT = 64
 
 # training parameters
 BATCH_SIZE = 128
