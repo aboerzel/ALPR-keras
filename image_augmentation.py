@@ -7,16 +7,16 @@ import random
 import matplotlib.pyplot as plt
 from config import alpr_config as config
 
+batch_size = 32
+
 trainData = h5py.File(config.TRAIN_HDF5)
 images = np.array(trainData["images"])
 labels = np.array(trainData["labels"])
-image = images[0]
-label = labels[0]
 trainData.close()
 
-n = random.randint(0, 15000)
-images = images[n:n + 30]
-labels = labels[n:n + 30]
+n = random.randint(0, len(images)-batch_size)
+images = images[n:n + batch_size]
+labels = labels[n:n + batch_size]
 
 OUTPUT_SHAPE = config.IMAGE_HEIGHT, config.IMAGE_WIDTH
 
@@ -70,7 +70,7 @@ p.rotate(probability=0.7, max_left_rotation=5, max_right_rotation=5)
 p.gaussian_distortion(probability=1, grid_width=4, grid_height=4, magnitude=1, corner="bell", method="in",
                       mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
 
-g = p.keras_generator_from_array(plates, labels, batch_size=30)
+g = p.keras_generator_from_array(plates, labels, batch_size=batch_size)
 
 images, labels = next(g)
 
