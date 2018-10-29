@@ -6,7 +6,7 @@ PROJECT_ROOT_PATH = "D:/development/cv/ANPR-keras"
 DATASET_ROOT_PATH = "D:/development/datasets/alpr"
 
 # network image size
-IMAGE_WIDTH = 160
+IMAGE_WIDTH = 128
 IMAGE_HEIGHT = 64
 
 # training parameters
