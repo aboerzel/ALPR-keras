@@ -3,13 +3,11 @@ import argparse
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import SGD
 from keras.optimizers import Adam
-from keras.preprocessing.image import ImageDataGenerator
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.callbacks import CustomModelCheckpoint
 from pyimagesearch.nn.conv import OCR
-from pyimagesearch.preprocessing import SimplePreprocessor
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
@@ -17,15 +15,12 @@ args = vars(ap.parse_args())
 
 print("[INFO] loading data...")
 
-# initialize the image preprocessors
-sp = SimplePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-
 # initialize the training and validation images generators
 trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                                        config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
+                                        config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
 valGen = LicensePlateDatasetGenerator(config.VAL_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                                      config.MAX_TEXT_LEN, config.BATCH_SIZE, preprocessors=[sp])
+                                      config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
 # define optimizer
 optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)

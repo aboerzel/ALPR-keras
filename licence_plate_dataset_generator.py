@@ -3,17 +3,16 @@ import random
 import h5py
 import numpy as np
 from config import alpr_config as config
+from licens_plate_augmentor import LicensePlateAugmentor
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, db_path, img_w, img_h, pool_size, max_text_len, batch_size, preprocessors=None, aug=None):
+    def __init__(self, db_path, img_w, img_h, pool_size, max_text_len, batch_size):
 
         self.img_w = img_w
         self.img_h = img_h
         self.max_text_len = max_text_len
         self.batch_size = batch_size
-        self.preprocessors = preprocessors
-        self.aug = aug
         self.downsample_factor = pool_size ** 2
 
         # open the HDF5 database for reading and determine the total number of entries in the database
@@ -23,6 +22,8 @@ class LicensePlateDatasetGenerator:
         self.indexes = list(range(self.numImages))
         random.shuffle(self.indexes)
         self.cur_index = 0
+
+        self.augmentor = LicensePlateAugmentor(img_w, img_h)
 
     def next_sample(self):
         self.cur_index += 1
@@ -46,19 +47,16 @@ class LicensePlateDatasetGenerator:
             input_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
             label_length = np.zeros((self.batch_size, 1))
 
+            x_data = []
+            y_data = []
             for i in range(self.batch_size):
+                image, label = self.next_sample()
+                x_data.append(image)
+                y_data.append(label)
 
-                image, number = self.next_sample()
+            x_data, y_data = self.augmentor.generator(x_data, y_data)
 
-                if self.preprocessors is not None:
-                    for p in self.preprocessors:
-                        image = p.preprocess(image)
-
-                # if the data augmenator exists, apply it
-                # if self.aug is not None:
-                #     (images, labels) = next(self.aug.flow(images,
-                #                                           labels, batch_size=self.batch_size))
-
+            for i, (image, number) in enumerate(zip(x_data, y_data)):
                 image = image.T
                 image = np.expand_dims(image, -1)
                 data[i] = image
