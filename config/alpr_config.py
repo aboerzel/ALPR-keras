@@ -17,7 +17,6 @@ START_EPOCH = 0
 
 # license number construction
 MAX_TEXT_LEN = 9
-ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
 # model name
 MODEL_NAME = "alpr.model"

@@ -1,30 +1,20 @@
-import itertools
+import argparse
+
 import cv2
 import h5py
-import argparse
 import numpy as np
 import tensorflow as tf
 from keras import backend as K
 from keras.models import load_model
 from keras.optimizers import SGD
-from config import alpr_config as config
 from sklearn.metrics import accuracy_score
+
+from config import alpr_config as config
+from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-n", "--number", default=100, type=int, help="number of images to test")
 args = vars(ap.parse_args())
-
-
-def decode(out):
-    for j in range(out.shape[0]):
-        out_best = list(np.argmax(out[j, 2:], 1))
-        out_best = [k for k, g in itertools.groupby(out_best)]
-        outstr = ''
-        for c in out_best:
-            if c < len(config.ALPHABET):
-                outstr += config.ALPHABET[c]
-        return outstr
-
 
 sess = tf.Session()
 K.set_session(sess)
@@ -67,7 +57,7 @@ for i, (image, label) in enumerate(zip(images, labels)):
     image = np.expand_dims(image.T, -1)
     X_data = [image]
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
-    pred_text = decode(net_out_value)
+    pred_text = LabelCodec.decode_number_from_output(net_out_value)
     y_pred[i] = pred_text == label
     print('%6s - Predicted: %-9s - True: %-9s - %s' % (i + 1, pred_text, label, y_pred[i]))
 

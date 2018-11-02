@@ -48,7 +48,7 @@ class GermanLicensePlateImagesGenerator:
             return False
 
         id = re.compile('<id>(.*?)</id>', re.DOTALL | re.IGNORECASE).findall(
-            r.content.decode("utf-8"))[0]
+            r.content.decode_number_from_output("utf-8"))[0]
 
         status_url = 'http://nummernschild.heisnbrg.net/fe/task?action=status&id=%s' % id
         time.sleep(.200)

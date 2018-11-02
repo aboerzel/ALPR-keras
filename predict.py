@@ -1,6 +1,6 @@
-import itertools
-import cv2
 import argparse
+
+import cv2
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,7 +8,9 @@ import tensorflow as tf
 from keras import backend as K
 from keras.models import load_model
 from keras.optimizers import SGD
+
 from config import alpr_config as config
+from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", default="../../datasets/alpr/test/TS-U9235.png", type=str, help="image to predict")
@@ -19,18 +21,8 @@ img_filepath = args["image"]
 
 if not args["label"] == "":
     label = img_filepath.split('/')[-1].split('.')[0]
-
-
-def decode(out):
-    for j in range(out.shape[0]):
-        out_best = list(np.argmax(out[j, 2:], 1))
-        out_best = [k for k, g in itertools.groupby(out_best)]
-        outstr = ''
-        for c in out_best:
-            if c < len(config.ALPHABET):
-                outstr += config.ALPHABET[c]
-        return outstr
-
+else:
+    label = args["label"]
 
 sess = tf.Session()
 K.set_session(sess)
@@ -61,7 +53,7 @@ X_data = [img]
 
 # batch_output = model.predict(X_data)
 net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
-pred_text = decode(net_out_value)
+pred_text = LabelCodec.decode_number_from_output(net_out_value)
 fig = plt.figure(figsize=(10, 10))
 outer = gridspec.GridSpec(2, 1, wspace=10, hspace=0.1)
 ax1 = plt.Subplot(fig, outer[0])
@@ -76,10 +68,10 @@ ax1.set_xticks([])
 ax1.set_yticks([])
 ax2.set_title('Activations')
 ax2.imshow(net_out_value[0].T, cmap='binary', interpolation='nearest')
-ax2.set_yticks(list(range(len(config.ALPHABET) + 1)))
-ax2.set_yticklabels(config.ALPHABET)  # + ['blank'])
+ax2.set_yticks(list(range(len(LabelCodec.ALPHABET) + 1)))
+ax2.set_yticklabels(LabelCodec.ALPHABET)  # + ['blank'])
 ax2.grid(False)
-for h in np.arange(-0.5, len(config.ALPHABET) + 1 + 0.5, 1):
+for h in np.arange(-0.5, len(LabelCodec.ALPHABET) + 1 + 0.5, 1):
     ax2.axhline(h, linestyle='-', color='k', alpha=0.5, linewidth=1)
 
 plt.show()

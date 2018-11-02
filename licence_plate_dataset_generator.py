@@ -1,8 +1,9 @@
-# import the necessary packages
 import random
+
 import h5py
 import numpy as np
-from config import alpr_config as config
+
+from label_codec import LabelCodec
 from licens_plate_augmentor import LicensePlateAugmentor
 
 
@@ -66,7 +67,7 @@ class LicensePlateDatasetGenerator:
                 image = np.expand_dims(image, -1)
                 data[i] = image
                 text_length = len(number)
-                labels[i, 0:text_length] = self.number_to_labels(number)
+                labels[i, 0:text_length] = LabelCodec.encode_number(number)
                 label_length[i] = text_length
 
             data = data.astype("float") / 255.0
@@ -89,20 +90,5 @@ class LicensePlateDatasetGenerator:
 
     @staticmethod
     def get_output_size():
-        return len(config.ALPHABET) + 1
+        return LabelCodec.get_alphabet_len() + 1
 
-    # Translation of characters to unique numerical classes
-    @staticmethod
-    def number_to_labels(number):
-        return list(map(lambda c: config.ALPHABET.index(c), number))
-
-    # Reverse translation of numerical classes back to characters
-    @staticmethod
-    def labels_to_number(labels):
-        ret = []
-        for c in labels:
-            if c == len(config.ALPHABET):  # CTC Blank
-                ret.append("")
-            else:
-                ret.append(config.ALPHABET[c])
-        return "".join(ret)
