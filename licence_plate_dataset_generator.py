@@ -22,6 +22,7 @@ class LicensePlateDatasetGenerator:
         self.indexes = list(range(self.numImages))
         random.shuffle(self.indexes)
         self.cur_index = 0
+        self.batch_index = 0
 
         self.augmentor = LicensePlateAugmentor(img_w, img_h)
 
@@ -33,6 +34,16 @@ class LicensePlateDatasetGenerator:
             random.shuffle(self.indexes)
 
         return self.db["images"][self.indexes[self.cur_index]], self.db["labels"][self.indexes[self.cur_index]]
+
+    def next_batch(self):
+
+        if self.batch_index >= (self.numImages // self.batch_size):
+            self.batch_index = 0
+            random.shuffle(self.indexes)
+
+        index = self.indexes[self.batch_index]
+        self.batch_index += 1
+        return self.db["images"][index:index + self.batch_size], self.db["labels"][index:index + self.batch_size]
 
     def generator(self, passes=np.inf):
         # initialize the epoch count
@@ -47,13 +58,7 @@ class LicensePlateDatasetGenerator:
             input_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
             label_length = np.zeros((self.batch_size, 1))
 
-            x_data = []
-            y_data = []
-            for i in range(self.batch_size):
-                image, label = self.next_sample()
-                x_data.append(image)
-                y_data.append(label)
-
+            x_data, y_data = self.next_batch()
             x_data, y_data = self.augmentor.generator(x_data, y_data)
 
             for i, (image, number) in enumerate(zip(x_data, y_data)):
