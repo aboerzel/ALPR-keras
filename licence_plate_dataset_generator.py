@@ -22,7 +22,7 @@ class LicensePlateDatasetGenerator:
         self.labels = np.asarray(self.db["labels"])
         self.numImages = self.labels.shape[0]
 
-        self.indexes = list(range(self.numImages))
+        self.indexes = np.asarray(range(self.numImages))
         random.shuffle(self.indexes)
         self.batch_index = 0
 
@@ -35,7 +35,7 @@ class LicensePlateDatasetGenerator:
             random.shuffle(self.indexes)
 
         current_index = self.batch_index * self.batch_size
-        batch_indexes = np.asarray(self.indexes[current_index:current_index + self.batch_size])
+        batch_indexes = self.indexes[current_index:current_index + self.batch_size]
         self.batch_index += 1
         return self.images[batch_indexes], self.labels[batch_indexes]
 

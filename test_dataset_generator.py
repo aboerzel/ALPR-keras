@@ -12,6 +12,12 @@ trainGen.close()
 cols = 8
 rows = len(inputs["input"]) // cols
 
+# for img in inputs["input"]:
+#     img = img.T.reshape(config.IMAGE_HEIGHT, config.IMAGE_WIDTH)
+#     plt.axis("off")
+#     plt.imshow(img, cmap='Greys_r')
+#     plt.show()
+
 image_index = 0
 f, axarr = plt.subplots(rows, cols, figsize=(15, 10))
 for r in range(rows):

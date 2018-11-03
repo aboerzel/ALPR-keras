@@ -10,7 +10,7 @@ from config import alpr_config as config
 from pyimagesearch.io import HDF5DatasetWriter
 
 trainPaths = list(paths.list_images(config.TRAIN_IMAGES))
-trainLabels = [p.split(os.path.sep)[-1].split(".")[0] for p in trainPaths]
+trainLabels = [p.split(os.path.sep)[-1].split(".")[0].split('#')[1] for p in trainPaths]
 
 # perform stratified sampling from the training set to build the
 # testing split from the training data
@@ -29,8 +29,8 @@ datasets = [
     ("test", testPaths, testLabels, config.TEST_HDF5)]
 
 # original size of generated license plate images
-IMAGE_WIDTH = 473
-IMAGE_HEIGHT = 100
+IMAGE_WIDTH = 151
+IMAGE_HEIGHT = 32
 
 # loop over the images tuples
 for (dType, paths, labels, outputPath) in datasets:
@@ -49,8 +49,7 @@ for (dType, paths, labels, outputPath) in datasets:
         stream = open(path, "rb")
         bytes = bytearray(stream.read())
         numpyarray = np.asarray(bytes, dtype=np.uint8)
-        image = cv2.imdecode(numpyarray, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.imdecode(numpyarray, cv2.IMREAD_GRAYSCALE)
 
         # check image size
         if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH):

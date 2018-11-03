@@ -1,6 +1,7 @@
 import argparse
 
 import cv2
+import imutils
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +17,38 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", default="../../datasets/alpr/test/TS-U9235.png", type=str, help="image to predict")
 ap.add_argument("-l", "--label", default="TS-U9235", type=str, help="true label")
 args = vars(ap.parse_args())
+
+
+
+
+
+def preprocess(image, width, height):
+    # grab the dimensions of the image, then initialize the padding values
+    (h, w) = image.shape[:2]
+
+    # if the width is greater than the height then resize along the width
+    if w > h:
+        image = imutils.resize(image, width=width)
+
+    # otherwise, the height is greater than the width so resize along the height
+    else:
+        image = imutils.resize(image, height=height)
+
+    # determine the padding values for the width and height to
+    # obtain the target dimensions
+    padW = int((width - image.shape[1]) / 2.0)
+    padH = int((height - image.shape[0]) / 2.0)
+
+    # pad the image then apply one more resizing to handle any rounding issues
+    image = cv2.copyMakeBorder(image, padH, padH, padW, padW, cv2.BORDER_REPLICATE)
+    image = cv2.resize(image, (width, height))
+
+    # return the pre-processed image
+    return image
+
+
+
+
 
 img_filepath = args["image"]
 
@@ -41,12 +74,14 @@ bytes = bytearray(stream.read())
 numpyarray = np.asarray(bytes, dtype=np.uint8)
 img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-img = cv2.resize(img, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT))
-img = img.astype(np.float32)
-img /= 255
 
-# plt.imshow(img, cmap='gray')
-# plt.show()
+img = imutils.resize(img, width=(config.IMAGE_WIDTH - 10))
+img = preprocess(img, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+img = img.astype(np.float32) / 255.
+
+plt.axis("off")
+plt.imshow(img, cmap='gray')
+plt.show()
 
 img = np.expand_dims(img.T, -1)
 X_data = [img]
