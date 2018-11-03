@@ -9,11 +9,11 @@ trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, c
 inputs, outputs = next(trainGen.generator())
 trainGen.close()
 
-cols = 4
+cols = 8
 rows = len(inputs["input"]) // cols
 
 image_index = 0
-f, axarr = plt.subplots(rows, cols, figsize=(10, 50))
+f, axarr = plt.subplots(rows, cols, figsize=(15, 10))
 for r in range(rows):
     for c in range(cols):
         image = inputs["input"][image_index].T.reshape(config.IMAGE_HEIGHT, config.IMAGE_WIDTH)
