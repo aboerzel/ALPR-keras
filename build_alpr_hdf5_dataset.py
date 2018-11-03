@@ -14,12 +14,12 @@ trainLabels = [p.split(os.path.sep)[-1].split(".")[0] for p in trainPaths]
 
 # perform stratified sampling from the training set to build the
 # testing split from the training data
-split = train_test_split(trainPaths, trainLabels, test_size=0.2, random_state=42)
-(trainPaths, valPaths, trainLabels, valLabels) = split
+split = train_test_split(trainPaths, trainLabels, test_size=0.30, random_state=42)
+(trainPaths, testPaths, trainLabels, testLabels) = split
 
 # perform another stratified sampling, this time to build the validation data
-split = train_test_split(trainPaths, trainLabels, test_size=0.3, random_state=42)
-(trainPaths, testPaths, trainLabels, testLabels) = split
+split = train_test_split(trainPaths, trainLabels, test_size=0.25, random_state=42)
+(trainPaths, valPaths, trainLabels, valLabels) = split
 
 # construct a list pairing the training, validation, and testing
 # image paths along with their corresponding labels and output HDF5 files
