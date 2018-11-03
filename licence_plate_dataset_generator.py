@@ -42,7 +42,7 @@ class LicensePlateDatasetGenerator:
             self.batch_index = 0
             random.shuffle(self.indexes)
 
-        index = self.indexes[self.batch_index]
+        index = self.indexes[self.batch_index * self.batch_size]
         self.batch_index += 1
         return self.db["images"][index:index + self.batch_size], self.db["labels"][index:index + self.batch_size]
 
@@ -59,7 +59,14 @@ class LicensePlateDatasetGenerator:
             input_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor - 2
             label_length = np.zeros((self.batch_size, 1))
 
-            x_data, y_data = self.next_batch()
+            #x_data, y_data = self.next_batch()
+            x_data = []
+            y_data = []
+            for i in range(self.batch_size):
+                image, label = self.next_sample()
+                x_data.append(image)
+                y_data.append(label)
+
             x_data, y_data = self.augmentor.generator(x_data, y_data)
 
             for i, (image, number) in enumerate(zip(x_data, y_data)):
@@ -70,7 +77,7 @@ class LicensePlateDatasetGenerator:
                 labels[i, 0:text_length] = LabelCodec.encode_number(number)
                 label_length[i] = text_length
 
-            data = data.astype("float") / 255.0
+            data = data.astype("float")
 
             inputs = {
                 'input': data,

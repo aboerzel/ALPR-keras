@@ -9,7 +9,6 @@ class ImageToArrayPreprocessor:
         self.dataFormat = dataFormat
 
     def preprocess(self, image):
-        # image = image.astype(np.float32)
-        #  image /= 255
+        # mage = image.astype(np.float32) / 255.
         # apply the Keras utility function that correctly rearranges the dimensions of the image
         return img_to_array(image, data_format=self.dataFormat)

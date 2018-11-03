@@ -21,12 +21,15 @@ class LicensePlateAugmentor:
 
         self.OUTPUT_SHAPE = img_h, img_w
 
-    def __get_background_image__(self):
         bg = cv2.imread('D:/development/datasets/SUN397/c/campus/sun_akgyyhdnnpenxrwv.jpg')
-        bg = cv2.cvtColor(bg, cv2.COLOR_RGB2BGRA)
-        return bg
+        self.bg = cv2.cvtColor(bg, cv2.COLOR_RGB2BGRA)
 
-    def generate_bg(self, num_bg_images):
+    def __get_background_image__(self):
+        # bg = cv2.imread('D:/development/datasets/SUN397/c/campus/sun_akgyyhdnnpenxrwv.jpg')
+        # bg = cv2.cvtColor(bg, cv2.COLOR_RGB2BGRA)
+        return self.bg
+
+    def __generate_bg__(self, num_bg_images):
         found = False
         while not found:
             fname = "bgs/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
@@ -42,7 +45,7 @@ class LicensePlateAugmentor:
         return bg
 
     def __get_random_background__(self):
-        background = self.__get_background_image__()  # .copy()
+        background = self.__get_background_image__().copy()
         x = random.randint(0, background.shape[1] - self.OUTPUT_SHAPE[1])
         y = random.randint(0, background.shape[0] - self.OUTPUT_SHAPE[0])
         background = background[y:y + self.OUTPUT_SHAPE[0], x:x + self.OUTPUT_SHAPE[1]]

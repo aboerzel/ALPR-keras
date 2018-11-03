@@ -4,7 +4,6 @@ import numpy as np
 
 
 class LabelCodec:
-
     ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
     # Translation of characters to unique numerical classes

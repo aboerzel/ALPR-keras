@@ -34,9 +34,6 @@ images = np.array(validationData["images"])
 labels = np.array(validationData["labels"])
 validationData.close()
 
-# normalize image data
-images = images.astype("float") / 255.0
-
 # shuffle images and lables
 randomize = np.arange(len(images))
 np.random.shuffle(randomize)
@@ -47,13 +44,15 @@ labels = labels[randomize]
 images = images[:args["number"]]
 labels = labels[:args["number"]]
 
+# normalize image data
+images = images.astype("float") / 255.0
+
 # predictions for accuracy measurement
 y_true = np.full(len(images), True, dtype=bool)
 y_pred = np.full(len(images), False, dtype=bool)
 
 for i, (image, label) in enumerate(zip(images, labels)):
     image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT))
-    ##image = image.astype("float") / 255.0
     image = np.expand_dims(image.T, -1)
     X_data = [image]
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
