@@ -38,7 +38,7 @@ OUTPUT_PATH = "output"
 
 # path to the output model file
 MODEL_PATH = path.sep.join([OUTPUT_PATH, MODEL_NAME]) + ".h5"
-MODEL_CHECKPOINT_PATH = path.sep.join([OUTPUT_PATH, MODEL_NAME]) + '.{epoch:02d}.hdf5'
+MODEL_CHECKPOINT_PATH = path.sep.join([OUTPUT_PATH, MODEL_NAME]) + '.{epoch:02d}.h5'
 FIG_PATH = path.sep.join([OUTPUT_PATH, "alpr.png"])
 JSON_PATH = path.sep.join([OUTPUT_PATH, "alpr.json"])
 CHECKPOINTS_PATH = path.sep.join([OUTPUT_PATH, "checkpoints"])

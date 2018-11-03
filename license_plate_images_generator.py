@@ -103,7 +103,7 @@ class GermanLicensePlateImagesGenerator:
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--items",
-                default="30000",
+                default="60000",
                 help="number of items to generate")
 args = vars(ap.parse_args())
 
