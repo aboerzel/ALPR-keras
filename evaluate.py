@@ -15,7 +15,7 @@ from config import alpr_config as config
 from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-n", "--number", default=100, type=int, help="number of images to test")
+ap.add_argument("-n", "--number", default=1000, type=int, help="number of images to test")
 args = vars(ap.parse_args())
 
 
@@ -56,7 +56,7 @@ model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
-# load validation data from dataset
+# load test data from dataset
 testData = h5py.File(config.TEST_HDF5)
 images = np.array(testData["images"])
 labels = np.array(testData["labels"])
@@ -94,7 +94,7 @@ for i, (image, label) in enumerate(zip(images, labels)):
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
     pred_text = LabelCodec.decode_number_from_output(net_out_value)
     y_pred[i] = pred_text == label
-    print('%6s - Predicted: %-9s - True: %-9s - %s' % (i + 1, pred_text, label, y_pred[i]))
+    print('%6s - Predicted: %-10s - True: %-10s - %s' % (i + 1, pred_text, label, y_pred[i]))
 
 print()
 accuracy = accuracy_score(y_true, y_pred)
