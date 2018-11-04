@@ -56,6 +56,11 @@ for (dType, paths, labels, outputPath) in datasets:
             print("image with wrong size: %s" % path)
             continue
 
+        # check number length
+        if len(label) > 10:
+            print("image with wrong label: %s - %s" % (path, label))
+            continue
+
         # add the image and label # to the HDF5 images
         writer.add([image], [label])
         pbar.update(i)

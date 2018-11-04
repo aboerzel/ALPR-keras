@@ -12,8 +12,9 @@ trainGen.close()
 cols = 8
 rows = len(inputs["input"]) // cols
 
-# for img in inputs["input"]:
+# for i, img in enumerate(inputs["input"]):
 #     img = img.T.reshape(config.IMAGE_HEIGHT, config.IMAGE_WIDTH)
+#     plt.title(inputs["labels"][i])
 #     plt.axis("off")
 #     plt.imshow(img, cmap='Greys_r')
 #     plt.show()

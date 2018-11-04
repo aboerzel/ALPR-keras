@@ -7,7 +7,7 @@ DATASET_ROOT_PATH = "D:/development/datasets/alpr"
 
 # network image size
 IMAGE_WIDTH = 128
-IMAGE_HEIGHT = 64
+IMAGE_HEIGHT = 44
 
 # training parameters
 BATCH_SIZE = 256
@@ -16,7 +16,7 @@ NUM_EPOCHS = 50
 START_EPOCH = 0
 
 # license number construction
-MAX_TEXT_LEN = 9
+MAX_TEXT_LEN = 10
 
 # model name
 MODEL_NAME = "alpr.model"
