@@ -14,7 +14,7 @@ trainLabels = [p.split(os.path.sep)[-1].split(".")[0].split('#')[1] for p in tra
 
 # perform stratified sampling from the training set to build the
 # testing split from the training data
-split = train_test_split(trainPaths, trainLabels, test_size=0.30, random_state=42)
+split = train_test_split(trainPaths, trainLabels, test_size=0.25, random_state=42)
 (trainPaths, testPaths, trainLabels, testLabels) = split
 
 # perform another stratified sampling, this time to build the validation data
@@ -40,7 +40,8 @@ for (dType, paths, labels, outputPath) in datasets:
 
     # initialize the progress bar
     widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
-    pbar = progressbar.ProgressBar(maxval=len(paths), widgets=widgets).start()
+    pbar = progressbar.ProgressBar(maxval=len(paths), widgets=widgets)
+    pbar.start()
 
     # loop over the image paths
     for (i, (path, label)) in enumerate(zip(paths, labels)):
