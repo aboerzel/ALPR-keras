@@ -1,14 +1,13 @@
 import random
 
-import h5py
 import numpy as np
 
 from label_codec import LabelCodec
-from licens_plate_augmentor import LicensePlateAugmentor
+from license_plate_image_augmentor import LicensePlateImageAugmentor
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, db_path, img_w, img_h, pool_size, max_text_len, batch_size):
+    def __init__(self, images, labels, img_w, img_h, pool_size, max_text_len, batch_size):
 
         self.img_w = img_w
         self.img_h = img_h
@@ -16,17 +15,15 @@ class LicensePlateDatasetGenerator:
         self.batch_size = batch_size
         self.downsample_factor = pool_size ** 2
 
-        # open the HDF5 database for reading and determine the total number of entries in the database
-        self.db = h5py.File(db_path)
-        self.images = np.asarray(self.db["images"])
-        self.labels = np.asarray(self.db["labels"])
+        self.images = images
+        self.labels = labels
         self.numImages = self.labels.shape[0]
 
         self.indexes = np.asarray(range(self.numImages))
         random.shuffle(self.indexes)
         self.batch_index = 0
 
-        self.augmentor = LicensePlateAugmentor(img_w, img_h)
+        self.augmentor = LicensePlateImageAugmentor(img_w, img_h)
 
     def next_batch(self):
 
@@ -53,9 +50,9 @@ class LicensePlateDatasetGenerator:
             label_length = np.zeros((self.batch_size, 1))
 
             x_data, y_data = self.next_batch()
-            x_data, y_data = self.augmentor.generator(x_data, y_data)
 
             for i, (image, number) in enumerate(zip(x_data, y_data)):
+                image = self.augmentor.generate_plate_image(image)
                 image = image.T
                 image = np.expand_dims(image, -1)
                 data[i] = image
@@ -74,10 +71,6 @@ class LicensePlateDatasetGenerator:
 
             # increment the total number of epochs
             epochs += 1
-
-    def close(self):
-        # close the database
-        self.db.close()
 
     @staticmethod
     def get_output_size():
