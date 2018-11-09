@@ -10,7 +10,7 @@ class LicensePlateAugmentor:
     def __init__(self, img_w, img_h):
         self.augmentor = Augmentor.Pipeline()
 
-        #self.augmentor.zoom_random(probability=0.8, percentage_area=0.998)
+        self.augmentor.zoom_random(probability=0.8, percentage_area=0.998)
 
         self.augmentor.skew_top_bottom(probability=0.8, magnitude=0.05)
         self.augmentor.skew_left_right(probability=0.8, magnitude=0.1)
@@ -19,9 +19,8 @@ class LicensePlateAugmentor:
 
         self.augmentor.rotate(probability=0.7, max_left_rotation=5, max_right_rotation=5)
 
-        #self.augmentor.gaussian_distortion(probability=1, grid_width=3, grid_height=3,
-        #                                   magnitude=1, corner="bell", method="in",
-        #                                   mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
+        # self.augmentor.gaussian_distortion(probability=1, grid_width=3, grid_height=3,
+        #                                    magnitude=2, corner="bell", method="in")
 
         self.OUTPUT_SHAPE = img_h, img_w
 
@@ -71,6 +70,16 @@ class LicensePlateAugmentor:
 
         # convert to grayscale image without alpha channel
         image = cv2.cvtColor(background, cv2.COLOR_BGR2GRAY)
+
+        row, col = image.shape
+        mean = 0.0
+        var = 0.02
+        sigma = var ** 0.5
+
+        gauss = np.random.normal(mean, sigma, (row, col))
+        gauss = gauss.reshape(row, col)
+        image = image + gauss
+
         return image
 
     def generator(self, images, labels):

@@ -57,6 +57,10 @@ if not args["label"] == "":
 else:
     label = args["label"]
 
+
+img_filepath = "D:/development/datasets/alpr/val/K-OE296.png"
+label = "HD-SK2015"
+
 sess = tf.Session()
 K.set_session(sess)
 
@@ -75,8 +79,9 @@ numpyarray = np.asarray(bytes, dtype=np.uint8)
 img = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-img = imutils.resize(img, width=(config.IMAGE_WIDTH - 10))
-img = preprocess(img, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+#img = imutils.resize(img, width=(config.IMAGE_WIDTH - 10))
+#img = preprocess(img, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+img = cv2.resize(img, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT))
 img = img.astype(np.float32) / 255.
 
 plt.axis("off")

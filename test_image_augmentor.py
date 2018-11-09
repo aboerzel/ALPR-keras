@@ -1,9 +1,11 @@
-import h5py
-import numpy as np
 import random
+
+import h5py
 import matplotlib.pyplot as plt
+import numpy as np
+
 from config import alpr_config as config
-from licens_plate_augmentor import LicensePlateAugmentor
+from license_plate_image_augmentor import LicensePlateImageAugmentor
 
 batch_size = 32
 
@@ -16,21 +18,20 @@ n = random.randint(0, len(images) - batch_size)
 images = images[n:n + batch_size]
 labels = labels[n:n + batch_size]
 
-aug = LicensePlateAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-images, labels = aug.generator(images, labels)
+augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 
 cols = 6
 rows = len(images) // cols
 
 image_index = 0
-f, axarr = plt.subplots(rows, cols, figsize=(15, 50))
+fig, axarr = plt.subplots(rows, cols, figsize=(15, 50))
 for r in range(rows):
     for c in range(cols):
-        image = images[image_index].reshape(images[image_index].shape[:2])
+        image = images[image_index]
+        image = augmentor.generate_plate_image(image)
+        axarr[r, c].title.set_text(labels[image_index])
         axarr[r, c].axis("off")
-        # axarr[r, c].imshow(image, cmap='Greys_r')
         axarr[r, c].imshow(image, cmap='gray')
-
         image_index += 1
 
 plt.show()
