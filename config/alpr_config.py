@@ -9,7 +9,8 @@ DATASET_ROOT_PATH = "D:/development/datasets/alpr"
 IMAGE_WIDTH = 128
 IMAGE_HEIGHT = 44
 
-# training parameters
+# training parameter
+FOLDS = 10
 BATCH_SIZE = 256
 POOL_SIZE = 2
 NUM_EPOCHS = 50

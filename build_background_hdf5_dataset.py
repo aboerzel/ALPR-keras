@@ -6,13 +6,12 @@ import numpy
 
 from pyimagesearch.io import HDF5DatasetWriter
 
-IMAGE_WIDTH = 151
-IMAGE_HEIGHT = 32
+IMAGE_WIDTH = 256
+IMAGE_HEIGHT = 256
 
 
 def im_from_file(f):
     a = numpy.asarray(bytearray(f.read()), dtype=numpy.uint8)
-    # cv2.imdecode(a, cv2.CV_CV_LOAD_IMAGE_GRAYSCALE)
     return cv2.imdecode(a, cv2.IMREAD_GRAYSCALE)
 
 
@@ -42,24 +41,26 @@ def extract_backgrounds(archive_name, outputPath):
         #     continue
         f = t.extractfile(m)
         try:
-            im = im_from_file(f)
+            image = im_from_file(f)
         finally:
             f.close()
-        if im is None:
+        if image is None:
             continue
 
-        if im.shape[0] > im.shape[1]:
-            im = im[:im.shape[1], :]
+        if image.shape[0] > image.shape[1]:
+            image = image[:image.shape[1], :]
         else:
-            im = im[:, :im.shape[0]]
-        if im.shape[0] > 256:
-            im = cv2.resize(im, (256, 256))
+            image = image[:, :image.shape[0]]
 
-        fname = "{:08}.jpg".format(index)
-        # print(fname)
+        # if image.shape[0] > 256:
+        #     image = cv2.resize(image, (256, 256))
 
-        # add the image and label # to the HDF5 images
-        writer.add([im], [fname])
+        image = cv2.resize(image, (256, 256))
+
+        name = "{:08}".format(index)
+
+        # add the image and name # to the HDF5 images
+        writer.add([image], [name])
         pbar.update(i)
 
         index += 1

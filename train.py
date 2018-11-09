@@ -1,7 +1,5 @@
 import argparse
-import cv2
 
-import h5py
 import numpy as np
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import SGD
@@ -10,27 +8,25 @@ from sklearn.model_selection import StratifiedKFold
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.callbacks import CustomModelCheckpoint
+from pyimagesearch.datasets.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
-from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
+ap.add_argument("-f", "--folds", default=config.FOLDS, type=int, help="folds")
 args = vars(ap.parse_args())
 
+k = args['folds']
+
 print("[INFO] loading data...")
-
-trainData = h5py.File(config.TRAIN_HDF5)
-images = np.array(trainData["images"])
-labels = np.array(trainData["labels"])
-trainData.close()
+images, labels = Hdf5DatasetLoader(config.TRAIN_HDF5)
 
 
-def create_model():
+def create_model(img_w, img_h, pool_size, output_size, max_text_length):
     optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
     # optimizer = Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
 
-    model = OCR.build(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                      LabelCodec.get_alphabet_len() + 1, config.MAX_TEXT_LEN)
+    model = OCR.build(img_w, img_h, pool_size, output_size, max_text_length)
 
     model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
 
@@ -56,7 +52,6 @@ k = 10
 cvscores = []
 skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=1)
 
-k = 10
 l = int(len(images) / k)
 
 for i in range(k):
@@ -68,13 +63,15 @@ for i in range(k):
 
     print("Training on fold " + str(i + 1) + "/{0}...".format(k))
 
-    model = create_model()
-
     trainGen = LicensePlateDatasetGenerator(xtrain, ytrain, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
     valGen = LicensePlateDatasetGenerator(xval, yval, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                            config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
+                                          config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
+
+    model = create_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
+                         trainGen.get_output_size(), config.MAX_TEXT_LEN)
+
     history = model.fit_generator(
         trainGen.generator(),
         steps_per_epoch=trainGen.numImages // config.BATCH_SIZE,
@@ -94,4 +91,4 @@ for i in range(k):
     print("Last training accuracy: " + str(accuracy_history[-1]) + ", last validation accuracy: " + str(
         val_accuracy_history[-1]))
 
-print("%.2f%% (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
+print("{:.2f}%% (+/- {:.2f}%%)".format(np.mean(cvscores), np.std(cvscores)))
