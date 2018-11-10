@@ -12,20 +12,15 @@ class LicensePlateImageAugmentor:
 
         self.OUTPUT_SHAPE = img_h, img_w
 
-        #loader = Hdf5DatasetLoader()
-        #self.background_images, _ = loader.load(background_image_db_path, True)
-
-        bg = cv2.imread('D:/development/datasets/SUN397/c/campus/sun_akgyyhdnnpenxrwv.jpg')
-        self.bg = cv2.cvtColor(bg, cv2.COLOR_RGB2BGRA)
+        loader = Hdf5DatasetLoader()
+        self.background_images, _ = loader.load(background_image_db_path, True)
 
     def __get_random_background_image__(self):
-        return self.bg.copy()
-        # index = random.randint(0, len(self.background_images))
-        # return self.background_images[index]
+        index = random.randint(0, len(self.background_images))
+        return self.background_images[index]
 
     def __generate_background_image__(self):
         background = self.__get_random_background_image__()
-        background = cv2.cvtColor(background, cv2.COLOR_BGR2GRAY)
         x = random.randint(0, background.shape[1] - self.OUTPUT_SHAPE[1])
         y = random.randint(0, background.shape[0] - self.OUTPUT_SHAPE[0])
         background = background[y:y + self.OUTPUT_SHAPE[0], x:x + self.OUTPUT_SHAPE[1]]
