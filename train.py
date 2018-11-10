@@ -18,9 +18,6 @@ args = vars(ap.parse_args())
 
 k = args['folds']
 
-print("[INFO] loading data...")
-images, labels = Hdf5DatasetLoader(config.TRAIN_HDF5)
-
 
 def create_model(img_w, img_h, pool_size, output_size, max_text_length):
     optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
@@ -52,6 +49,9 @@ k = 10
 cvscores = []
 skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=1)
 
+print("[INFO] loading data...")
+loader = Hdf5DatasetLoader()
+images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
 fold_size = int(len(images) / k)
 
 for fold_index in range(k):
