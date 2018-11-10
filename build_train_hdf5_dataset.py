@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import cv2
@@ -9,7 +10,14 @@ from sklearn.model_selection import train_test_split
 from config import alpr_config as config
 from pyimagesearch.io import HDF5DatasetWriter
 
-trainPaths = list(paths.list_images(config.TRAIN_IMAGES))
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--image_data", default=config.TRAIN_IMAGES, help="image data path")
+ap.add_argument("-t", "--train_data", default=config.TRAIN_HDF5, help="train dataset hdf5-file")
+ap.add_argument("-v", "--test_data", default=config.TEST_HDF5, help="test dataset hdf5-file")
+ap.add_argument("-i", "--items", default=1000, type=int, help="max images")
+args = vars(ap.parse_args())
+
+trainPaths = list(paths.list_images(args['image_data']))
 trainLabels = [p.split(os.path.sep)[-1].split(".")[0].split('#')[1] for p in trainPaths]
 
 # perform stratified sampling from the training set to build the
@@ -20,8 +28,8 @@ split = train_test_split(trainPaths, trainLabels, test_size=0.20, random_state=4
 # construct a list pairing the training, validation, and testing
 # image paths along with their corresponding labels and output HDF5 files
 datasets = [
-    ("train", trainPaths, trainLabels, config.TRAIN_HDF5),
-    ("test", testPaths, testLabels, config.TEST_HDF5)]
+    ("train", trainPaths, trainLabels, args['train_data']),
+    ("test", testPaths, testLabels, args['test_data'])]
 
 # original size of generated license plate images
 IMAGE_WIDTH = 151

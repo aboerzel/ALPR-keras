@@ -1,8 +1,10 @@
+import argparse
 import tarfile
 
 import cv2
 import numpy
 import progressbar
+import numpy as np
 
 from config import alpr_config as config
 from pyimagesearch.io import HDF5DatasetWriter
@@ -10,16 +12,32 @@ from pyimagesearch.io import HDF5DatasetWriter
 IMAGE_WIDTH = 256
 IMAGE_HEIGHT = 256
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-s", "--source", default=config.SUN397_TAR_FILE, help="source tar-file")
+ap.add_argument("-t", "--target", default=config.SUN397_HDF5, help="target output hdf5-file")
+ap.add_argument("-i", "--items", default=1000, type=int, help="max images")
+args = vars(ap.parse_args())
+
 
 def im_from_file(f):
     a = numpy.asarray(bytearray(f.read()), dtype=numpy.uint8)
     return cv2.imdecode(a, cv2.IMREAD_GRAYSCALE)
 
 
-def extract_backgrounds(archive_name, output_path):
+def extract_backgrounds(archive_name, output_path, max_items=np.inf):
     print("[INFO] reading content of {}...".format(archive_name))
     tar = tarfile.open(name=archive_name)
-    files = tar.getnames()
+    files = np.array(tar.getnames())
+
+    # shuffle files
+    randomized_indexes = np.arange(len(files))
+    np.random.shuffle(randomized_indexes)
+    files = files[randomized_indexes]
+
+    # pick max number of items
+    if max_items != np.inf and max_items <= len(files):
+        max_items = len(files)
+        files = files[0:max_items]
 
     print("[INFO] building {}...".format(output_path))
     writer = HDF5DatasetWriter((len(files), IMAGE_HEIGHT, IMAGE_WIDTH), output_path)
@@ -69,4 +87,7 @@ def extract_backgrounds(archive_name, output_path):
 
 
 if __name__ == "__main__":
-    extract_backgrounds(config.SUN397_TAR_FILE, config.SUN397_HDF5)
+    max_items = np.inf
+    if args['items'] > 0:
+        max_items = args['items']
+    extract_backgrounds(args['source'], args['target'], max_items)

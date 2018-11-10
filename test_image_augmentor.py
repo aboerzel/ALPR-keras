@@ -9,7 +9,7 @@ batch_size = 6
 loader = Hdf5DatasetLoader()
 images, labels = loader.load(config.TRAIN_HDF5, shuffle=True, max_items=batch_size)
 
-augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.SUN397_HDF5, 1000)
+augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.SUN397_HDF5)
 
 cols = 2
 rows = len(images) // cols

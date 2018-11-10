@@ -23,7 +23,7 @@ class LicensePlateDatasetGenerator:
         random.shuffle(self.indexes)
         self.batch_index = 0
 
-        self.augmentor = LicensePlateImageAugmentor(img_w, img_h, background_image_db_path, 1000)
+        self.augmentor = LicensePlateImageAugmentor(img_w, img_h, background_image_db_path)
 
     def next_batch(self):
 

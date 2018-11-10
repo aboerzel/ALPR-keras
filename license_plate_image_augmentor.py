@@ -8,12 +8,12 @@ from pyimagesearch.io import Hdf5DatasetLoader
 
 
 class LicensePlateImageAugmentor:
-    def __init__(self, img_w, img_h, background_image_db_path, max_items=np.inf):
+    def __init__(self, img_w, img_h, background_image_db_path):
 
         self.OUTPUT_SHAPE = img_h, img_w
 
         loader = Hdf5DatasetLoader()
-        self.background_images, _ = loader.load(background_image_db_path, True, max_items)
+        self.background_images, _ = loader.load(background_image_db_path, True)
 
     def __get_random_background_image__(self):
         index = random.randint(0, len(self.background_images))
