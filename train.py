@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
@@ -14,29 +14,33 @@ from pyimagesearch.nn.conv import OCR
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
 ap.add_argument("-k", "--folds", default=config.FOLDS, type=int, help="k-folds")
+ap.add_argument("-o", "--optimizer", default="sdg", help="optimizer method: sdg, adam, rmprop")
 args = vars(ap.parse_args())
 
 k = args['folds']
 
 
-def create_model(img_w, img_h, pool_size, output_size, max_text_length):
-    optimizer = SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
-    # optimizer = Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
+def get_optimizer(optimizer_method):
+    if optimizer_method == "sdg":
+        return SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+    if optimizer_method == "adam":
+        return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
 
+
+def create_model(img_w, img_h, pool_size, output_size, max_text_length, optimizer_method):
     model = OCR.build(img_w, img_h, pool_size, output_size, max_text_length)
-
-    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=optimizer)
-
+    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=get_optimizer(optimizer_method))
     return model
 
 
-def get_callbacks(output_path, model_name, fold_index):
+def get_callbacks(output_path, optimizer_method, fold_index, model_name):
     # construct the set of callbacks
     # callbacks = [
     #     EpochCheckpoint(config.CHECKPOINTS_PATH, every=5, startAt=config.START_EPOCH),
     #     TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
 
-    model_checkpoint_path = os.path.sep.join([output_path, "fold{:02d}", model_name]) + '.{epoch:02d}.h5'
+    model_checkpoint_path = os.path.sep.join(
+        [output_path, optimizer_method, "fold{:02d}", model_name]) + '.{epoch:02d}.h5'
     model_checkpoint_path.format(fold_index)
 
     callbacks = [
@@ -71,7 +75,7 @@ for fold_index in range(k):
                                           config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, config.SUN397_HDF5)
 
     model = create_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                         trainGen.get_output_size(), config.MAX_TEXT_LEN)
+                         trainGen.get_output_size(), config.MAX_TEXT_LEN, args['optimizer'])
 
     history = model.fit_generator(
         trainGen.generator(),
@@ -80,7 +84,7 @@ for fold_index in range(k):
         validation_steps=valGen.numImages // config.BATCH_SIZE,
         epochs=config.NUM_EPOCHS,
         max_queue_size=10,
-        callbacks=get_callbacks(config.OUTPUT_PATH, config.MODEL_NAME, fold_index),
+        callbacks=get_callbacks(config.OUTPUT_PATH, args['optimizer'], fold_index, config.MODEL_NAME),
         verbose=1)
 
     scores = model.evaluate(val_data, val_labels, verbose=1)
