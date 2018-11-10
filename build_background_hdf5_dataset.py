@@ -40,10 +40,10 @@ def extract_backgrounds(archive_name, output_path, max_items=np.inf):
     randomized_indexes = randomized_indexes[0:max_items]
 
     print("[INFO] building {}...".format(output_path))
-    writer = HDF5DatasetWriter((len(files), IMAGE_HEIGHT, IMAGE_WIDTH), output_path)
+    writer = HDF5DatasetWriter((len(randomized_indexes), IMAGE_HEIGHT, IMAGE_WIDTH), output_path)
 
     widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
-    pbar = progressbar.ProgressBar(maxval=len(files), widgets=widgets).start()
+    pbar = progressbar.ProgressBar(maxval=len(randomized_indexes), widgets=widgets).start()
     index = 0
 
     for i, file in enumerate(files):
