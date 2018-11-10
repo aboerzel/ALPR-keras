@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import SGD, Adam
+from keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
@@ -14,7 +14,7 @@ from pyimagesearch.nn.conv import OCR
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
 ap.add_argument("-k", "--folds", default=config.FOLDS, type=int, help="k-folds")
-ap.add_argument("-o", "--optimizer", default="sdg", help="optimizer method: sdg, adam, rmprop")
+ap.add_argument("-o", "--optimizer", default="sdg", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
 k = args['folds']
@@ -23,8 +23,15 @@ k = args['folds']
 def get_optimizer(optimizer_method):
     if optimizer_method == "sdg":
         return SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+    if optimizer_method == "rmsprop":
+        return RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
     if optimizer_method == "adam":
         return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
+        # Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    if optimizer_method == "adagrad":
+        return Adagrad(lr=0.01, epsilon=1e-08, decay=0.0)
+    if optimizer_method == "adadelta":
+        return Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0)
 
 
 def create_model(img_w, img_h, pool_size, output_size, max_text_length, optimizer_method):
