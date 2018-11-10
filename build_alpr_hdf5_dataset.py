@@ -14,18 +14,13 @@ trainLabels = [p.split(os.path.sep)[-1].split(".")[0].split('#')[1] for p in tra
 
 # perform stratified sampling from the training set to build the
 # testing split from the training data
-split = train_test_split(trainPaths, trainLabels, test_size=0.25, random_state=42)
+split = train_test_split(trainPaths, trainLabels, test_size=0.20, random_state=42)
 (trainPaths, testPaths, trainLabels, testLabels) = split
-
-# perform another stratified sampling, this time to build the validation data
-split = train_test_split(trainPaths, trainLabels, test_size=0.25, random_state=42)
-(trainPaths, valPaths, trainLabels, valLabels) = split
 
 # construct a list pairing the training, validation, and testing
 # image paths along with their corresponding labels and output HDF5 files
 datasets = [
     ("train", trainPaths, trainLabels, config.TRAIN_HDF5),
-    ("val", valPaths, valLabels, config.VAL_HDF5),
     ("test", testPaths, testLabels, config.TEST_HDF5)]
 
 # original size of generated license plate images

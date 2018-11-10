@@ -44,10 +44,15 @@ def extract_backgrounds(archive_name, output_path):
         else:
             image = image[:, :image.shape[0]]
 
-        if image.shape[0] > 256:
+        if image.shape[0] != 256:
             image = cv2.resize(image, (256, 256))
 
         name = "{:08}".format(index)
+
+        # check image size
+        if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH):
+            print("image with wrong size: %s" % name)
+            continue
 
         # add the image and name to the HDF5 db
         writer.add([image], [name])

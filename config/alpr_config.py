@@ -32,7 +32,6 @@ VAL_IMAGES = path.sep.join([DATASET_ROOT_PATH, "val"])
 
 # define the path to the output training, validation, and testing HDF5 files
 TRAIN_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/train.h5"])
-VAL_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/val.h5"])
 TEST_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/test.h5"])
 SUN397_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/SUN397.h5"])
 
