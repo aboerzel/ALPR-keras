@@ -27,18 +27,17 @@ def im_from_file(f):
 def extract_backgrounds(archive_name, output_path, max_items=np.inf):
     print("[INFO] reading content of {}...".format(archive_name))
     tar = tarfile.open(name=archive_name)
-    files = np.array(tar.getnames())
+    files = tar.getnames()
 
-    # shuffle files
+    # create shuffled index list
     randomized_indexes = np.arange(len(files))
     np.random.shuffle(randomized_indexes)
-    files = files[randomized_indexes]
 
     # pick max number of items
     if max_items == np.inf or max_items > len(files):
         max_items = len(files)
 
-    files = files[0:max_items]
+    randomized_indexes = randomized_indexes[0:max_items]
 
     print("[INFO] building {}...".format(output_path))
     writer = HDF5DatasetWriter((len(files), IMAGE_HEIGHT, IMAGE_WIDTH), output_path)
@@ -48,6 +47,10 @@ def extract_backgrounds(archive_name, output_path, max_items=np.inf):
     index = 0
 
     for i, file in enumerate(files):
+
+        if i not in randomized_indexes:
+            continue
+
         f = tar.extractfile(file)
         if f is None:
             continue  # skip directories
