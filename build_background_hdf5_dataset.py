@@ -88,6 +88,7 @@ def extract_backgrounds(archive_name, output_path, max_items=np.inf):
     # close the HDF5 writer
     pbar.finish()
     writer.close()
+    print("[INFO] {} images saved to {}...".format(len(randomized_indexes), output_path))
 
 
 if __name__ == "__main__":
