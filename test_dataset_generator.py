@@ -4,7 +4,7 @@ from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 
 trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                        config.POOL_SIZE, config.MAX_TEXT_LEN, 20)
+                                        config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, config.SUN397_HDF5)
 
 inputs, outputs = next(trainGen.generator())
 trainGen.close()

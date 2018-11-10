@@ -4,37 +4,24 @@ import random
 import cv2
 import numpy as np
 
+from pyimagesearch.io import Hdf5DatasetLoader
+
 
 class LicensePlateImageAugmentor:
-    def __init__(self, img_w, img_h):
+    def __init__(self, img_w, img_h, background_image_db_path, max_items=np.inf):
 
         self.OUTPUT_SHAPE = img_h, img_w
 
-        bg = cv2.imread('D:/development/datasets/SUN397/c/campus/sun_akgyyhdnnpenxrwv.jpg')
-        self.bg = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
+        loader = Hdf5DatasetLoader()
+        self.background_images, _ = loader.load(background_image_db_path, True, max_items)
 
-    def __get_background_image__(self):
-        # bg = cv2.imread('D:/development/datasets/SUN397/c/campus/sun_akgyyhdnnpenxrwv.jpg')
-        # bg = cv2.cvtColor(bg, cv2.COLOR_RGB2BGRA)
-        return self.bg
-
-    def __get_random_background_image__(self, num_bg_images):
-        found = False
-        while not found:
-            fname = "bgs/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
-            bi = cv2.imread(fname, cv2.IMREAD_GRAYSCALE) / 255.
-            if (bi.shape[1] >= self.OUTPUT_SHAPE[1] and
-                    bi.shape[0] >= self.OUTPUT_SHAPE[0]):
-                found = True
-
-        x = random.randint(0, bi.shape[1] - self.OUTPUT_SHAPE[1])
-        y = random.randint(0, bi.shape[0] - self.OUTPUT_SHAPE[0])
-        bi = bi[y:y + self.OUTPUT_SHAPE[0], x:x + self.OUTPUT_SHAPE[1]]
-
-        return bi
+    def __get_random_background_image__(self):
+        index = random.randint(0, len(self.background_images))
+        return self.background_images[index]
 
     def __generate_background_image__(self):
-        background = self.__get_background_image__().copy()
+        background = self.__get_random_background_image__()
+        background = cv2.cvtColor(background, cv2.COLOR_BGR2GRAY)
         x = random.randint(0, background.shape[1] - self.OUTPUT_SHAPE[1])
         y = random.randint(0, background.shape[0] - self.OUTPUT_SHAPE[0])
         background = background[y:y + self.OUTPUT_SHAPE[0], x:x + self.OUTPUT_SHAPE[1]]
@@ -130,7 +117,7 @@ class LicensePlateImageAugmentor:
             max_scale=1.0,
             rotation_variation=0.8,
             scale_variation=1.0,
-            translation_variation=0)
+            translation_variation=0.0)
 
         plate_mask = np.ones(plate.shape)
         plate = cv2.warpAffine(plate, M, (bi.shape[1], bi.shape[0]))

@@ -18,7 +18,7 @@ n = random.randint(0, len(images) - batch_size)
 images = images[n:n + batch_size]
 labels = labels[n:n + batch_size]
 
-augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.SUN397_HDF5)
 
 cols = 2
 rows = len(images) // cols

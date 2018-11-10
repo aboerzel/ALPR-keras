@@ -30,6 +30,8 @@ def extract_backgrounds(archive_name, output_path):
 
     for i, file in enumerate(files):
         f = tar.extractfile(file)
+        if f is None:
+            continue
         try:
             image = im_from_file(f)
         finally:

@@ -64,10 +64,11 @@ for fold_index in range(k):
     print("Training on fold " + str(fold_index + 1) + "/{0}...".format(k))
 
     trainGen = LicensePlateDatasetGenerator(train_data, train_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                            config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
+                                            config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                            config.SUN397_HDF5)
 
     valGen = LicensePlateDatasetGenerator(validation_data, validation_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                          config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
+                                          config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, config.SUN397_HDF5)
 
     model = create_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
                          trainGen.get_output_size(), config.MAX_TEXT_LEN)
