@@ -1,9 +1,9 @@
 import argparse
+import os
 
 import numpy as np
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import SGD
-from sklearn.model_selection import StratifiedKFold
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
@@ -13,7 +13,7 @@ from pyimagesearch.nn.conv import OCR
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
-ap.add_argument("-f", "--folds", default=config.FOLDS, type=int, help="folds")
+ap.add_argument("-k", "--folds", default=config.FOLDS, type=int, help="k-folds")
 args = vars(ap.parse_args())
 
 k = args['folds']
@@ -30,33 +30,33 @@ def create_model(img_w, img_h, pool_size, output_size, max_text_length):
     return model
 
 
-def get_callbacks():
+def get_callbacks(output_path, model_name, fold_index):
     # construct the set of callbacks
     # callbacks = [
     #     EpochCheckpoint(config.CHECKPOINTS_PATH, every=5, startAt=config.START_EPOCH),
     #     TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
 
+    model_checkpoint_path = os.path.sep.join([output_path, "fold{:02d}", model_name]) + '.{epoch:02d}.h5'
+    model_checkpoint_path.format(fold_index)
+
     callbacks = [
         EarlyStopping(monitor='loss', min_delta=0.01, patience=5, mode='min', verbose=1),
-        CustomModelCheckpoint(model_to_save=model, filepath=config.MODEL_CHECKPOINT_PATH,
+        CustomModelCheckpoint(model_to_save=model, filepath=model_checkpoint_path,
                               monitor='loss', verbose=1, save_best_only=True, mode='min', period=1),
         ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01,
                           cooldown=0, min_lr=0)]
     return callbacks
 
 
-k = 10
-cvscores = []
-skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=1)
-
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
 images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
 fold_size = int(len(images) / k)
+cvscores = []
 
 for fold_index in range(k):
-    validation_data = images[fold_index * fold_size:(fold_index + 1) * fold_size]
-    validation_labels = labels[fold_index * fold_size:(fold_index + 1) * fold_size]
+    val_data = images[fold_index * fold_size:(fold_index + 1) * fold_size]
+    val_labels = labels[fold_index * fold_size:(fold_index + 1) * fold_size]
 
     train_data = np.concatenate([images[:fold_index * fold_size], images[(fold_index + 1) * fold_size:]])
     train_labels = np.concatenate([labels[:fold_index * fold_size], labels[(fold_index + 1) * fold_size:]])
@@ -67,7 +67,7 @@ for fold_index in range(k):
                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE,
                                             config.SUN397_HDF5)
 
-    valGen = LicensePlateDatasetGenerator(validation_data, validation_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+    valGen = LicensePlateDatasetGenerator(val_data, val_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                           config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, config.SUN397_HDF5)
 
     model = create_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
@@ -80,10 +80,10 @@ for fold_index in range(k):
         validation_steps=valGen.numImages // config.BATCH_SIZE,
         epochs=config.NUM_EPOCHS,
         max_queue_size=10,
-        callbacks=get_callbacks(),
+        callbacks=get_callbacks(config.OUTPUT_PATH, config.MODEL_NAME, fold_index),
         verbose=1)
 
-    scores = model.evaluate(validation_data, validation_labels, verbose=1)
+    scores = model.evaluate(val_data, val_labels, verbose=1)
     print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
     cvscores.append(scores[1] * 100)
 

@@ -2,12 +2,16 @@ import matplotlib.pyplot as plt
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
+from pyimagesearch.io import Hdf5DatasetLoader
 
-trainGen = LicensePlateDatasetGenerator(config.TRAIN_HDF5, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                        config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, config.SUN397_HDF5)
+loader = Hdf5DatasetLoader()
+images, labels = loader.load(config.TRAIN_HDF5, shuffle=True, max_items=config.BATCH_SIZE)
+
+trainGen = LicensePlateDatasetGenerator(images, labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+                                        config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                        config.SUN397_HDF5)
 
 inputs, outputs = next(trainGen.generator())
-trainGen.close()
 
 cols = 2
 rows = len(inputs["input"]) // cols
@@ -25,7 +29,7 @@ for r in range(rows):
     for c in range(cols):
         image = inputs["input"][image_index].T.reshape(config.IMAGE_HEIGHT, config.IMAGE_WIDTH)
         axarr[r, c].axis("off")
-        # axarr[r, c].imshow(image, cmap='Greys_r')
+        axarr[r, c].title.set_text(labels[image_index])
         axarr[r, c].imshow(image, cmap='gray')
         image_index += 1
 

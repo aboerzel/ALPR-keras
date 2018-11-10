@@ -31,22 +31,25 @@ def extract_backgrounds(archive_name, output_path):
     for i, file in enumerate(files):
         f = tar.extractfile(file)
         if f is None:
-            continue
+            continue  # skip directories
         try:
             image = im_from_file(f)
         finally:
             f.close()
         if image is None:
-            continue
+            continue  # skip non image files
 
+        # make same width and height, by cutting the larger dimension to the smaller dimension
         if image.shape[0] > image.shape[1]:
             image = image[:image.shape[1], :]
         else:
             image = image[:, :image.shape[0]]
 
+        # resize to target-width and -height, keeping the aspect ratio
         if image.shape[0] != 256:
             image = cv2.resize(image, (256, 256))
 
+        # name from index
         name = "{:08}".format(index)
 
         # check image size
