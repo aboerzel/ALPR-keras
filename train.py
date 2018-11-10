@@ -8,7 +8,7 @@ from sklearn.model_selection import StratifiedKFold
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from pyimagesearch.callbacks import CustomModelCheckpoint
-from pyimagesearch.datasets.hdf5datasetloader import Hdf5DatasetLoader
+from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
 
 ap = argparse.ArgumentParser()
@@ -52,21 +52,21 @@ k = 10
 cvscores = []
 skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=1)
 
-l = int(len(images) / k)
+fold_size = int(len(images) / k)
 
-for i in range(k):
-    xval = images[i * l:(i + 1) * l]
-    yval = labels[i * l:(i + 1) * l]
+for fold_index in range(k):
+    validation_data = images[fold_index * fold_size:(fold_index + 1) * fold_size]
+    validation_labels = labels[fold_index * fold_size:(fold_index + 1) * fold_size]
 
-    xtrain = np.concatenate([images[:i * l], images[(i + 1) * l:]]);
-    ytrain = np.concatenate([labels[:i * l], labels[(i + 1) * l:]]);
+    train_data = np.concatenate([images[:fold_index * fold_size], images[(fold_index + 1) * fold_size:]])
+    train_labels = np.concatenate([labels[:fold_index * fold_size], labels[(fold_index + 1) * fold_size:]])
 
-    print("Training on fold " + str(i + 1) + "/{0}...".format(k))
+    print("Training on fold " + str(fold_index + 1) + "/{0}...".format(k))
 
-    trainGen = LicensePlateDatasetGenerator(xtrain, ytrain, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+    trainGen = LicensePlateDatasetGenerator(train_data, train_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
-    valGen = LicensePlateDatasetGenerator(xval, yval, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+    valGen = LicensePlateDatasetGenerator(validation_data, validation_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                           config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE)
 
     model = create_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
@@ -82,7 +82,7 @@ for i in range(k):
         callbacks=get_callbacks(),
         verbose=1)
 
-    scores = model.evaluate(xval, yval, verbose=1)
+    scores = model.evaluate(validation_data, validation_labels, verbose=1)
     print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
     cvscores.append(scores[1] * 100)
 

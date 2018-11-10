@@ -58,7 +58,7 @@ else:
     label = args["label"]
 
 
-img_filepath = "D:/development/datasets/alpr/val/K-OE296.png"
+img_filepath = "D:/development/datasets/alpr/val/SÜW-E1557.png"
 label = "HD-SK2015"
 
 sess = tf.Session()

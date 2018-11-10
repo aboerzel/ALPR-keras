@@ -1,9 +1,10 @@
-import sys
 import tarfile
-import progressbar
+
 import cv2
 import numpy
+import progressbar
 
+from config import alpr_config as config
 from pyimagesearch.io import HDF5DatasetWriter
 
 IMAGE_WIDTH = 256
@@ -15,31 +16,20 @@ def im_from_file(f):
     return cv2.imdecode(a, cv2.IMREAD_GRAYSCALE)
 
 
-def extract_backgrounds(archive_name, outputPath):
-    t = tarfile.open(name=archive_name)
+def extract_backgrounds(archive_name, output_path):
+    print("[INFO] reading content of {}...".format(archive_name))
+    tar = tarfile.open(name=archive_name)
+    files = tar.getnames()
 
-    def members():
-        m = t.next()
-        while m:
-            yield m
-            m = t.next()
+    print("[INFO] building {}...".format(output_path))
+    writer = HDF5DatasetWriter((len(files), IMAGE_HEIGHT, IMAGE_WIDTH), output_path)
 
+    widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
+    pbar = progressbar.ProgressBar(maxval=len(files), widgets=widgets).start()
     index = 0
 
-    members = members()
-
-    # create HDF5 writer
-    print("[INFO] building {}...".format(outputPath))
-    writer = HDF5DatasetWriter((len(members), IMAGE_HEIGHT, IMAGE_WIDTH), outputPath)
-
-    # initialize the progress bar
-    widgets = ["Building Dataset: ", progressbar.Percentage(), " ", progressbar.Bar(), " ", progressbar.ETA()]
-    pbar = progressbar.ProgressBar(maxval=len(members), widgets=widgets).start()
-
-    for i, m in enumerate(members):
-        # if not m.name.endswith(".jpg"):
-        #     continue
-        f = t.extractfile(m)
+    for i, file in enumerate(files):
+        f = tar.extractfile(file)
         try:
             image = im_from_file(f)
         finally:
@@ -52,14 +42,12 @@ def extract_backgrounds(archive_name, outputPath):
         else:
             image = image[:, :image.shape[0]]
 
-        # if image.shape[0] > 256:
-        #     image = cv2.resize(image, (256, 256))
-
-        image = cv2.resize(image, (256, 256))
+        if image.shape[0] > 256:
+            image = cv2.resize(image, (256, 256))
 
         name = "{:08}".format(index)
 
-        # add the image and name # to the HDF5 images
+        # add the image and name to the HDF5 db
         writer.add([image], [name])
         pbar.update(i)
 
@@ -71,4 +59,4 @@ def extract_backgrounds(archive_name, outputPath):
 
 
 if __name__ == "__main__":
-    extract_backgrounds(sys.argv[1])
+    extract_backgrounds(config.SUN397_TAR_FILE, config.SUN397_HDF5)

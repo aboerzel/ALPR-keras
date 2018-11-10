@@ -7,7 +7,7 @@ import numpy as np
 from config import alpr_config as config
 from license_plate_image_augmentor import LicensePlateImageAugmentor
 
-batch_size = 32
+batch_size = 6
 
 trainData = h5py.File(config.TRAIN_HDF5)
 images = np.array(trainData["images"])
@@ -20,7 +20,7 @@ labels = labels[n:n + batch_size]
 
 augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 
-cols = 6
+cols = 2
 rows = len(images) // cols
 
 image_index = 0

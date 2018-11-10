@@ -4,6 +4,7 @@ from os import path
 # root paths
 PROJECT_ROOT_PATH = "D:/development/cv/ANPR-keras"
 DATASET_ROOT_PATH = "D:/development/datasets/alpr"
+SUN397_TAR_FILE = "D:/development/datasets/SUN397.tar.gz"
 
 # network image size
 IMAGE_WIDTH = 128
@@ -33,6 +34,7 @@ VAL_IMAGES = path.sep.join([DATASET_ROOT_PATH, "val"])
 TRAIN_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/train.h5"])
 VAL_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/val.h5"])
 TEST_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/test.h5"])
+SUN397_HDF5 = path.sep.join([DATASET_ROOT_PATH, "hdf5/SUN397.h5"])
 
 # define the path to the output directory used for storing plots, classification reports, etc.
 OUTPUT_PATH = "output"

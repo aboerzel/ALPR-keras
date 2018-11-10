@@ -126,10 +126,10 @@ class LicensePlateImageAugmentor:
         M = self.__make_affine_transform__(
             from_shape=plate.shape,
             to_shape=bi.shape,
-            min_scale=0.8,
+            min_scale=0.9,
             max_scale=1.0,
             rotation_variation=0.8,
-            scale_variation=0.8,
+            scale_variation=1.0,
             translation_variation=0)
 
         plate_mask = np.ones(plate.shape)
@@ -137,6 +137,5 @@ class LicensePlateImageAugmentor:
         plate_mask = cv2.warpAffine(plate_mask, M, (bi.shape[1], bi.shape[0]))
 
         out = plate * plate_mask + bi * (1.0 - plate_mask)
-
         out = out / 255.
         return self.__gaussian_noise__(out)
