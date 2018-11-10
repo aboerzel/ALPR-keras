@@ -1,3 +1,5 @@
+import os
+
 from keras.callbacks import ModelCheckpoint
 
 
@@ -9,12 +11,22 @@ class CustomModelCheckpoint(ModelCheckpoint):
         super(CustomModelCheckpoint, self).__init__(**kwargs)
         self.model_to_save = model_to_save
 
+    @staticmethod
+    def ensure_dir(file_path):
+        directory = os.path.dirname(file_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}
         self.epochs_since_last_save += 1
         if self.epochs_since_last_save >= self.period:
             self.epochs_since_last_save = 0
             filepath = self.filepath.format(epoch=epoch + 1, **logs)
+
+            # create output directory if not exists
+            self.ensure_dir(filepath)
+
             if self.save_best_only:
                 current = logs.get(self.monitor)
                 if current is None:

@@ -81,8 +81,7 @@ def extract_backgrounds(archive_name, output_path, max_items=np.inf):
 
         # add the image and name to the HDF5 db
         writer.add([image], [name])
-        pbar.update(i)
-
+        pbar.update(index)
         index += 1
 
     # close the HDF5 writer

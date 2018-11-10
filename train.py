@@ -34,13 +34,8 @@ def create_model(img_w, img_h, pool_size, output_size, max_text_length, optimize
 
 
 def get_callbacks(output_path, optimizer_method, fold_index, model_name):
-    # construct the set of callbacks
-    # callbacks = [
-    #     EpochCheckpoint(config.CHECKPOINTS_PATH, every=5, startAt=config.START_EPOCH),
-    #     TrainingMonitor(config.FIG_PATH, jsonPath=config.JSON_PATH, startAt=config.START_EPOCH)]
-
     model_checkpoint_path = os.path.sep.join(
-        [output_path, optimizer_method, "fold{:02d}".format(fold_index), model_name]) + '.{epoch:02d}.h5'
+        [output_path, optimizer_method, "fold{:02d}".format(fold_index), model_name]) + '.h5'
 
     callbacks = [
         EarlyStopping(monitor='loss', min_delta=0.01, patience=5, mode='min', verbose=1),
@@ -86,13 +81,8 @@ for fold_index in range(k):
         callbacks=get_callbacks(config.OUTPUT_PATH, args['optimizer'], fold_index, config.MODEL_NAME),
         verbose=1)
 
-    # scores = model.evaluate(val_data, val_labels, verbose=1)
-    # print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
-    # cvscores.append(scores[1] * 100)
-
-    accuracy_history = history.history['acc']
-    val_accuracy_history = history.history['val_acc']
-    print("Last training accuracy: " + str(accuracy_history[-1]) + ", last validation accuracy: " + str(
-        val_accuracy_history[-1]))
+    score = model.evaluate_generator(valGen.generator(), valGen.numImages / config.BATCH_SIZE, workers=1)
+    print("Evaluation loss: %.2f%%" % score)
+    cvscores.append(score)
 
 print("{:.2f}%% (+/- {:.2f}%%)".format(np.mean(cvscores), np.std(cvscores)))
