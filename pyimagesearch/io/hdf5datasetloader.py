@@ -23,10 +23,11 @@ class Hdf5DatasetLoader:
             images = images[randomized_indexes]
             labels = labels[randomized_indexes]
 
-        if max_items != np.inf and max_items <= len(images):
+        if max_items == np.inf or max_items > len(images):
             max_items = len(images)
-            images = images[0:max_items]
-            labels = labels[0:max_items]
+
+        images = images[0:max_items]
+        labels = labels[0:max_items]
 
         # preprocess images
         for i, (image, label) in enumerate(zip(images, labels)):

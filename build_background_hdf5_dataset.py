@@ -35,9 +35,10 @@ def extract_backgrounds(archive_name, output_path, max_items=np.inf):
     files = files[randomized_indexes]
 
     # pick max number of items
-    if max_items != np.inf and max_items <= len(files):
+    if max_items == np.inf or max_items > len(files):
         max_items = len(files)
-        files = files[0:max_items]
+
+    files = files[0:max_items]
 
     print("[INFO] building {}...".format(output_path))
     writer = HDF5DatasetWriter((len(files), IMAGE_HEIGHT, IMAGE_WIDTH), output_path)
