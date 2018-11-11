@@ -58,8 +58,8 @@ else:
     label = args["label"]
 
 
-img_filepath = "D:/development/datasets/alpr/val/SÜW-E1557.png"
-label = "HD-SK2015"
+img_filepath = "D:/development/datasets/alpr/val/test2.png"
+label = "K-OE296"
 
 sess = tf.Session()
 K.set_session(sess)
@@ -84,9 +84,9 @@ img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 img = cv2.resize(img, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT))
 img = img.astype(np.float32) / 255.
 
-plt.axis("off")
-plt.imshow(img, cmap='gray')
-plt.show()
+# plt.axis("off")
+# plt.imshow(img, cmap='gray')
+# plt.show()
 
 img = np.expand_dims(img.T, -1)
 X_data = [img]
@@ -102,7 +102,7 @@ ax2 = plt.Subplot(fig, outer[1])
 fig.add_subplot(ax2)
 print('Predicted: %9s\nTrue:      %9s\n=> %s' % (pred_text, label, pred_text == label))
 img = X_data[0][:, :, 0].T
-ax1.set_title('Input img')
+ax1.set_title('True: {}\nPred: {}'.format(label, pred_text), loc='left')
 ax1.imshow(img, cmap='gray')
 ax1.set_xticks([])
 ax1.set_yticks([])

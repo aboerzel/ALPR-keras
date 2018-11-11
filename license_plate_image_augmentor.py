@@ -16,7 +16,7 @@ class LicensePlateImageAugmentor:
         self.background_images, _ = loader.load(background_image_db_path, True)
 
     def __get_random_background_image__(self):
-        index = random.randint(0, len(self.background_images))
+        index = random.randint(0, len(self.background_images) - 1)
         return self.background_images[index]
 
     def __generate_background_image__(self):
@@ -124,4 +124,4 @@ class LicensePlateImageAugmentor:
 
         out = plate * plate_mask + bi * (1.0 - plate_mask)
         out = out / 255.
-        return self.__gaussian_noise__(out, random.uniform(0.0, 0.005))
+        return out  # self.__gaussian_noise__(out, random.uniform(0.0, 0.0005))

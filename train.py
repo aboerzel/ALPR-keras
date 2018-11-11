@@ -36,7 +36,9 @@ def get_optimizer(optimizer_method):
 
 def create_model(img_w, img_h, pool_size, output_size, max_text_length, optimizer_method):
     model = OCR.build(img_w, img_h, pool_size, output_size, max_text_length)
-    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=get_optimizer(optimizer_method))
+    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred},
+                  optimizer=get_optimizer(optimizer_method),
+                  metrics=['accuracy'])
     return model
 
 
