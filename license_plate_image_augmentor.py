@@ -124,4 +124,4 @@ class LicensePlateImageAugmentor:
 
         out = plate * plate_mask + bi * (1.0 - plate_mask)
         out = out / 255.
-        return out  # self.__gaussian_noise__(out, random.uniform(0.0, 0.0005))
+        return self.__gaussian_noise__(out, random.uniform(0.0, 0.0005))
