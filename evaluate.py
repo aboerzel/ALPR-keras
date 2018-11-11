@@ -23,8 +23,7 @@ def preprocess(image, width, height):
     # make image smaller than than the output size (along width) keeping the aspect ratio
     image = imutils.resize(image, width=(width - 10))
 
-    # determine the padding values for the width and height to
-    # obtain the target dimensions
+    # determine the padding values for the width and height to obtain the target dimensions
     padW = int((width - image.shape[1]) / 2.0)
     padH = int((height - image.shape[0]) / 2.0)
 
@@ -32,8 +31,18 @@ def preprocess(image, width, height):
     image = cv2.copyMakeBorder(image, padH, padH, padW, padW, cv2.BORDER_REPLICATE)
     image = cv2.resize(image, (width, height))
 
+    # normalize data
+    image = image.astype("float") / 255.
+
     # return the pre-processed image
     return image
+
+
+def show_image(image, label, pred_text):
+    plt.axis("off")
+    plt.title('True: {}\nPred: {}'.format(label, pred_text), loc='left')
+    plt.imshow(image, cmap='gray')
+    plt.show()
 
 
 sess = tf.Session()
@@ -58,17 +67,12 @@ y_pred = np.full(len(images), False, dtype=bool)
 
 for i, (image, label) in enumerate(zip(images, labels)):
     image = preprocess(image, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
-    image = image.astype("float") / 255.
     imput_image = np.expand_dims(image.T, -1)
     X_data = [imput_image]
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
     pred_text = LabelCodec.decode_number_from_output(net_out_value)
 
-    plt.axis("off")
-    # plt.title(pred_text)
-    plt.title('True: {}\nPred: {}'.format(label, pred_text), loc='left')
-    plt.imshow(image, cmap='gray')
-    plt.show()
+    show_image(image, label, pred_text)
 
     y_pred[i] = pred_text == label
     print('%6s - Predicted: %-10s - True: %-10s - %s' % (i + 1, pred_text, label, y_pred[i]))
