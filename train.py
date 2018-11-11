@@ -91,7 +91,7 @@ for fold_index in range(k):
         verbose=1)
 
     score = model.evaluate_generator(valGen.generator(), valGen.numImages / config.BATCH_SIZE, workers=1)
-    print("Evaluation loss: %.2f%%" % score)
+    print("Loss: %.2f%%  Accuracy: %.2f%%".format(score[0], score[1]))
     cvscores.append(score)
 
 print("{:.2f}%% (+/- {:.2f}%%)".format(np.mean(cvscores), np.std(cvscores)))
