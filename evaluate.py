@@ -1,4 +1,6 @@
 import argparse
+import math
+import random
 
 import cv2
 import imutils
@@ -12,6 +14,7 @@ from sklearn.metrics import accuracy_score
 
 from config import alpr_config as config
 from label_codec import LabelCodec
+from license_plate_image_augmentor import LicensePlateImageAugmentor
 from pyimagesearch.io import Hdf5DatasetLoader
 
 ap = argparse.ArgumentParser()
@@ -61,12 +64,14 @@ net_out = model.get_layer(name='softmax').output
 loader = Hdf5DatasetLoader()
 images, labels = loader.load(config.TEST_HDF5, shuffle=True, max_items=args["items"])
 
+augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.SUN397_HDF5)
+
 # predictions for accuracy measurement
 y_true = np.full(len(images), True, dtype=bool)
 y_pred = np.full(len(images), False, dtype=bool)
 
 for i, (image, label) in enumerate(zip(images, labels)):
-    image = preprocess(image, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+    image = augmentor.generate_plate_image(image)
     imput_image = np.expand_dims(image.T, -1)
     X_data = [imput_image]
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})

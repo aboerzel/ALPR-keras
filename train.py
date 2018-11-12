@@ -90,8 +90,9 @@ for fold_index in range(k):
         callbacks=get_callbacks(config.OUTPUT_PATH, args['optimizer'], fold_index, config.MODEL_NAME),
         verbose=1)
 
-    score = model.evaluate_generator(valGen.generator(), valGen.numImages / config.BATCH_SIZE, workers=1)
-    print("Loss: {:.2f}%%  Accuracy: {:.2f}%%".format(score[0], score[1]))
-    cvscores.append(score)
+    scores = model.evaluate_generator(valGen.generator(), valGen.numImages / config.BATCH_SIZE, workers=0)
+    scores *= 100  # convert in percentages
+    print("Validation loss: {:.2f}%  Validation accuracy: {:.2f}%".format(scores[0], scores[1]))
+    cvscores.append(scores)
 
-print("{:.2f}%% (+/- {:.2f}%%)".format(np.mean(cvscores), np.std(cvscores)))
+print("{:.2f}% (+/- {:.2f}%)".format(np.mean(cvscores), np.std(cvscores)))
