@@ -1,4 +1,5 @@
 import argparse
+import os
 import random
 import math
 
@@ -26,7 +27,11 @@ def load_image(filepath):
     bytes = bytearray(stream.read())
     numpyarray = np.asarray(bytes, dtype=np.uint8)
     image = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # convert image to grayscale, if it is not already a grayscale image
+    if len(image.shape) > 2:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     return image
 
 
@@ -153,7 +158,7 @@ def preprocess(image, width, height):
     # image = cv2.dilate(image, kernel, iterations=3)
 
     # normalize data
-    #image = image.astype(np.float32) / 255.
+    # image = image.astype(np.float32) / 255.
     # return the pre-processed image
     return image
 
@@ -165,6 +170,18 @@ def show_image(image):
     plt.show()
 
 
+def save_image(image):
+    cv2.imwrite(os.path.join('D:/development/datasets/alpr/test', img_filename), image)
+
+
+def downscale_image(image, scale_percent=20):
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+    return resized
+
+
 img_filepath = args["image"]
 
 if not args["label"] == "":
@@ -172,8 +189,9 @@ if not args["label"] == "":
 else:
     label = args["label"]
 
-img_filepath = "D:/development/datasets/alpr/val/SÜW-E1557.png"
-label = "SÜW-E1557"
+img_filename = 'SÜW-E1557.png'
+img_filepath = os.path.join("D:/development/datasets/alpr/val", img_filename)
+label = "K-OE296"
 
 sess = tf.Session()
 K.set_session(sess)
@@ -188,8 +206,21 @@ net_inp = model.get_layer(name='input').input
 net_out = model.get_layer(name='softmax').output
 
 image = load_image(img_filepath)
-image = preprocess(image, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 show_image(image)
+#image = downscale_image(image, 60)
+#show_image(image)
+
+# save_image(image)
+image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT), interpolation=cv2.INTER_AREA)
+save_image(image)
+# show_image(image)
+image = image.astype(np.float32) / 255.  # np.max(image).astype(np.float32)
+# save_image(image)
+show_image(image)
+
+# image = preprocess(image, config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+
+# save_image(image)
 
 image = np.expand_dims(image.T, -1)
 
@@ -198,7 +229,7 @@ image = np.expand_dims(image.T, -1)
 
 net_out_value = sess.run(net_out, feed_dict={net_inp: [image]})
 pred_text = LabelCodec.decode_number_from_output(net_out_value)
-fig = plt.figure(figsize=(10, 10))
+fig = plt.figure(figsize=(6, 10))
 outer = gridspec.GridSpec(2, 1, wspace=10, hspace=0.1)
 ax1 = plt.Subplot(fig, outer[0])
 fig.add_subplot(ax1)

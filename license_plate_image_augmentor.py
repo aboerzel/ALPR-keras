@@ -99,11 +99,43 @@ class LicensePlateImageAugmentor:
         return M
 
     @staticmethod
-    def __gaussian_noise__(image, var=0.005):
+    def __gaussian_noise__(image, sigma=1):
         mean = 0.0
-        sigma = var ** 0.5
         gauss = np.random.normal(mean, sigma, image.shape)
         image = image + gauss
+        return image
+
+    @staticmethod
+    def add_gaussian_noise(image_in, noise_sigma):
+        temp_image = np.float64(np.copy(image_in))
+
+        h = temp_image.shape[0]
+        w = temp_image.shape[1]
+        noise = np.random.randn(h, w) * noise_sigma
+
+        noisy_image = np.zeros(temp_image.shape, np.float64)
+        if len(temp_image.shape) == 2:
+            noisy_image = temp_image + noise
+        else:
+            noisy_image[:, :, 0] = temp_image[:, :, 0] + noise
+            noisy_image[:, :, 1] = temp_image[:, :, 1] + noise
+            noisy_image[:, :, 2] = temp_image[:, :, 2] + noise
+
+        return noisy_image
+
+    @staticmethod
+    def downscale_image(image, scale_percent=20):
+        width = int(image.shape[1] * scale_percent / 100)
+        height = int(image.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        downscaled = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+        downscaled = cv2.resize(downscaled, (image.shape[1], image.shape[0]))
+        return downscaled
+
+    @staticmethod
+    def normalize_image(image):
+        # normalize image data between 0 and 1
+        image = (image - image.min()) / (image.max() - image.min())
         return image
 
     def generate_plate_image(self, plate):
@@ -123,5 +155,8 @@ class LicensePlateImageAugmentor:
         plate_mask = cv2.warpAffine(plate_mask, M, (bi.shape[1], bi.shape[0]))
 
         out = plate * plate_mask + bi * (1.0 - plate_mask)
-        out = out / 255.
-        return self.__gaussian_noise__(out, random.uniform(0.0, 0.0005))
+
+        out = self.__gaussian_noise__(out, 15)
+        out = self.downscale_image(out, 70)
+        out = self.normalize_image(out)
+        return out

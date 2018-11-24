@@ -77,7 +77,7 @@ for i, (image, label) in enumerate(zip(images, labels)):
     net_out_value = sess.run(net_out, feed_dict={net_inp: X_data})
     pred_text = LabelCodec.decode_number_from_output(net_out_value)
 
-    show_image(image, label, pred_text)
+    #show_image(image, label, pred_text)
 
     y_pred[i] = pred_text == label
     print('%6s - Predicted: %-10s - True: %-10s - %s' % (i + 1, pred_text, label, y_pred[i]))
