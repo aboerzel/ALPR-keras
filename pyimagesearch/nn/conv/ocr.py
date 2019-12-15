@@ -50,7 +50,7 @@ class OCR:
         # transforms RNN output to character activations:
         inner = Dense(output_size, kernel_initializer='he_normal', name='dense2')(concatenate([gru_2, gru_2b]))
         y_pred = Activation('softmax', name='softmax')(inner)
-        Model(inputs=input_data, outputs=y_pred).summary()
+        #Model(inputs=input_data, outputs=y_pred).summary()
 
         labels = Input(name='labels', shape=[max_text_len], dtype='float32')
         input_length = Input(name='input_length', shape=[1], dtype='int64')

@@ -2,8 +2,8 @@ import argparse
 import os
 
 import numpy as np
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
