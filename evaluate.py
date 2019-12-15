@@ -7,9 +7,9 @@ import imutils
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from keras import backend as K
-from keras.models import load_model
-from keras.optimizers import SGD
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import load_model
+from tensorflow.keras.optimizers import SGD
 from sklearn.metrics import accuracy_score
 
 from config import alpr_config as config

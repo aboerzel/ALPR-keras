@@ -106,3 +106,4 @@ logs/
 output/
 
 /backup.ipynb
+/logs/

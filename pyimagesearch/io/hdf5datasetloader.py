@@ -12,7 +12,7 @@ class Hdf5DatasetLoader:
 
     def load(self, db_path, shuffle=False, max_items=np.inf):
 
-        db = h5py.File(db_path)
+        db = h5py.File(db_path, 'r')
         images = np.array(db["images"])
         labels = np.array(db["labels"])
         db.close()

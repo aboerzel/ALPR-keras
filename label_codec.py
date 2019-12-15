@@ -1,5 +1,4 @@
 import itertools
-
 import numpy as np
 
 
@@ -23,13 +22,9 @@ class LabelCodec:
         return "".join(ret)
 
     @staticmethod
-    def get_alphabet_len():
-        return len(LabelCodec.ALPHABET)
-
-    @staticmethod
     def decode_number_from_output(out):
         for j in range(out.shape[0]):
-            out_best = list(np.argmax(out[j, 2:], 1))
+            out_best = list(np.argmax(out[j], 1))
             out_best = [k for k, g in itertools.groupby(out_best)]
             outstr = ''
             for c in out_best:

@@ -7,9 +7,10 @@ from pyimagesearch.io import Hdf5DatasetLoader
 batch_size = 6
 
 loader = Hdf5DatasetLoader()
+background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
 images, labels = loader.load(config.TRAIN_HDF5, shuffle=True, max_items=batch_size)
 
-augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.SUN397_HDF5)
+augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 
 cols = 2
 rows = len(images) // cols
