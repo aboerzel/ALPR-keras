@@ -8,12 +8,12 @@ from pyimagesearch.io import Hdf5DatasetLoader
 
 
 class LicensePlateImageAugmentor:
-    def __init__(self, img_w, img_h, background_image_db_path):
+    def __init__(self, img_w, img_h, background_images):
 
         self.OUTPUT_SHAPE = img_h, img_w
 
-        loader = Hdf5DatasetLoader()
-        self.background_images, _ = loader.load(background_image_db_path, True)
+        # loader = Hdf5DatasetLoader()
+        self.background_images, _ = background_images
 
     def __get_random_background_image__(self):
         index = random.randint(0, len(self.background_images) - 1)
@@ -157,6 +157,6 @@ class LicensePlateImageAugmentor:
         out = plate * plate_mask + bi * (1.0 - plate_mask)
 
         out = self.__gaussian_noise__(out, 15)
-        out = self.downscale_image(out, 70)
+        #out = self.downscale_image(out, 70)
         out = self.normalize_image(out)
         return out

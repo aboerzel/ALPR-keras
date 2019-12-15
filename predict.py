@@ -9,9 +9,9 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from keras import backend as K
-from keras.models import load_model
-from keras.optimizers import SGD
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import load_model
+from tensorflow.keras.optimizers import SGD
 
 from config import alpr_config as config
 from label_codec import LabelCodec
@@ -193,10 +193,12 @@ img_filename = 'SÜW-E1557.png'
 img_filepath = os.path.join("D:/development/datasets/alpr/val", img_filename)
 label = "K-OE296"
 
-sess = tf.Session()
-K.set_session(sess)
+#sess = tf.Session()
+#K.set_session(sess)
 
-model = load_model(config.MODEL_PATH, compile=False)
+model_path = "D:/development/tensorflow/ANPR/output/adagrad/alpr.model.h5"
+
+model = load_model(model_path, compile=False)
 
 optimizer = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 

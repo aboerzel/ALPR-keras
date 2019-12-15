@@ -1,5 +1,5 @@
-from keras import backend as K, Input, Model
-from keras.layers import Conv2D, MaxPooling2D, Reshape, Dense, GRU, add, concatenate, Activation, Lambda
+from tensorflow.keras import backend as K, Input, Model
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Reshape, Dense, GRU, add, concatenate, Activation, Lambda
 
 
 def ctc_lambda_func(args):

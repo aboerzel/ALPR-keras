@@ -1,6 +1,6 @@
 import os
 
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 
 class CustomModelCheckpoint(ModelCheckpoint):

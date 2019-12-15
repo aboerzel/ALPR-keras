@@ -7,7 +7,7 @@ from license_plate_image_augmentor import LicensePlateImageAugmentor
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, images, labels, img_w, img_h, pool_size, max_text_len, batch_size, background_image_db_path):
+    def __init__(self, images, labels, img_w, img_h, pool_size, max_text_len, batch_size, augmentor):
 
         self.img_w = img_w
         self.img_h = img_h
@@ -23,7 +23,7 @@ class LicensePlateDatasetGenerator:
         random.shuffle(self.indexes)
         self.batch_index = 0
 
-        self.augmentor = LicensePlateImageAugmentor(img_w, img_h, background_image_db_path)
+        self.augmentor = augmentor
 
     def next_batch(self):
 
