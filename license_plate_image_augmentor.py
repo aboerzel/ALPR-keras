@@ -4,16 +4,12 @@ import random
 import cv2
 import numpy as np
 
-from pyimagesearch.io import Hdf5DatasetLoader
-
 
 class LicensePlateImageAugmentor:
-    def __init__(self, img_w, img_h, background_image_db_path):
+    def __init__(self, img_w, img_h, background_images):
 
         self.OUTPUT_SHAPE = img_h, img_w
-
-        loader = Hdf5DatasetLoader()
-        self.background_images, _ = loader.load(background_image_db_path, True)
+        self.background_images, _ = background_images
 
     def __get_random_background_image__(self):
         index = random.randint(0, len(self.background_images) - 1)
@@ -106,33 +102,6 @@ class LicensePlateImageAugmentor:
         return image
 
     @staticmethod
-    def add_gaussian_noise(image_in, noise_sigma):
-        temp_image = np.float64(np.copy(image_in))
-
-        h = temp_image.shape[0]
-        w = temp_image.shape[1]
-        noise = np.random.randn(h, w) * noise_sigma
-
-        noisy_image = np.zeros(temp_image.shape, np.float64)
-        if len(temp_image.shape) == 2:
-            noisy_image = temp_image + noise
-        else:
-            noisy_image[:, :, 0] = temp_image[:, :, 0] + noise
-            noisy_image[:, :, 1] = temp_image[:, :, 1] + noise
-            noisy_image[:, :, 2] = temp_image[:, :, 2] + noise
-
-        return noisy_image
-
-    @staticmethod
-    def downscale_image(image, scale_percent=20):
-        width = int(image.shape[1] * scale_percent / 100)
-        height = int(image.shape[0] * scale_percent / 100)
-        dim = (width, height)
-        downscaled = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
-        downscaled = cv2.resize(downscaled, (image.shape[1], image.shape[0]))
-        return downscaled
-
-    @staticmethod
     def normalize_image(image):
         # normalize image data between 0 and 1
         image = (image - image.min()) / (image.max() - image.min())
@@ -157,6 +126,5 @@ class LicensePlateImageAugmentor:
         out = plate * plate_mask + bi * (1.0 - plate_mask)
 
         out = self.__gaussian_noise__(out, 15)
-        out = self.downscale_image(out, 70)
         out = self.normalize_image(out)
         return out

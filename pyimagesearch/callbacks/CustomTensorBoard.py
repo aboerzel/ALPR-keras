@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import TensorBoard
 
 
 class CustomTensorBoard(TensorBoard):
@@ -18,7 +18,7 @@ class CustomTensorBoard(TensorBoard):
                 if name in ['batch', 'size']:
                     continue
                 summary = tf.Summary()
-                summary_value = summary.value.add()
+                summary_value = summary.value.add_point()
                 summary_value.simple_value = value.item()
                 summary_value.tag = name
                 self.writer.add_summary(summary, self.counter)

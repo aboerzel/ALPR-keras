@@ -1,6 +1,6 @@
 import os
 
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 
 class CustomModelCheckpoint(ModelCheckpoint):
@@ -32,6 +32,7 @@ class CustomModelCheckpoint(ModelCheckpoint):
                 if current is None:
                     print("warning")
                 else:
+                    #current = current[-1]
                     if self.monitor_op(current, self.best):
                         if self.verbose > 0:
                             print('\nEpoch %05d: %s improved from %0.5f to %0.5f,'

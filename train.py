@@ -1,98 +1,118 @@
 import argparse
 import os
 
-import numpy as np
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.models import save_model
+from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
+from tensorflow.python.keras import Input
+from tensorflow.python.keras.callbacks import TensorBoard
+from tensorflow.python.keras.models import Model
 
 from config import alpr_config as config
+from label_codec import LabelCodec
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
+from license_plate_image_augmentor import LicensePlateImageAugmentor
 from pyimagesearch.callbacks import CustomModelCheckpoint
 from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
-ap.add_argument("-k", "--folds", default=config.FOLDS, type=int, help="k-folds")
-ap.add_argument("-o", "--optimizer", default="sdg", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
+ap.add_argument("-o", "--optimizer", default="rmsprop", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
-k = args['folds']
+OPTIMIZER = args["optimizer"]
+MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
+MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '.weights.h5'
+
+print("Optimizer:    {}".format(OPTIMIZER))
+print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
+print("Model path:   {}".format(MODEL_PATH))
+
+tf.compat.v1.disable_eager_execution()
 
 
-def get_optimizer(optimizer_method):
-    if optimizer_method == "sdg":
+def get_optimizer(optimizer):
+    if optimizer == "sdg":
         return SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
-    if optimizer_method == "rmsprop":
+    if optimizer == "rmsprop":
         return RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
-    if optimizer_method == "adam":
+    if optimizer == "adam":
         return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
         # Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    if optimizer_method == "adagrad":
-        return Adagrad(lr=0.01, epsilon=1e-08, decay=0.0)
-    if optimizer_method == "adadelta":
+    if optimizer == "adagrad":
+        return Adagrad(0.01)
+    if optimizer == "adadelta":
         return Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0)
 
 
-def create_model(img_w, img_h, pool_size, output_size, max_text_length, optimizer_method):
-    model = OCR.build(img_w, img_h, pool_size, output_size, max_text_length)
-    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred},
-                  optimizer=get_optimizer(optimizer_method),
-                  metrics=['accuracy'])
-    return model
-
-
-def get_callbacks(output_path, optimizer_method, fold_index, model_name):
-    model_checkpoint_path = os.path.sep.join(
-        [output_path, optimizer_method, "fold{:02d}".format(fold_index), model_name]) + '.h5'
+def get_callbacks(optimizer):
+    logdir = os.path.join("logs", optimizer)
 
     callbacks = [
         EarlyStopping(monitor='loss', min_delta=0.01, patience=5, mode='min', verbose=1),
-        CustomModelCheckpoint(model_to_save=model, filepath=model_checkpoint_path,
-                              monitor='loss', verbose=1, save_best_only=True, mode='min', period=1),
-        ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01,
-                          cooldown=0, min_lr=0)]
+        CustomModelCheckpoint(model_to_save=train_model, filepath=MODEL_WEIGHTS_PATH, monitor='loss', verbose=1,
+                              save_best_only=True, save_weights_only=True, mode='min'),
+        ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0,
+                          min_lr=0),
+        TensorBoard(log_dir=logdir)]
     return callbacks
 
 
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
 images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
-fold_size = int(len(images) / k)
-cvscores = []
 
-for fold_index in range(k):
-    val_data = images[fold_index * fold_size:(fold_index + 1) * fold_size]
-    val_labels = labels[fold_index * fold_size:(fold_index + 1) * fold_size]
+X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
 
-    train_data = np.concatenate([images[:fold_index * fold_size], images[(fold_index + 1) * fold_size:]])
-    train_labels = np.concatenate([labels[:fold_index * fold_size], labels[(fold_index + 1) * fold_size:]])
+loader = Hdf5DatasetLoader()
+background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
 
-    print("Training on fold " + str(fold_index + 1) + "/{0}...".format(k))
+augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
+train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+                                               config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentor)
 
-    trainGen = LicensePlateDatasetGenerator(train_data, train_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                            config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE,
-                                            config.SUN397_HDF5)
+val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentor)
 
-    valGen = LicensePlateDatasetGenerator(val_data, val_labels, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                          config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, config.SUN397_HDF5)
 
-    model = create_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE,
-                         trainGen.get_output_size(), config.MAX_TEXT_LEN, args['optimizer'])
+class CTCLoss(tf.keras.losses.Loss):
 
-    history = model.fit_generator(
-        trainGen.generator(),
-        steps_per_epoch=trainGen.numImages // config.BATCH_SIZE,
-        validation_data=valGen.generator(),
-        validation_steps=valGen.numImages // config.BATCH_SIZE,
-        epochs=config.NUM_EPOCHS,
-        max_queue_size=10,
-        callbacks=get_callbacks(config.OUTPUT_PATH, args['optimizer'], fold_index, config.MODEL_NAME),
-        verbose=1)
+    def __init__(self, input_length, label_length, name='CTCLoss'):
+        super().__init__(name=name)
+        self.input_length = input_length
+        self.label_length = label_length
 
-    scores = model.evaluate_generator(valGen.generator(), valGen.numImages / config.BATCH_SIZE, workers=0)
-    scores *= 100  # convert in percentages
-    print("Validation loss: {:.2f}%  Validation accuracy: {:.2f}%".format(scores[0], scores[1]))
-    cvscores.append(scores)
+    def call(self, labels, predictions):
+        loss = tf.keras.backend.ctc_batch_cost(labels, predictions, self.input_length, self.label_length)
+        loss = tf.reduce_mean(loss)
+        return loss
 
-print("{:.2f}% (+/- {:.2f}%)".format(np.mean(cvscores), np.std(cvscores)))
+
+print("[INFO] build model...")
+labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
+input_length = Input(name='input_length', shape=(1,), dtype='int64')
+label_length = Input(name='label_length', shape=(1,), dtype='int64')
+
+inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+train_model = Model(inputs=[inputs, labels, input_length, label_length], outputs=predictions)
+train_model.add_loss(CTCLoss(input_length, label_length)(labels, predictions))
+train_model.compile(loss=None, optimizer=get_optimizer(OPTIMIZER), metrics=['accuracy'])
+
+print("[INFO] model architecture...")
+train_model.summary()
+
+print("[INFO] train model...")
+history = train_model.fit(
+    train_generator.generator(),
+    steps_per_epoch=train_generator.numImages // config.BATCH_SIZE,
+    validation_data=val_generator.generator(),
+    validation_steps=val_generator.numImages // config.BATCH_SIZE,
+    epochs=config.NUM_EPOCHS,
+    callbacks=get_callbacks(OPTIMIZER), verbose=1)
+
+print("[INFO] save model...")
+predict_model = Model(inputs=inputs, outputs=predictions)
+predict_model.load_weights(MODEL_WEIGHTS_PATH)
+save_model(predict_model, filepath=MODEL_PATH, save_format="h5")

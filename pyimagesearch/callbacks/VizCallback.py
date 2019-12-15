@@ -2,16 +2,16 @@ import itertools
 import os
 
 import editdistance
-import keras.callbacks
+import tensorflow.keras.callbacks
 import pylab
 import matplotlib.pyplot as plt
 import numpy as np
-from keras import backend as K
+from tensorflow.keras import backend as K
 from config import alpr_config as config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 
 
-class VizCallback(keras.callbacks.Callback):
+class VizCallback(tensorflow.keras.callbacks.Callback):
 
     def __init__(self, run_name, test_func, text_img_gen, num_display_words=6):
         self.test_func = test_func
