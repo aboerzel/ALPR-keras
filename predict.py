@@ -21,6 +21,11 @@ args = vars(ap.parse_args())
 MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, args["optimizer"], config.MODEL_NAME]) + ".h5"
 print("Model path:   {}".format(MODEL_PATH))
 
+img_filepath = args["image"]
+label = args["label"]
+print("Image: {}".format(img_filepath))
+print("Label: {}".format(label))
+
 tf.compat.v1.disable_eager_execution()
 
 
@@ -37,46 +42,11 @@ def load_image(filepath):
     return image
 
 
-def show_image(image):
-    plt.axis("off")
-    plt.title(label)
-    plt.imshow(image, cmap='gray')
-    plt.show()
-
-
-def save_image(image, filepath):
-    cv2.imwrite(os.path.join(config.OUTPUT_PATH, "predictions", filepath), image)
-
-
-img_filepath = args["image"]
-
-if not args["label"] == "":
-    label = img_filepath.split('/')[-1].split('.')[0]
-    # label = img_filepath.split('/')[-1].split("#")[1].split('.')[0]
-else:
-    label = args["label"]
-
-#img_filepath = "D:/development/tensorflow/datasets/alpr/test"
-#img_filename = random.choice(os.listdir(img_filepath))
-#img_filepath = os.path.join(img_filepath, img_filename)
-#label = img_filename.split(".")[0]
-
-# img_filepath = "D:/development/tensorflow/datasets/alpr/plates"
-# img_filename = random.choice(os.listdir(img_filepath))
-# img_filepath = os.path.join(img_filepath, img_filename)
-# label = img_filename.split("#")[1].split(".")[0]
-
-# img_filepath = "D:/development/tensorflow/datasets/alpr/images"
-# img_filename = random.choice(os.listdir(img_filepath))
-# img_filepath = os.path.join(img_filepath, img_filename)
-# label = img_filename.split('.')[0]
-
 model = load_model(MODEL_PATH, compile=False)
 
 image = load_image(img_filepath)
 image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT), interpolation=cv2.INTER_AREA)
 image = image.astype(np.float32) / 255.
-#show_image(image)
 
 image = np.expand_dims(image.T, -1)
 
