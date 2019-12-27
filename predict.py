@@ -11,8 +11,6 @@ from tensorflow.keras.models import load_model
 
 from config import alpr_config as config
 from label_codec import LabelCodec
-from license_plate_image_augmentor import LicensePlateImageAugmentor
-from pyimagesearch.io import Hdf5DatasetLoader
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", default="../../datasets/alpr/test/TS-U9235.png", type=str, help="image to predict")
@@ -47,7 +45,7 @@ def show_image(image):
 
 
 def save_image(image):
-    cv2.imwrite(os.path.join('D:/development/datasets/alpr/test', img_filename), image)
+    cv2.imwrite(os.path.join(config.OUTPUT_PATH, "predictions", img_filename), image)
 
 
 img_filepath = args["image"]
@@ -75,17 +73,8 @@ label = img_filename.split(".")[0]
 
 model = load_model(MODEL_PATH, compile=False)
 
-loader = Hdf5DatasetLoader()
-background_images = loader.load(config.DATASET_ROOT_PATH + '/hdf5/background.h5', shuffle=True, max_items=10000)
-
-augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
-
 image = load_image(img_filepath)
-# image = augmentor.generate_plate_image(image)
-#show_image(image)
-
 image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT), interpolation=cv2.INTER_AREA)
-# show_image(image)
 image = image.astype(np.float32) / 255.
 #show_image(image)
 
@@ -93,8 +82,8 @@ image = np.expand_dims(image.T, -1)
 
 predictions = model.predict(np.asarray([image]), batch_size=1)
 pred_text = LabelCodec.decode_number_from_output(predictions)
-fig = plt.figure(figsize=(6, 10))
-outer = gridspec.GridSpec(2, 1, wspace=10, hspace=0.1)
+fig = plt.figure(figsize=(15, 10))
+outer = gridspec.GridSpec(1, 2, wspace=0.5, hspace=0.1)
 ax1 = plt.Subplot(fig, outer[0])
 fig.add_subplot(ax1)
 print('Predicted: %9s\nTrue:      %9s\n=> %s' % (pred_text, label, pred_text == label))
