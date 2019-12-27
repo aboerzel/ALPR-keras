@@ -62,9 +62,9 @@ def get_callbacks(optimizer):
 
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
-images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
-
-X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
+X_train, y_train = loader.load(config.TRAIN_HDF5, shuffle=True)
+X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
+# X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
 
 loader = Hdf5DatasetLoader()
 background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
