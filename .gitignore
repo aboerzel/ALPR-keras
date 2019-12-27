@@ -105,6 +105,5 @@ venv.bak/
 logs/
 output/
 
-/backup.ipynb
 /logs/
 /output/
