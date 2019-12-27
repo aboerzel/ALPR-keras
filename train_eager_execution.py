@@ -6,9 +6,10 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 from tensorflow.python.training.tracking.util import Checkpoint
-from tensorflow.python.keras.models import model_from_json
+from tensorflow.python.keras.models import model_from_json, Model
 from tensorflow.python.keras.saving.saved_model_experimental import export_saved_model, load_from_saved_model
 from tensorflow.python.keras import Input
+from tensorflow_core.python.keras.callbacks import TensorBoard
 
 from config import alpr_config as config
 from label_codec import LabelCodec
@@ -18,46 +19,50 @@ from pyimagesearch.callbacks import CustomModelCheckpoint
 from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
 
-from sklearn.model_selection import train_test_split
-
 ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--model", default=config.MODEL_PATH, help="model file")
-ap.add_argument("-o", "--optimizer", default="sdg", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
+ap.add_argument("-o", "--optimizer", default="rmsprop", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
+OPTIMIZER = args["optimizer"]
+MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
+MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '.weights.h5'
 
-def get_optimizer(optimizer_method):
-    if optimizer_method == "sdg":
+print("Optimizer:    {}".format(OPTIMIZER))
+print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
+print("Model path:   {}".format(MODEL_PATH))
+
+
+def get_optimizer(optimizer):
+    if optimizer == "sdg":
         return SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
-    if optimizer_method == "rmsprop":
+    if optimizer == "rmsprop":
         return RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
-    if optimizer_method == "adam":
+    if optimizer == "adam":
         return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
         # Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    if optimizer_method == "adagrad":
-        return Adagrad(lr=0.01, epsilon=1e-08, decay=0.0)
-    if optimizer_method == "adadelta":
+    if optimizer == "adagrad":
+        return Adagrad(0.01)
+    if optimizer == "adadelta":
         return Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0)
 
 
-def get_callbacks(output_path, optimizer_method, model_name):
-    model_checkpoint_path = os.path.sep.join(
-        [output_path, optimizer_method, model_name]) + '.h5'
+def get_callbacks(optimizer):
+    logdir = os.path.join("logs", optimizer)
 
     callbacks = [
         EarlyStopping(monitor='loss', min_delta=0.01, patience=5, mode='min', verbose=1),
-        CustomModelCheckpoint(model_to_save=model, filepath=model_checkpoint_path,
-                              monitor='loss', verbose=1, save_best_only=True, mode='min', period=1),
-        ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01,
-                          cooldown=0, min_lr=0)]
+        CustomModelCheckpoint(model_to_save=model, filepath=MODEL_WEIGHTS_PATH, monitor='loss', verbose=1,
+                              save_best_only=True, save_weights_only=True, mode='min'),
+        ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0,
+                          min_lr=0),
+        TensorBoard(log_dir=logdir)]
     return callbacks
 
 
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
-images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
-
-X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
+X_train, y_train = loader.load(config.TRAIN_HDF5, shuffle=True)
+X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
 
 loader = Hdf5DatasetLoader()
 background_images = loader.load(config.DATASET_ROOT_PATH + '/hdf5/background.h5', shuffle=True, max_items=10000)
@@ -69,31 +74,20 @@ train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WI
 val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                              config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentor)
 
-# Average the loss across the batch size within an epoch
-train_loss = tf.keras.metrics.Mean(name='train_loss')
-valid_loss = tf.keras.metrics.Mean(name='test_loss')
-best_loss = None
-epochs_without_improvement = 0
-patience = 10
+print("[INFO] build model...")
+labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
+input_length = Input(name='input_length', shape=(1,), dtype='int64')
+label_length = Input(name='label_length', shape=(1,), dtype='int64')
 
-# model = CLPR(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+model = Model(inputs=[inputs, labels, input_length, label_length], outputs=predictions)
 
-model, input_length, label_length = OCR.build_train_model(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1,
-                              config.MAX_TEXT_LEN)
-
-
-# model.add_loss(ctc_loss(y_pred=y_pred, input_length=input_length, label_length=label_length, labels=labels))
-# model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.0001))
 
 def ctc_loss(labels, predictions, input_length, label_length):
-    # the 2 is critical here since the first couple outputs of the RNN tend to be garbage:
-    predictions = predictions[:, 2:, :]
     return tf.keras.backend.ctc_batch_cost(labels, predictions, input_length, label_length)
 
 
 ctc_loss_prepare_fn = functools.partial(ctc_loss, input_length=input_length, label_length=label_length)
-
-OPTIMIZER = "adagrad"
 
 model.compile(loss=ctc_loss_prepare_fn,
               optimizer=get_optimizer(OPTIMIZER),
@@ -102,21 +96,18 @@ model.compile(loss=ctc_loss_prepare_fn,
 
 # model.summary()
 
-history = model.fit(
-    train_generator.generator(),
-    steps_per_epoch=train_generator.numImages // config.BATCH_SIZE,
-    validation_data=val_generator.generator(),
-    validation_steps=val_generator.numImages // config.BATCH_SIZE,
-    epochs=config.NUM_EPOCHS,
-    callbacks=get_callbacks(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME), verbose=1)
+# Average the loss across the batch size within an epoch
+train_loss = tf.keras.metrics.Mean(name='train_loss')
+valid_loss = tf.keras.metrics.Mean(name='test_loss')
+best_loss = None
+epochs_without_improvement = 0
+patience = 10
 
-OPTIMIZER_METHOD = "rmsprop"
-
-optimizer = get_optimizer(OPTIMIZER_METHOD)
+optimizer = get_optimizer(OPTIMIZER)
 
 ckpt = Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=model)
 
-model_checkpoint_path = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER_METHOD, config.MODEL_NAME])
+model_checkpoint_path = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME])
 
 
 def save_best(ckpt, best_loss, epochs_without_improvement):
