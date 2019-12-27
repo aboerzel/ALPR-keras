@@ -19,7 +19,7 @@ NUM_EPOCHS = 1000
 MAX_TEXT_LEN = 10
 
 # model name
-MODEL_NAME = "alpr.model"
+MODEL_NAME = "clpr-model"
 
 # define the path to the output directory used for storing plots, classification reports, etc.
 OUTPUT_PATH = "output"

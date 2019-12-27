@@ -10,7 +10,7 @@ from tensorflow.python.keras import Input
 from tensorflow.python.keras.callbacks import TensorBoard
 from tensorflow.python.keras.models import Model
 
-from config import alpr_config as config
+from config import config
 from label_codec import LabelCodec
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from license_plate_image_augmentor import LicensePlateImageAugmentor
@@ -24,7 +24,7 @@ args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
 MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
-MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '.weights.h5'
+MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '-weights.h5config'
 
 print("Optimizer:    {}".format(OPTIMIZER))
 print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
@@ -116,3 +116,9 @@ print("[INFO] save model...")
 predict_model = Model(inputs=inputs, outputs=predictions)
 predict_model.load_weights(MODEL_WEIGHTS_PATH)
 save_model(predict_model, filepath=MODEL_PATH, save_format="h5")
+
+print("[INFO] evaluating model...")
+x_test, y_test = next(val_generator.generator())
+score = train_model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])

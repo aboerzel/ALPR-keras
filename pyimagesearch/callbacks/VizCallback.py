@@ -7,7 +7,7 @@ import pylab
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.keras import backend as K
-from config import alpr_config as config
+from config import config
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 
 

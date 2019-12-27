@@ -7,7 +7,7 @@ import progressbar
 from imutils import paths
 from sklearn.model_selection import train_test_split
 
-from config import alpr_config as config
+from config import config
 from pyimagesearch.io import HDF5DatasetWriter
 
 ap = argparse.ArgumentParser()

@@ -7,7 +7,7 @@ from tensorflow.keras.models import save_model
 from tensorflow.python.keras.models import Model
 from tensorflow_core.lite.python.lite import TFLiteConverter
 
-from config import alpr_config as config
+from config import config
 from label_codec import LabelCodec
 from pyimagesearch.nn.conv import OCR
 
@@ -17,7 +17,7 @@ args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
 MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
-MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '.weights.h5'
+MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '-weights.h5config'
 TFLITE_MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + "tflite.h5"
 
 print("Optimizer:    {}".format(OPTIMIZER))

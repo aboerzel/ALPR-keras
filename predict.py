@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
-from config import alpr_config as config
+from config import config
 from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()

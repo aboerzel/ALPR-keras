@@ -11,7 +11,7 @@ from tensorflow.python.keras.saving.saved_model_experimental import export_saved
 from tensorflow.python.keras import Input
 from tensorflow_core.python.keras.callbacks import TensorBoard
 
-from config import alpr_config as config
+from config import config
 from label_codec import LabelCodec
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from license_plate_image_augmentor import LicensePlateImageAugmentor
@@ -25,7 +25,7 @@ args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
 MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
-MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '.weights.h5'
+MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '-weights.h5config'
 
 print("Optimizer:    {}".format(OPTIMIZER))
 print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
