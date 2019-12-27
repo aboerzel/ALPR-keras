@@ -76,6 +76,9 @@ train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WI
 val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                              config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentor)
 
+print("Train dataset size: {}".format(X_train.shape[0]))
+print("Test dataset size:  {}".format(X_test.shape[0]))
+
 
 class CTCLoss(tf.keras.losses.Loss):
 
@@ -95,10 +98,11 @@ labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
 input_length = Input(name='input_length', shape=(1,), dtype='int64')
 label_length = Input(name='label_length', shape=(1,), dtype='int64')
 
-inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE,
+                                len(LabelCodec.ALPHABET) + 1)
 train_model = Model(inputs=[inputs, labels, input_length, label_length], outputs=predictions)
 train_model.add_loss(CTCLoss(input_length, label_length)(labels, predictions))
-train_model.compile(loss=None, optimizer=get_optimizer(OPTIMIZER), metrics=['accuracy'])
+train_model.compile(loss=None, optimizer=get_optimizer(OPTIMIZER))
 
 print("[INFO] model architecture...")
 train_model.summary()
@@ -117,8 +121,8 @@ predict_model = Model(inputs=inputs, outputs=predictions)
 predict_model.load_weights(MODEL_WEIGHTS_PATH)
 save_model(predict_model, filepath=MODEL_PATH, save_format="h5")
 
-print("[INFO] evaluating model...")
-x_test, y_test = next(val_generator.generator())
-score = train_model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+# print("[INFO] evaluating model...")
+# X_test, y_test = next(val_generator.generator())
+# score = train_model.evaluate(X_test, y_test, verbose=0)
+# print('Test loss:', score[0])
+# print('Test accuracy:', score[1])
