@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 
-class LicensePlateImageAugmentor:
+class LicensePlateImageAugmentator:
     def __init__(self, img_w, img_h, background_images):
 
         self.OUTPUT_SHAPE = img_h, img_w

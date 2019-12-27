@@ -1,6 +1,5 @@
 import argparse
 import os
-import random
 
 import cv2
 import matplotlib.gridspec as gridspec

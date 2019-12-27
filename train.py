@@ -13,7 +13,7 @@ from tensorflow.python.keras.models import Model
 from config import config
 from label_codec import LabelCodec
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
-from license_plate_image_augmentor import LicensePlateImageAugmentor
+from license_plate_image_augmentator import LicensePlateImageAugmentator
 from pyimagesearch.callbacks import CustomModelCheckpoint
 from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
@@ -69,12 +69,12 @@ X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
 loader = Hdf5DatasetLoader()
 background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
 
-augmentor = LicensePlateImageAugmentor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
+augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                               config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentor)
+                                               config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
 val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentor)
+                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
 print("Train dataset size: {}".format(X_train.shape[0]))
 print("Test dataset size:  {}".format(X_test.shape[0]))

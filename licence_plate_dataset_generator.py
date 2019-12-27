@@ -6,7 +6,7 @@ from label_codec import LabelCodec
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, images, labels, img_w, img_h, pool_size, max_text_len, batch_size, augmentor):
+    def __init__(self, images, labels, img_w, img_h, pool_size, max_text_len, batch_size, augmentator):
 
         self.img_w = img_w
         self.img_h = img_h
@@ -22,7 +22,7 @@ class LicensePlateDatasetGenerator:
         random.shuffle(self.indexes)
         self.batch_index = 0
 
-        self.augmentor = augmentor
+        self.augmentator = augmentator
 
     def next_batch(self):
 
@@ -51,7 +51,7 @@ class LicensePlateDatasetGenerator:
             x_data, y_data = self.next_batch()
 
             for i, (image, number) in enumerate(zip(x_data, y_data)):
-                image = self.augmentor.generate_plate_image(image)
+                image = self.augmentator.generate_plate_image(image)
                 # image = image.astype(np.float32) / 255.
                 data[i] = np.expand_dims(image.T, -1)
                 text_length = len(number)
