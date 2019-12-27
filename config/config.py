@@ -2,7 +2,7 @@
 from os import path
 
 # root paths
-DATASET_ROOT_PATH = "D:/development/tensorflow/datasets/alpr"
+DATASET_ROOT_PATH = "D:/development/tensorflow/datasets/clpr"
 SUN397_TAR_FILE = "D:/development/tensorflow/datasets/SUN397.tar.gz"
 
 # network image size

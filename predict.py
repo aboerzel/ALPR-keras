@@ -13,8 +13,8 @@ from config import config
 from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", default="../../datasets/alpr/test/TS-U9235.png", type=str, help="image to predict")
-ap.add_argument("-l", "--label", default="TS-U9235", type=str, help="true label")
+ap.add_argument("-i", "--image", default="testimages/DÜW-AS870.jpg", type=str, help="image to predict")
+ap.add_argument("-l", "--label", default="DÜW-AS870", type=str, help="true label")
 ap.add_argument("-o", "--optimizer", default="rmsprop", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
@@ -44,8 +44,8 @@ def show_image(image):
     plt.show()
 
 
-def save_image(image):
-    cv2.imwrite(os.path.join(config.OUTPUT_PATH, "predictions", img_filename), image)
+def save_image(image, filepath):
+    cv2.imwrite(os.path.join(config.OUTPUT_PATH, "predictions", filepath), image)
 
 
 img_filepath = args["image"]
@@ -56,10 +56,10 @@ if not args["label"] == "":
 else:
     label = args["label"]
 
-img_filepath = "D:/development/tensorflow/datasets/alpr/test"
-img_filename = random.choice(os.listdir(img_filepath))
-img_filepath = os.path.join(img_filepath, img_filename)
-label = img_filename.split(".")[0]
+#img_filepath = "D:/development/tensorflow/datasets/alpr/test"
+#img_filename = random.choice(os.listdir(img_filepath))
+#img_filepath = os.path.join(img_filepath, img_filename)
+#label = img_filename.split(".")[0]
 
 # img_filepath = "D:/development/tensorflow/datasets/alpr/plates"
 # img_filename = random.choice(os.listdir(img_filepath))
