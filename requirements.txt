@@ -6,6 +6,7 @@ asn1crypto=1.2.0=py37_0
 astor=0.8.1=pypi_0
 attrs=19.3.0=py_0
 backcall=0.1.0=py37_0
+beautifulsoup4=4.8.1=py37_0
 blas=1.0=mkl
 bleach=3.1.0=py37_0
 ca-certificates=2019.11.27=0
@@ -126,6 +127,7 @@ send2trash=1.5.0=py37_0
 setuptools=42.0.2=py37_0
 sip=4.19.8=py37h6538335_0
 six=1.13.0=py37_0
+soupsieve=1.9.5=py37_0
 sqlite=3.30.1=he774522_0
 tb-nightly=2.1.0a20191206=pypi_0
 tensorboard=2.1.0=pypi_0
