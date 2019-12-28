@@ -29,6 +29,7 @@ gast=0.2.2=pypi_0
 google-auth=1.9.0=pypi_0
 google-auth-oauthlib=0.4.1=pypi_0
 google-pasta=0.1.8=pypi_0
+graphviz=2.38=hfd603c8_2
 grpcio=1.24.3=pypi_0
 h5py=2.10.0=pypi_0
 icc_rt=2019.0.0=h0cc432a_1
@@ -98,6 +99,7 @@ pyasn1=0.4.8=pypi_0
 pyasn1-modules=0.2.7=pypi_0
 pycosat=0.6.3=py37he774522_0
 pycparser=2.19=py37_0
+pydot=1.4.1=py37_0
 pygments=2.5.2=py_0
 pyopenssl=19.1.0=py37_0
 pyparsing=2.4.5=py_0
