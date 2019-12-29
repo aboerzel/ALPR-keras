@@ -24,8 +24,8 @@ ap.add_argument("-o", "--optimizer", default=config.OPTIMIZER, help="supported o
 args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
-MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
-MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '-weights.h5config'
+MODEL_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + ".h5"
+MODEL_WEIGHTS_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + '-weights.h5config'
 
 print("Optimizer:    {}".format(OPTIMIZER))
 print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
@@ -108,7 +108,7 @@ optimizer = get_optimizer(OPTIMIZER)
 
 ckpt = Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=model)
 
-model_checkpoint_path = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME])
+model_checkpoint_path = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME)
 
 
 def save_best(ckpt, best_loss, epochs_without_improvement):

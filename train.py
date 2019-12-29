@@ -44,7 +44,7 @@ def get_optimizer(optimizer):
     if optimizer == "adagrad":
         return Adagrad(learning_rate=0.001)
     if optimizer == "adadelta":
-        return Adadelta(learning_rate=0.01)
+        return Adadelta(learning_rate=0.1)
 
 
 def get_callbacks(optimizer):
