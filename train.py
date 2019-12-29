@@ -22,8 +22,10 @@ ap.add_argument("-o", "--optimizer", default=config.OPTIMIZER, help="supported o
 args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
-MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + ".h5"
-MODEL_WEIGHTS_PATH = os.path.sep.join([config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME]) + '-weights.h5config'
+MODEL_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + ".h5"
+MODEL_WEIGHTS_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + '-weights.h5config'
+
+os.makedirs(os.path.join(config.OUTPUT_PATH, OPTIMIZER), exist_ok=True)
 
 print("Optimizer:    {}".format(OPTIMIZER))
 print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
@@ -34,21 +36,20 @@ tf.compat.v1.disable_eager_execution()
 
 def get_optimizer(optimizer):
     if optimizer == "sdg":
-        return SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+        return SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
     if optimizer == "rmsprop":
-        return RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
+        return RMSprop(learning_rate=0.001)
     if optimizer == "adam":
-        return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
-        # Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        return Adam(learning_rate=0.001)
     if optimizer == "adagrad":
-        return Adagrad(0.001)
+        return Adagrad(learning_rate=0.001)
     if optimizer == "adadelta":
-        return Adadelta(lr=0.001, rho=0.95, epsilon=1e-08)
+        return Adadelta(learning_rate=0.01)
 
 
 def get_callbacks(optimizer):
     logdir = os.path.join("logs", optimizer)
-    chkpt_filepath = 'glpr-model--{epoch:02d}--{loss:.3f}--{val_loss:.3f}.h5'
+    chkpt_filepath = config.MODEL_NAME + '--{epoch:02d}--{loss:.3f}--{val_loss:.3f}.h5'
 
     callbacks = [
         EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5, mode='min', verbose=1),
@@ -65,7 +66,7 @@ X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
 # X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
 
 loader = Hdf5DatasetLoader()
-background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
+background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10000)
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,

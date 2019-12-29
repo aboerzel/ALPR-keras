@@ -17,7 +17,7 @@ ap.add_argument("-l", "--label", default="DÜW-AS870", type=str, help="true labe
 ap.add_argument("-o", "--optimizer", default=config.OPTIMIZER, help="supported optimizer methods: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
-MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, args["optimizer"], config.MODEL_NAME]) + ".h5"
+MODEL_PATH = os.path.join(config.OUTPUT_PATH, args["optimizer"], config.MODEL_NAME) + ".h5"
 print("Model path:   {}".format(MODEL_PATH))
 
 img_filepath = os.path.join(config.TEST_IMAGES, args["image"])

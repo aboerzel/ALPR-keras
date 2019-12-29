@@ -36,6 +36,6 @@ TRAIN_IMAGES = os.path.join(DATASET_ROOT_PATH, "images")
 TEST_IMAGES = "testimages"
 
 # define the path to the output training, validation, and testing HDF5 files
-TRAIN_HDF5 = os.path.join(DATASET_ROOT_PATH, "hdf5/train.h5")
-TEST_HDF5 = os.path.join(DATASET_ROOT_PATH, "hdf5/test.h5")
-SUN397_HDF5 = os.path.join(DATASET_ROOT_PATH, "hdf5/background.h5")
+TRAIN_HDF5 = os.path.join(DATASET_ROOT_PATH, "train.h5")
+TEST_HDF5 = os.path.join(DATASET_ROOT_PATH, "test.h5")
+BACKGRND_HDF5 = os.path.join(DATASET_ROOT_PATH, "background.h5")

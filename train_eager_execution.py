@@ -65,7 +65,7 @@ X_train, y_train = loader.load(config.TRAIN_HDF5, shuffle=True)
 X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
 
 loader = Hdf5DatasetLoader()
-background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
+background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10000)
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,

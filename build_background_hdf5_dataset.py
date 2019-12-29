@@ -14,7 +14,7 @@ IMAGE_HEIGHT = 256
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-s", "--source", default=config.SUN397_TAR_FILE, help="source tar-file")
-ap.add_argument("-t", "--target", default=config.SUN397_HDF5, help="target output hdf5-file")
+ap.add_argument("-t", "--target", default=config.BACKGRND_HDF5, help="target output hdf5-file")
 ap.add_argument("-i", "--items", default=1000, type=int, help="max images")
 args = vars(ap.parse_args())
 
