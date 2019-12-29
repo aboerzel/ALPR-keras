@@ -20,7 +20,7 @@ from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-o", "--optimizer", default="rmsprop", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
+ap.add_argument("-o", "--optimizer", default=config.OPTIMIZER, help="supported optimizer methods: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
@@ -65,7 +65,7 @@ X_train, y_train = loader.load(config.TRAIN_HDF5, shuffle=True)
 X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
 
 loader = Hdf5DatasetLoader()
-background_images = loader.load(config.DATASET_ROOT_PATH + '/hdf5/background.h5', shuffle=True, max_items=10000)
+background_images = loader.load(config.SUN397_HDF5, shuffle=True, max_items=10000)
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
@@ -79,7 +79,8 @@ labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
 input_length = Input(name='input_length', shape=(1,), dtype='int64')
 label_length = Input(name='label_length', shape=(1,), dtype='int64')
 
-inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE,
+                                len(LabelCodec.ALPHABET) + 1)
 model = Model(inputs=[inputs, labels, input_length, label_length], outputs=predictions)
 
 

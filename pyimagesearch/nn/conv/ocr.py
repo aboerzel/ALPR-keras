@@ -32,6 +32,7 @@ class OCR:
         bgru = TimeDistributed(Dense(units=time_dense_size))(bgru)
 
         bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, dropout=0.5))(bgru)
-        output_data = TimeDistributed(Dense(units=output_size, activation="softmax"))(bgru)
+        dense = TimeDistributed(Dense(units=output_size))(bgru)
+        output_data = Activation("softmax", name="output")(dense)
 
         return input_data, output_data

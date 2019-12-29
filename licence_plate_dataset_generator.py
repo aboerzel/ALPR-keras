@@ -52,20 +52,12 @@ class LicensePlateDatasetGenerator:
 
             for i, (image, number) in enumerate(zip(x_data, y_data)):
                 image = self.augmentator.generate_plate_image(image)
-                # image = image.astype(np.float32) / 255.
                 data[i] = np.expand_dims(image.T, -1)
                 text_length = len(number)
                 labels[i, 0:text_length] = LabelCodec.encode_number(number)
                 label_length[i] = text_length
 
-            inputs = {
-                'input': data,
-                'labels': labels,
-                'input_length': input_length,
-                'label_length': label_length
-            }
-            outputs = {'softmax': np.zeros([self.batch_size])}
-            yield (inputs, outputs)
+            yield {'input': data, 'labels': labels, 'input_length': input_length, 'label_length': label_length}
 
             # increment the total number of epochs
             epochs += 1

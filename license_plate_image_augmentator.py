@@ -104,14 +104,15 @@ class LicensePlateImageAugmentator:
     @staticmethod
     def normalize_image(image):
         # normalize image data between 0 and 1
-        image = (image - image.min()) / (image.max() - image.min())
+        # image = (image - image.min()) / (image.max() - image.min())
+        image = image.astype(np.float32) / 255.
         return image
 
-    def generate_plate_image(self, plate):
+    def generate_plate_image(self, plate_img):
         bi = self.__generate_background_image__()
 
         M = self.__make_affine_transform__(
-            from_shape=plate.shape,
+            from_shape=plate_img.shape,
             to_shape=bi.shape,
             min_scale=0.9,
             max_scale=1.0,
@@ -119,11 +120,11 @@ class LicensePlateImageAugmentator:
             scale_variation=1.0,
             translation_variation=0.0)
 
-        plate_mask = np.ones(plate.shape)
-        plate = cv2.warpAffine(plate, M, (bi.shape[1], bi.shape[0]))
+        plate_mask = np.ones(plate_img.shape)
+        plate_img = cv2.warpAffine(plate_img, M, (bi.shape[1], bi.shape[0]))
         plate_mask = cv2.warpAffine(plate_mask, M, (bi.shape[1], bi.shape[0]))
 
-        out = plate * plate_mask + bi * (1.0 - plate_mask)
+        out = plate_img * plate_mask + bi * (1.0 - plate_mask)
 
         out = self.__gaussian_noise__(out, 15)
         out = self.normalize_image(out)

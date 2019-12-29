@@ -12,15 +12,15 @@ from config import config
 from label_codec import LabelCodec
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", default="testimages/DÜW-AS870.jpg", type=str, help="image to predict")
+ap.add_argument("-i", "--image", default="DÜW-AS870.jpg", type=str, help="image to predict")
 ap.add_argument("-l", "--label", default="DÜW-AS870", type=str, help="true label")
-ap.add_argument("-o", "--optimizer", default="rmsprop", help="optimizer method: sdg, rmsprop, adam, adagrad, adadelta")
+ap.add_argument("-o", "--optimizer", default=config.OPTIMIZER, help="supported optimizer methods: sdg, rmsprop, adam, adagrad, adadelta")
 args = vars(ap.parse_args())
 
 MODEL_PATH = os.path.sep.join([config.OUTPUT_PATH, args["optimizer"], config.MODEL_NAME]) + ".h5"
 print("Model path:   {}".format(MODEL_PATH))
 
-img_filepath = args["image"]
+img_filepath = os.path.join(config.TEST_IMAGES, args["image"])
 label = args["label"]
 print("Image: {}".format(img_filepath))
 print("Label: {}".format(label))
