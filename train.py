@@ -32,6 +32,7 @@ print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
 print("Model path:   {}".format(MODEL_PATH))
 
 tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_v2_behavior()
 
 
 def get_optimizer(optimizer):
