@@ -41,7 +41,7 @@ def get_optimizer(optimizer):
         return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
         # Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     if optimizer == "adagrad":
-        return Adagrad(0.01)
+        return Adagrad(0.001)
     if optimizer == "adadelta":
         return Adadelta(lr=0.001, rho=0.95, epsilon=1e-08)
 
