@@ -5,17 +5,16 @@ import os
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
-from tensorflow.python.training.tracking.util import Checkpoint
+from tensorflow.python.keras import Input
 from tensorflow.python.keras.models import model_from_json, Model
 from tensorflow.python.keras.saving.saved_model_experimental import export_saved_model, load_from_saved_model
-from tensorflow.python.keras import Input
-from tensorflow_core.python.keras.callbacks import TensorBoard
+from tensorflow.python.training.tracking.util import Checkpoint
+from tensorflow_core.python.keras.callbacks import TensorBoard, ModelCheckpoint
 
 from config import config
 from label_codec import LabelCodec
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from license_plate_image_augmentator import LicensePlateImageAugmentator
-from pyimagesearch.callbacks import CustomModelCheckpoint
 from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
 from pyimagesearch.nn.conv import OCR
 
@@ -34,27 +33,25 @@ print("Model path:   {}".format(MODEL_PATH))
 
 def get_optimizer(optimizer):
     if optimizer == "sdg":
-        return SGD(lr=1e-2, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+        return SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
     if optimizer == "rmsprop":
-        return RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
+        return RMSprop(learning_rate=0.001)
     if optimizer == "adam":
-        return Adam(lr=0.001, decay=0.001 / config.NUM_EPOCHS)
-        # Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        return Adam(learning_rate=0.001)
     if optimizer == "adagrad":
-        return Adagrad(0.01)
+        return Adagrad(learning_rate=0.001)
     if optimizer == "adadelta":
-        return Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0)
+        return Adadelta(learning_rate=0.1)
 
 
 def get_callbacks(optimizer):
     logdir = os.path.join("logs", optimizer)
+    chkpt_filepath = config.MODEL_NAME + '--{epoch:02d}--{loss:.3f}--{val_loss:.3f}.h5'
 
     callbacks = [
-        EarlyStopping(monitor='loss', min_delta=0.01, patience=5, mode='min', verbose=1),
-        CustomModelCheckpoint(model_to_save=model, filepath=MODEL_WEIGHTS_PATH, monitor='loss', verbose=1,
-                              save_best_only=True, save_weights_only=True, mode='min'),
-        ReduceLROnPlateau(monitor='loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0,
-                          min_lr=0),
+        EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5, mode='min', verbose=1),
+        ModelCheckpoint(filepath=MODEL_WEIGHTS_PATH, monitor='val_loss', save_best_only=True, save_weights_only=True, verbose=1, mode='min'),
+        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0, min_lr=0),
         TensorBoard(log_dir=logdir)]
     return callbacks
 
