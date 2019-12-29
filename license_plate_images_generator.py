@@ -1,25 +1,25 @@
-import requests
-import re
-import random
-import time
-import numpy as np
-import cv2
-import os.path
-import json
 import argparse
+import json
+import os.path
+import random
+import re
+import time
+
+import cv2
+import numpy as np
+import requests
 from PIL import Image
+
 from config import config
 
 
 class GermanLicensePlateImagesGenerator:
     def __init__(self, output):
         self.output = output
-        self.COUNTRY_MARKS = np.asarray(
-            [d['CM'] for d in json.loads(open(config.GERMAN_COUNTY_MARKS, encoding='utf-8').read())])
+        self.COUNTRY_MARKS = np.asarray([d['CM'] for d in json.loads(open(config.GERMAN_COUNTY_MARKS, encoding='utf-8').read())])
         self.LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
         self.DIGITS = "0123456789"
-        self.COUNTRIES = ['BW', 'BY', 'BE', 'BB', 'HB', 'HH', 'HE', 'MV', 'NI', 'NW', 'RP', 'SL', 'SN', 'ST', 'SH',
-                          'TH']
+        self.COUNTRIES = ['BW', 'BY', 'BE', 'BB', 'HB', 'HH', 'HE', 'MV', 'NI', 'NW', 'RP', 'SL', 'SN', 'ST', 'SH', 'TH']
         self.MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
         self.YEARS = ['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17']
 
@@ -102,10 +102,9 @@ class GermanLicensePlateImagesGenerator:
 
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--items",
-                default="60000",
-                help="number of items to generate")
+ap.add_argument("-i", "--items", default="60000", help="Number of items to generate")
+ap.add_argument("-o", "--output", default=config.TRAIN_IMAGES, help="Output path")
 args = vars(ap.parse_args())
 
-lpdg = GermanLicensePlateImagesGenerator(config.TRAIN_IMAGES)
+lpdg = GermanLicensePlateImagesGenerator(os.path.abspath(args["output"]))
 lpdg.generate(int(args["items"]))
