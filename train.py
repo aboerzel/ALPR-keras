@@ -120,7 +120,7 @@ predict_model = Model(inputs=inputs, outputs=outputs)
 predict_model.load_weights(MODEL_WEIGHTS_PATH)
 save_model(predict_model, filepath=MODEL_PATH, save_format="h5")
 
-# summarize history for loss
+print("[INFO] plot and save training history...")
 print(history.history.keys())
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
