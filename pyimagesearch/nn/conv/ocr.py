@@ -2,6 +2,7 @@ from tensorflow.keras.layers import (
     Conv2D, MaxPooling2D, GRU, Bidirectional,
     Input, Dense, Activation, Reshape, BatchNormalization
 )
+from tensorflow_core.python.keras.layers import TimeDistributed
 
 
 class OCR:
@@ -28,16 +29,12 @@ class OCR:
         shape = cnn.get_shape()
         cnn = Reshape((shape[1], shape[2] * shape[3]))(cnn)
 
-        # cuts down input size going into RNN:
-        dense = Dense(time_dense_size, activation='relu')(cnn)
+        bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, reset_after=True, dropout=0.5))(cnn)
+        bgru = TimeDistributed(Dense(units=time_dense_size))(bgru)
 
-        gru_1 = Bidirectional(GRU(rnn_size, return_sequences=True, kernel_initializer='he_normal', dropout=0.5), merge_mode='sum')(dense)
-        gru_1 = BatchNormalization()(gru_1)
-        gru_2 = Bidirectional(GRU(rnn_size, return_sequences=True, kernel_initializer='he_normal', dropout=0.5), merge_mode='concat')(gru_1)
-        gru_2 = BatchNormalization()(gru_2)
+        bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, reset_after=True, dropout=0.5))(bgru)
+        dense = TimeDistributed(Dense(units=output_size))(bgru)
 
-        # transforms RNN output to character activations:
-        dense = Dense(output_size, kernel_initializer='he_normal')(gru_2)
         output_data = Activation("softmax", name="output")(dense)
 
         return input_data, output_data
