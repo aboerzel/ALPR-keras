@@ -9,7 +9,7 @@ class OCR:
     def build(input_size, pool_size, output_size):
         conv_filters = 16
         kernel_size = (3, 3)
-        time_dense_size = 32
+        time_dense_size = 128
         rnn_size = 512
 
         input_data = Input(name="input", shape=input_size)
