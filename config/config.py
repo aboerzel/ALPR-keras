@@ -12,8 +12,8 @@ IMAGE_HEIGHT = 64
 POOL_SIZE = 2
 
 # training parameter
-BATCH_SIZE = 100
-NUM_EPOCHS = 1000
+BATCH_SIZE = 128
+NUM_EPOCHS = 50
 
 # license number construction
 MAX_TEXT_LEN = 10
