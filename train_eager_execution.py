@@ -3,6 +3,7 @@ import functools
 import os
 
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 from tensorflow.python.keras import Input
@@ -58,8 +59,8 @@ def get_callbacks(optimizer):
 
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
-X_train, y_train = loader.load(config.TRAIN_HDF5, shuffle=True)
-X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
+images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
+X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
 
 loader = Hdf5DatasetLoader()
 background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10000)
