@@ -104,8 +104,7 @@ class LicensePlateImageAugmentator:
     @staticmethod
     def normalize_image(image):
         # normalize image data between 0 and 1
-        # image = (image - image.min()) / (image.max() - image.min())
-        image = image.astype(np.float32) / 255.
+        image = (image - image.min()) / (image.max() - image.min())
         return image
 
     def generate_plate_image(self, plate_img):
