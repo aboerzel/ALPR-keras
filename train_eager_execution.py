@@ -67,18 +67,17 @@ background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                               config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                               config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
 val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                             config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
 print("[INFO] build model...")
 labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
 input_length = Input(name='input_length', shape=(1,), dtype='int64')
 label_length = Input(name='label_length', shape=(1,), dtype='int64')
 
-inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE,
-                                len(LabelCodec.ALPHABET) + 1)
+inputs, predictions = OCR.conv_bgru((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), len(LabelCodec.ALPHABET) + 1)
 model = Model(inputs=[inputs, labels, input_length, label_length], outputs=predictions)
 
 

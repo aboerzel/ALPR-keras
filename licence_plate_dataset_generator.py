@@ -6,13 +6,13 @@ from label_codec import LabelCodec
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, images, labels, img_w, img_h, pool_size, max_text_len, batch_size, augmentator):
+    def __init__(self, images, labels, img_w, img_h, max_text_len, batch_size, augmentator):
 
         self.img_w = img_w
         self.img_h = img_h
         self.max_text_len = max_text_len
         self.batch_size = batch_size
-        self.downsample_factor = pool_size ** 2  # 2 <=> number of convolution+pool layers
+        self.input_length = 30
 
         self.images = images
         self.labels = labels
@@ -45,7 +45,7 @@ class LicensePlateDatasetGenerator:
 
             data = np.ones([self.batch_size, self.img_w, self.img_h, 1])
             labels = np.ones([self.batch_size, self.max_text_len])
-            input_length = np.ones((self.batch_size, 1)) * self.img_w // self.downsample_factor
+            input_length = np.ones((self.batch_size, 1)) * self.input_length
             label_length = np.zeros((self.batch_size, 1))
 
             x_data, y_data = self.next_batch()

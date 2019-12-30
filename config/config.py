@@ -9,8 +9,6 @@ SUN397_TAR_FILE = os.path.join(os.getcwd(), "..", "datasets", "SUN397.tar.gz")
 IMAGE_WIDTH = 128
 IMAGE_HEIGHT = 64
 
-POOL_SIZE = 2
-
 # training parameter
 BATCH_SIZE = 128
 NUM_EPOCHS = 50

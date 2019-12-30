@@ -28,7 +28,7 @@ print("Model path:   {}".format(MODEL_PATH))
 
 tf.compat.v1.disable_eager_execution()
 
-inputs, predictions = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+inputs, predictions = OCR.conv_bgru((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), len(LabelCodec.ALPHABET) + 1)
 model = Model(inputs=inputs, outputs=predictions)
 
 model.load_weights(MODEL_WEIGHTS_PATH)

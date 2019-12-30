@@ -71,10 +71,10 @@ background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                               config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                               config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
 val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                             config.POOL_SIZE, config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                             config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
 print("Train dataset size: {}".format(X_train.shape[0]))
 print("Test dataset size:  {}".format(X_test.shape[0]))
@@ -88,6 +88,8 @@ class CTCLoss(tf.keras.losses.Loss):
         self.label_length = label_length
 
     def call(self, labels, predictions):
+        # the 2 is critical here since the first couple outputs of the RNN tend to be garbage:
+        predictions = predictions[:, 2:, :]
         loss = tf.keras.backend.ctc_batch_cost(labels, predictions, self.input_length, self.label_length)
         loss = tf.reduce_mean(loss)
         return loss
@@ -98,7 +100,7 @@ labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
 input_length = Input(name='input_length', shape=(1,), dtype='int64')
 label_length = Input(name='label_length', shape=(1,), dtype='int64')
 
-inputs, outputs = OCR.build((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), config.POOL_SIZE, len(LabelCodec.ALPHABET) + 1)
+inputs, outputs = OCR.vgg_bgru((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), len(LabelCodec.ALPHABET) + 1)
 train_model = Model(inputs=[inputs, labels, input_length, label_length], outputs=outputs)
 train_model.add_loss(CTCLoss(input_length, label_length)(labels, outputs))
 train_model.compile(loss=None, optimizer=get_optimizer(OPTIMIZER))

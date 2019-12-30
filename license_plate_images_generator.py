@@ -46,7 +46,7 @@ class GermanLicensePlateImagesGenerator:
 
         return "{}-{}{}".format(country, letters, digits)
 
-    def __create_license_plate_picture(self, license_number, country, front):
+    def __create_license_plate_picture(self, n, license_number, country, front):
         file_path = self.output + '/{0}#{1}.png'.format("F" if front else "R", license_number)
         if os.path.exists(file_path):
             return False
@@ -82,7 +82,7 @@ class GermanLicensePlateImagesGenerator:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             im = Image.fromarray(image)  # don't use cv2.imwrite() because there is a bug with utf-8 encoded filepaths
             im.save(file_path)
-            print(file_path)
+            print("{0:06d} : {1}".format(n, file_path))
             return True
         except:
             return False
@@ -93,11 +93,11 @@ class GermanLicensePlateImagesGenerator:
                 license_number = self.__generate_license_number()
 
                 country = random.choice(self.COUNTRIES)
-                if not self.__create_license_plate_picture(license_number, country, True):
+                if not self.__create_license_plate_picture(n, license_number, country, True):
                     break
 
                 time.sleep(.200)
-                self.__create_license_plate_picture(license_number, country, False)
+                self.__create_license_plate_picture(n, license_number, country, False)
                 time.sleep(.200)
 
 
