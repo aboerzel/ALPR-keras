@@ -1,8 +1,7 @@
 from tensorflow.keras.layers import (
-    Conv2D, MaxPooling2D, GRU, Bidirectional,
+    Conv2D, MaxPooling2D, GRU, Bidirectional, TimeDistributed,
     Input, Dense, Activation, Reshape, BatchNormalization
 )
-from tensorflow_core.python.keras.layers import TimeDistributed
 
 
 class OCR:
@@ -29,10 +28,10 @@ class OCR:
         shape = cnn.get_shape()
         cnn = Reshape((shape[1], shape[2] * shape[3]))(cnn)
 
-        bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, reset_after=True, dropout=0.5))(cnn)
+        bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, dropout=0.5))(cnn)
         bgru = TimeDistributed(Dense(units=time_dense_size))(bgru)
 
-        bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, reset_after=True, dropout=0.5))(bgru)
+        bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True, dropout=0.5))(bgru)
         dense = TimeDistributed(Dense(units=output_size))(bgru)
 
         output_data = Activation("softmax", name="output")(dense)
