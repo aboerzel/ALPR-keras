@@ -12,7 +12,7 @@ class LicensePlateDatasetGenerator:
         self.img_h = img_h
         self.max_text_len = max_text_len
         self.batch_size = batch_size
-        self.input_length = 30
+        self.input_length = 32
 
         self.images = images
         self.labels = labels

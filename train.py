@@ -54,7 +54,7 @@ def get_callbacks(optimizer):
 
     callbacks = [
         EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5, mode='min', verbose=1),
-        ModelCheckpoint(filepath=MODEL_WEIGHTS_PATH, monitor='val_loss', save_best_only=True, save_weights_only=True, verbose=1, mode='min'),
+        ModelCheckpoint(filepath=MODEL_WEIGHTS_PATH, monitor='val_loss', save_best_only=True, save_weights_only=True, verbose=1),
         ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0, min_lr=0),
         TensorBoard(log_dir=logdir)]
     return callbacks
@@ -88,11 +88,7 @@ class CTCLoss(tf.keras.losses.Loss):
         self.label_length = label_length
 
     def call(self, labels, predictions):
-        # the 2 is critical here since the first couple outputs of the RNN tend to be garbage:
-        predictions = predictions[:, 2:, :]
-        loss = tf.keras.backend.ctc_batch_cost(labels, predictions, self.input_length, self.label_length)
-        loss = tf.reduce_mean(loss)
-        return loss
+        return tf.keras.backend.ctc_batch_cost(labels, predictions, self.input_length, self.label_length)
 
 
 print("[INFO] build model...")
@@ -133,10 +129,8 @@ plt.legend(['train', 'test'], loc='upper left')
 plt.savefig(os.path.join("documentation", config.MODEL_NAME) + "-" + OPTIMIZER + "-train-history.png")
 plt.show()
 
-#tf.saved_model.save(predict_model, "out")
-
-# print("[INFO] evaluating model...")
-# X_test, y_test = next(val_generator.generator())
-# score = train_model.evaluate(X_test, y_test, verbose=0)
-# print('Test loss:', score[0])
-# print('Test accuracy:', score[1])
+print("[INFO] evaluating model...")
+X_test, y_test = next(val_generator.generator())
+score = predict_model.evaluate(X_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
