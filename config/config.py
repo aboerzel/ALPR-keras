@@ -20,7 +20,7 @@ MAX_TEXT_LEN = 10
 MODEL_NAME = "glpr-model"
 
 # supported optimizer methods: sdg, rmsprop, adam, adagrad, adadelta
-OPTIMIZER = "adagrad"
+OPTIMIZER = "adadelta"
 
 # define the path to the output directory used for storing plots, classification reports, etc.
 OUTPUT_PATH = "output"
@@ -30,10 +30,11 @@ DOCUMENTATION_PATH = "documentation"
 GERMAN_COUNTY_MARKS = "./config/german_county_marks.json"
 
 # define the paths to the training and validation directories
-TRAIN_IMAGES = os.path.join(DATASET_ROOT_PATH, "images")
+PLATE_IMAGES = os.path.join(DATASET_ROOT_PATH, "images")
 TEST_IMAGES = "testimages"
 
 # define the path to the output training, validation, and testing HDF5 files
+GLP_HDF5 = os.path.join(DATASET_ROOT_PATH, "glp.h5")
 TRAIN_HDF5 = os.path.join(DATASET_ROOT_PATH, "train.h5")
 TEST_HDF5 = os.path.join(DATASET_ROOT_PATH, "test.h5")
 BACKGRND_HDF5 = os.path.join(DATASET_ROOT_PATH, "background.h5")
