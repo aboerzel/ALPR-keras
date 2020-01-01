@@ -114,9 +114,9 @@ class LicensePlateImageAugmentator:
         M = self.__make_affine_transform__(
             from_shape=plate_img.shape,
             to_shape=bi.shape,
-            min_scale=0.9,
+            min_scale=0.8,
             max_scale=1.0,
-            rotation_variation=0.8,
+            rotation_variation=1.0,
             scale_variation=1.0,
             translation_variation=0.0)
 

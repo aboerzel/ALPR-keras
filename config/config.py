@@ -20,7 +20,7 @@ MAX_TEXT_LEN = 10
 MODEL_NAME = "glpr-model"
 
 # supported optimizer methods: sdg, rmsprop, adam, adagrad, adadelta
-OPTIMIZER = "rmsprop"
+OPTIMIZER = "adagrad"
 
 # define the path to the output directory used for storing plots, classification reports, etc.
 OUTPUT_PATH = "output"
