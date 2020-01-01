@@ -10,9 +10,8 @@ from config import config
 from pyimagesearch.io import HDF5DatasetWriter
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image_data", default=config.TRAIN_IMAGES, help="image data path")
-ap.add_argument("-d", "--dataset", default=config.TRAIN_HDF5, help="glp dataset hdf5-file")
-ap.add_argument("-i", "--items", default=1000, type=int, help="max images")
+ap.add_argument("-i", "--image_data", default=config.PLATE_IMAGES, help="image data path")
+ap.add_argument("-d", "--dataset", default=config.GLP_HDF5, help="glp dataset hdf5-file")
 args = vars(ap.parse_args())
 
 # read image paths and labels
@@ -39,7 +38,12 @@ for (i, (path, label)) in enumerate(zip(paths, labels)):
     stream = open(path, "rb")
     bytes = bytearray(stream.read())
     numpyarray = np.asarray(bytes, dtype=np.uint8)
-    image = cv2.imdecode(numpyarray, cv2.IMREAD_GRAYSCALE)
+
+    try:
+        image = cv2.imdecode(numpyarray, cv2.IMREAD_GRAYSCALE)
+    except:
+        print("open image failed: %s" % path)
+        continue
 
     # check image size
     if not image.shape == (IMAGE_HEIGHT, IMAGE_WIDTH):
