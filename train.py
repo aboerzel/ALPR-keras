@@ -130,7 +130,7 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'validation'], loc='upper left')
-plt.savefig(os.path.join("documentation", config.MODEL_NAME) + "-train-history-" + OPTIMIZER + ".png")
+plt.savefig(os.path.join(config.DOCUMENTATION_PATH, config.MODEL_NAME) + "-train-history-" + OPTIMIZER + ".png")
 plt.show()
 
 print("[INFO] evaluating model...")
