@@ -45,7 +45,7 @@ def get_optimizer(optimizer):
     if optimizer == "adagrad":
         return Adagrad(learning_rate=0.001)
     if optimizer == "adadelta":
-        return Adadelta(learning_rate=0.1)
+        return Adadelta()
 
 
 def get_callbacks(optimizer):
@@ -62,9 +62,9 @@ def get_callbacks(optimizer):
 
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
-X_train, y_train = loader.load(config.TRAIN_HDF5, shuffle=True)
-X_test, y_test = loader.load(config.TEST_HDF5, shuffle=True)
-# X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)
+images, labels = loader.load(config.GLP_HDF5, shuffle=True)
+X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
 
 loader = Hdf5DatasetLoader()
 background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10000)
@@ -73,11 +73,15 @@ augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIG
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                                config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
-val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+val_generator = LicensePlateDatasetGenerator(X_val, y_val, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
                                              config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
 
-print("Train dataset size: {}".format(X_train.shape[0]))
-print("Test dataset size:  {}".format(X_test.shape[0]))
+test_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
+                                              config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+
+print("Train dataset size:      {}".format(X_train.shape[0]))
+print("Validation dataset size: {}".format(X_val.shape[0]))
+print("Test dataset size:       {}".format(X_test.shape[0]))
 
 
 class CTCLoss(tf.keras.losses.Loss):
@@ -125,12 +129,12 @@ plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.savefig(os.path.join("documentation", config.MODEL_NAME) + "-" + OPTIMIZER + "-train-history.png")
+plt.legend(['train', 'validation'], loc='upper left')
+plt.savefig(os.path.join("documentation", config.MODEL_NAME) + "-train-history-" + OPTIMIZER + ".png")
 plt.show()
 
 print("[INFO] evaluating model...")
-X_test, y_test = next(val_generator.generator())
+X_test, y_test = next(test_generator.generator())
 score = predict_model.evaluate(X_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])

@@ -103,7 +103,7 @@ class GermanLicensePlateImagesGenerator:
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--items", default="60000", help="Number of items to generate")
-ap.add_argument("-o", "--output", default=config.TRAIN_IMAGES, help="Output path")
+ap.add_argument("-o", "--output", default=config.PLATE_IMAGES, help="Output path")
 args = vars(ap.parse_args())
 
 lpdg = GermanLicensePlateImagesGenerator(os.path.abspath(args["output"]))
