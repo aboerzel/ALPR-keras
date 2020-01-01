@@ -4,16 +4,14 @@ import os
 
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 from tensorflow.python.keras import Input
 from tensorflow.python.keras.models import model_from_json, Model
 from tensorflow.python.keras.saving.saved_model_experimental import export_saved_model, load_from_saved_model
 from tensorflow.python.training.tracking.util import Checkpoint
-from tensorflow_core.python.keras.callbacks import TensorBoard, ModelCheckpoint
 
 from config import config
 from label_codec import LabelCodec
+from train_helper import TrainHelper
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from license_plate_image_augmentator import LicensePlateImageAugmentator
 from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
@@ -32,31 +30,6 @@ print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
 print("Model path:   {}".format(MODEL_PATH))
 
 
-def get_optimizer(optimizer):
-    if optimizer == "sdg":
-        return SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
-    if optimizer == "rmsprop":
-        return RMSprop(learning_rate=0.001)
-    if optimizer == "adam":
-        return Adam(learning_rate=0.001)
-    if optimizer == "adagrad":
-        return Adagrad(learning_rate=0.001)
-    if optimizer == "adadelta":
-        return Adadelta(learning_rate=0.1)
-
-
-def get_callbacks(optimizer):
-    logdir = os.path.join("logs", optimizer)
-    chkpt_filepath = config.MODEL_NAME + '--{epoch:02d}--{loss:.3f}--{val_loss:.3f}.h5'
-
-    callbacks = [
-        EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5, mode='min', verbose=1),
-        ModelCheckpoint(filepath=MODEL_WEIGHTS_PATH, monitor='val_loss', save_best_only=True, save_weights_only=True, verbose=1, mode='min'),
-        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0, min_lr=0),
-        TensorBoard(log_dir=logdir)]
-    return callbacks
-
-
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
 images, labels = loader.load(config.TRAIN_HDF5, shuffle=True)
@@ -66,11 +39,14 @@ loader = Hdf5DatasetLoader()
 background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10000)
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
+
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                               config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                               config.DOWNSAMPLE_FACTOR, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                               augmentator)
 
 val_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                             config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                             config.DOWNSAMPLE_FACTOR, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                             augmentator)
 
 print("[INFO] build model...")
 labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
@@ -88,7 +64,7 @@ def ctc_loss(labels, predictions, input_length, label_length):
 ctc_loss_prepare_fn = functools.partial(ctc_loss, input_length=input_length, label_length=label_length)
 
 model.compile(loss=ctc_loss_prepare_fn,
-              optimizer=get_optimizer(OPTIMIZER),
+              optimizer=TrainHelper.get_optimizer(OPTIMIZER),
               metrics=['accuracy'],
               experimental_run_tf_function=False)
 
@@ -101,7 +77,7 @@ best_loss = None
 epochs_without_improvement = 0
 patience = 10
 
-optimizer = get_optimizer(OPTIMIZER)
+optimizer = TrainHelper.get_optimizer(OPTIMIZER)
 
 ckpt = Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=model)
 

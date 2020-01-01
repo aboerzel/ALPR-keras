@@ -3,15 +3,13 @@ import os
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.models import save_model
-from tensorflow.keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 from tensorflow.python.keras import Input
-from tensorflow.python.keras.callbacks import TensorBoard, ModelCheckpoint
 from tensorflow.python.keras.models import Model
 
 from config import config
 from label_codec import LabelCodec
+from train_helper import TrainHelper
 from licence_plate_dataset_generator import LicensePlateDatasetGenerator
 from license_plate_image_augmentator import LicensePlateImageAugmentator
 from pyimagesearch.io.hdf5datasetloader import Hdf5DatasetLoader
@@ -35,49 +33,27 @@ tf.compat.v1.disable_eager_execution()
 # tf.compat.v1.disable_v2_behavior()
 
 
-def get_optimizer(optimizer):
-    if optimizer == "sdg":
-        return SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
-    if optimizer == "rmsprop":
-        return RMSprop(learning_rate=0.001)
-    if optimizer == "adam":
-        return Adam(learning_rate=0.001)
-    if optimizer == "adagrad":
-        return Adagrad(learning_rate=0.001)
-    if optimizer == "adadelta":
-        return Adadelta()
-
-
-def get_callbacks(optimizer):
-    logdir = os.path.join("logs", optimizer)
-    chkpt_filepath = config.MODEL_NAME + '--{epoch:02d}--{loss:.3f}--{val_loss:.3f}.h5'
-
-    callbacks = [
-        EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5, mode='min', verbose=1),
-        ModelCheckpoint(filepath=MODEL_WEIGHTS_PATH, monitor='val_loss', save_best_only=True, save_weights_only=True, verbose=1),
-        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2, verbose=1, mode='min', min_delta=0.01, cooldown=0, min_lr=0),
-        TensorBoard(log_dir=logdir)]
-    return callbacks
-
-
 print("[INFO] loading data...")
 loader = Hdf5DatasetLoader()
 images, labels = loader.load(config.GLP_HDF5, shuffle=True)
 X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
 
-loader = Hdf5DatasetLoader()
 background_images = loader.load(config.BACKGRND_HDF5, shuffle=True, max_items=10000)
 
 augmentator = LicensePlateImageAugmentator(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, background_images)
+
 train_generator = LicensePlateDatasetGenerator(X_train, y_train, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                               config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                               config.DOWNSAMPLE_FACTOR, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                               augmentator)
 
 val_generator = LicensePlateDatasetGenerator(X_val, y_val, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                             config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                             config.DOWNSAMPLE_FACTOR, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                             augmentator)
 
 test_generator = LicensePlateDatasetGenerator(X_test, y_test, config.IMAGE_WIDTH, config.IMAGE_HEIGHT,
-                                              config.MAX_TEXT_LEN, config.BATCH_SIZE, augmentator)
+                                              config.DOWNSAMPLE_FACTOR, config.MAX_TEXT_LEN, config.BATCH_SIZE,
+                                              augmentator)
 
 print("Train dataset size:      {}".format(X_train.shape[0]))
 print("Validation dataset size: {}".format(X_val.shape[0]))
@@ -100,10 +76,10 @@ labels = Input(name='labels', shape=(config.MAX_TEXT_LEN,), dtype='float32')
 input_length = Input(name='input_length', shape=(1,), dtype='int64')
 label_length = Input(name='label_length', shape=(1,), dtype='int64')
 
-inputs, outputs = OCR.vgg_bgru((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), len(LabelCodec.ALPHABET) + 1)
+inputs, outputs = OCR.conv_bgru((config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 1), len(LabelCodec.ALPHABET) + 1)
 train_model = Model(inputs=[inputs, labels, input_length, label_length], outputs=outputs)
 train_model.add_loss(CTCLoss(input_length, label_length)(labels, outputs))
-train_model.compile(loss=None, optimizer=get_optimizer(OPTIMIZER))
+train_model.compile(loss=None, optimizer=TrainHelper.get_optimizer(OPTIMIZER))
 
 print("[INFO] model architecture...")
 train_model.summary()
@@ -115,7 +91,7 @@ history = train_model.fit(
     validation_data=val_generator.generator(),
     validation_steps=val_generator.numImages // config.BATCH_SIZE,
     epochs=config.NUM_EPOCHS,
-    callbacks=get_callbacks(OPTIMIZER), verbose=1)
+    callbacks=TrainHelper.get_callbacks(OPTIMIZER, MODEL_WEIGHTS_PATH), verbose=1)
 
 print("[INFO] save model...")
 predict_model = Model(inputs=inputs, outputs=outputs)

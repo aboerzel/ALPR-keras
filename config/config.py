@@ -11,9 +11,10 @@ IMAGE_HEIGHT = 64
 
 # training parameter
 BATCH_SIZE = 128
-NUM_EPOCHS = 50
+NUM_EPOCHS = 500
 
 # license number construction
+DOWNSAMPLE_FACTOR = 2 ** 2  # <= pool size ** number of pool layers
 MAX_TEXT_LEN = 10
 
 # model name

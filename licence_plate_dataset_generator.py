@@ -6,13 +6,13 @@ from label_codec import LabelCodec
 
 
 class LicensePlateDatasetGenerator:
-    def __init__(self, images, labels, img_w, img_h, max_text_len, batch_size, augmentator):
+    def __init__(self, images, labels, img_w, img_h, downsample_factor, max_text_len, batch_size, augmentator):
 
         self.img_w = img_w
         self.img_h = img_h
         self.max_text_len = max_text_len
         self.batch_size = batch_size
-        self.input_length = 32
+        self.input_length = img_w // downsample_factor
 
         self.images = images
         self.labels = labels
