@@ -10,8 +10,8 @@ IMAGE_WIDTH = 128
 IMAGE_HEIGHT = 64
 
 # training parameter
-BATCH_SIZE = 128
-NUM_EPOCHS = 500
+BATCH_SIZE = 64
+NUM_EPOCHS = 1000
 
 # license number construction
 DOWNSAMPLE_FACTOR = 2 ** 2  # <= pool size ** number of pool layers
@@ -21,7 +21,7 @@ MAX_TEXT_LEN = 10
 MODEL_NAME = "glpr-model"
 
 # supported optimizer methods: sdg, rmsprop, adam, adagrad, adadelta
-OPTIMIZER = "adadelta"
+OPTIMIZER = "adagrad"
 
 # define the path to the output directory used for storing plots, classification reports, etc.
 OUTPUT_PATH = "output"
