@@ -13,13 +13,13 @@ class TrainHelper:
         if optimizer == "sdg":
             return SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
         if optimizer == "rmsprop":
-            return RMSprop(learning_rate=0.001)
+            return RMSprop(learning_rate=0.01)
         if optimizer == "adam":
-            return Adam(learning_rate=0.001)
+            return Adam(learning_rate=0.01)
         if optimizer == "adagrad":
-            return Adagrad(learning_rate=0.001)
+            return Adagrad(learning_rate=0.01)
         if optimizer == "adadelta":
-            return Adadelta()
+            return Adadelta(learning_rate=1.0)
 
     @staticmethod
     def get_callbacks(optimizer, model_weigths_path):
