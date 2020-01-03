@@ -1,0 +1,74 @@
+{
+  "variant": {
+    "module": {
+      "rootBuildGradleFolder": "D:\\development\\tensorflow\\ANPR\\android",
+      "sdkFolder": "C:\\Users\\Andreas\\AppData\\Local\\Android\\Sdk",
+      "isNativeCompilerSettingsCacheEnabled": false,
+      "isBuildOnlyTargetAbiEnabled": true,
+      "splitsAbiFilterSet": [],
+      "intermediatesFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\build\\intermediates",
+      "gradleModulePathName": ":OpenCV",
+      "moduleRootFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV",
+      "makeFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\libcxx_helper\\CMakeLists.txt",
+      "buildSystem": "CMAKE",
+      "compilerSettingsCacheFolder": "D:\\development\\tensorflow\\ANPR\\android\\.cxx",
+      "cxxFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx",
+      "ndkFolder": "C:\\Users\\Andreas\\AppData\\Local\\Android\\Sdk\\ndk-bundle",
+      "ndkVersion": "20.1.5948944",
+      "ndkSupportedAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkDefaultAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "cmakeToolchainFile": "."
+    },
+    "buildSystemArgumentList": [
+      "-DANDROID_STL\u003dc++_shared"
+    ],
+    "cFlagList": [],
+    "cppFlagsList": [],
+    "variantName": "release",
+    "soFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\build\\intermediates\\cmake\\release\\lib",
+    "objFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\build\\intermediates\\cmake\\release\\obj",
+    "jsonFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release",
+    "gradleBuildOutputFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release",
+    "isDebuggableEnabled": false,
+    "validAbiList": [
+      "ARMEABI_V7A",
+      "ARM64_V8A",
+      "X86",
+      "X86_64"
+    ],
+    "buildTargetSet": [
+      "opencv_jni_shared"
+    ]
+  },
+  "abi": "ARM64_V8A",
+  "abiPlatformVersion": 21,
+  "cxxBuildFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a",
+  "jsonFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a\\android_gradle_build.json",
+  "gradleBuildOutputFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a",
+  "objFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\build\\intermediates\\cmake\\release\\obj\\arm64-v8a",
+  "buildCommandFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a\\build_command.txt",
+  "buildOutputFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a\\build_output.txt",
+  "modelOutputFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a\\build_model.json",
+  "cmake": {
+    "cmakeListsWrapperFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\CMakeLists.txt",
+    "toolchainWrapperFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\android_gradle_build.toolchain.cmake",
+    "buildGenerationStateFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\build_generation_state.json",
+    "cacheKeyFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\compiler_cache_key.json",
+    "compilerCacheUseFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\compiler_cache_use.json",
+    "compilerCacheWriteFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\compiler_cache_write.json",
+    "toolchainSettingsFromCacheFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\release\\arm64-v8a\\compiler_settings_cache.cmake",
+    "cmakeWrappingBaseFolder": "."
+  },
+  "jsonGenerationLoggingRecordFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a\\json_generation_record.json",
+  "compileCommandsJsonFile": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cmake\\release\\arm64-v8a\\compile_commands.json"
+}

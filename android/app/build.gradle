@@ -41,6 +41,7 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:2.0.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.0.0'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
+    implementation project(path: ':OpenCV')
     // Use local TensorFlow library
     // implementation 'org.tensorflow:tensorflow-lite-local:0.0.0'
 }
