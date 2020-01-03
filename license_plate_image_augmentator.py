@@ -44,53 +44,23 @@ class LicensePlateImageAugmentator:
 
         return M
 
-    def __make_affine_transform__(self, from_shape, to_shape,
-                                  min_scale, max_scale,
-                                  scale_variation=1.0,
-                                  rotation_variation=1.0,
-                                  translation_variation=1.0):
+    def __make_affine_transform__(self, from_shape, to_shape, rotation_variation=1.0):
 
         from_size = np.array([[from_shape[1], from_shape[0]]]).T
         to_size = np.array([[to_shape[1], to_shape[0]]]).T
-
-        scale = random.uniform((min_scale + max_scale) * 0.5 -
-                               (max_scale - min_scale) * 0.5 * scale_variation,
-                               (min_scale + max_scale) * 0.5 +
-                               (max_scale - min_scale) * 0.5 * scale_variation)
-        if scale > max_scale or scale < min_scale:
-            raise Exception("out_of_bounds")
 
         roll = random.uniform(-0.3, 0.3) * rotation_variation
         pitch = random.uniform(-0.2, 0.2) * rotation_variation
         yaw = random.uniform(-1.2, 1.2) * rotation_variation
 
-        # Compute a bounding box on the skewed input image (`from_shape`).
-        M = self.__euler_to_mat__(yaw, pitch, roll)[:2, :2]
-        h, w = from_shape
-        corners = np.matrix([[-w, +w, -w, +w],
-                             [-h, -h, +h, +h]]) * 0.5
-        skewed_size = np.array(np.max(M * corners, axis=1) -
-                               np.min(M * corners, axis=1))
-
-        # Set the scale as large as possible such that the skewed and scaled shape
-        # is less than or equal to the desired ratio in either dimension.
-        scale *= np.min(to_size / skewed_size)
-
-        # Set the translation such that the skewed and scaled image falls within
-        # the output shape's bounds.
-        trans = (np.random.random((2, 1)) - 0.5) * translation_variation
-        trans = ((2.0 * trans) ** 5.0) / 2.0
-        if np.any(trans < -0.5) or np.any(trans > 0.5):
-            raise Exception("out_of_bounds")
-
-        trans = (to_size - skewed_size * scale) * trans
+        scale = 0.8
 
         center_to = to_size / 2.
         center_from = from_size / 2.
 
         M = self.__euler_to_mat__(yaw, pitch, roll)[:2, :2]
         M *= scale
-        M = np.hstack([M, trans + center_to - M * center_from])
+        M = np.hstack([M, center_to - M * center_from])
 
         return M
 
@@ -102,7 +72,17 @@ class LicensePlateImageAugmentator:
         return image
 
     @staticmethod
-    def normalize_image(image):
+    def __brightness__(img, factor=0.5):
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)  # convert to hsv
+        hsv = np.array(hsv, dtype=np.float64)
+        hsv[:, :, 2] = hsv[:, :, 2] * (factor + np.random.uniform())  # scale channel V uniformly
+        hsv[:, :, 2][hsv[:, :, 2] > 255] = 255  # reset out of range values
+        rgb = cv2.cvtColor(np.array(hsv, dtype=np.uint8), cv2.COLOR_HSV2RGB)
+        return cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+
+    @staticmethod
+    def __normalize_image__(image):
         # normalize image data between 0 and 1
         # image = (image - image.min()) / (image.max() - image.min())
         image = image.astype(np.float32) / 255.
@@ -111,21 +91,20 @@ class LicensePlateImageAugmentator:
     def generate_plate_image(self, plate_img):
         bi = self.__generate_background_image__()
 
+        random_brightness = random.uniform(0.0, 0.7)
+        bi = self.__brightness__(bi, random_brightness)
+        plate_img = self.__brightness__(plate_img, random_brightness)
+
         M = self.__make_affine_transform__(
             from_shape=plate_img.shape,
             to_shape=bi.shape,
-            min_scale=0.8,
-            max_scale=1.0,
-            rotation_variation=1.0,
-            scale_variation=1.0,
-            translation_variation=0.0)
+            rotation_variation=0.8)
 
         plate_mask = np.ones(plate_img.shape)
         plate_img = cv2.warpAffine(plate_img, M, (bi.shape[1], bi.shape[0]))
         plate_mask = cv2.warpAffine(plate_mask, M, (bi.shape[1], bi.shape[0]))
 
         out = plate_img * plate_mask + bi * (1.0 - plate_mask)
-
-        out = self.__gaussian_noise__(out, 15)
-        out = self.normalize_image(out)
+        out = self.__gaussian_noise__(out, random.randrange(1, 10))
+        out = self.__normalize_image__(out)
         return out
