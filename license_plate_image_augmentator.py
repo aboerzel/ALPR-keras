@@ -82,17 +82,17 @@ class LicensePlateImageAugmentator:
         return cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
 
     @staticmethod
+    def __blur__(img):
+        blur_value = random.randint(0, 2) + 1
+        img = cv2.blur(img, (blur_value, blur_value))
+        return img
+
+    @staticmethod
     def __normalize_image__(image):
         # normalize image data between 0 and 1
         # image = (image - image.min()) / (image.max() - image.min())
         image = image.astype(np.float32) / 255.
         return image
-
-    @staticmethod
-    def __blur__(img):
-        blur_value = random.randint(0, 2) + 1
-        img = cv2.blur(img, (blur_value, blur_value))
-        return img
 
     def generate_plate_image(self, plate_img):
         bi = self.__generate_background_image__()
