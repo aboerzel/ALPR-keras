@@ -88,6 +88,12 @@ class LicensePlateImageAugmentator:
         image = image.astype(np.float32) / 255.
         return image
 
+    @staticmethod
+    def __blur__(img):
+        blur_value = random.randint(0, 2) + 1
+        img = cv2.blur(img, (blur_value, blur_value))
+        return img
+
     def generate_plate_image(self, plate_img):
         bi = self.__generate_background_image__()
 
@@ -105,6 +111,7 @@ class LicensePlateImageAugmentator:
         plate_mask = cv2.warpAffine(plate_mask, M, (bi.shape[1], bi.shape[0]))
 
         out = plate_img * plate_mask + bi * (1.0 - plate_mask)
-        out = self.__gaussian_noise__(out, random.randrange(1, 10))
+        #out = self.__gaussian_noise__(out, random.randrange(1, 10))
+        out = self.__blur__(out)
         out = self.__normalize_image__(out)
         return out
