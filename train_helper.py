@@ -27,7 +27,7 @@ class TrainHelper:
         chkpt_filepath = config.MODEL_NAME + '--{epoch:02d}--{loss:.3f}--{val_loss:.3f}.h5'
 
         callbacks = [
-            EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5, mode='min', verbose=1),
+            EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=4, verbose=1),
             ModelCheckpoint(filepath=model_weigths_path, monitor='val_loss', save_best_only=True, save_weights_only=True, verbose=1),
             TensorBoard(log_dir=logdir)]
 
