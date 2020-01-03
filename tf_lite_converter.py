@@ -16,7 +16,7 @@ print("Optimizer:    {}".format(OPTIMIZER))
 print("Model path:   {}".format(MODEL_PATH))
 
 converter = TFLiteConverter.from_keras_model_file(MODEL_PATH)
-#converter = TFLiteConverter.from_saved_model("D:/development/tensorflow/saved-model/saved_model-1")
+#converter = TFLiteConverter.from_saved_model("saved_model_path")
 #converter = TFLiteConverter.from_keras_model(model)
 converter.experimental_new_converter = True
 tflite_model = converter.convert()
