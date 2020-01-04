@@ -32,9 +32,9 @@ class OCR:
 
         # RNN layer
         bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True), merge_mode="sum")(dense)
-        bgru = BatchNormalization()(bgru)
+        #bgru = BatchNormalization()(bgru)
         bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True), merge_mode="concat")(bgru)
-        bgru = BatchNormalization()(bgru)
+        #bgru = BatchNormalization()(bgru)
 
         # transforms RNN output to character activations:
         dense = Dense(output_size, kernel_initializer='he_normal')(bgru)
@@ -94,6 +94,22 @@ class OCR:
     @staticmethod
     def __vgg__(input_data):
 
+        cnn = Conv2D(32, (3, 3), activation='relu', padding='same')(input_data)
+        # cnn = BatchNormalization()(cnn)
+        cnn = Conv2D(32, (3, 3), activation='relu', padding='same')(cnn)
+        # cnn = BatchNormalization()(cnn)
+        cnn = MaxPooling2D(pool_size=(2, 2))(cnn)
+
+        cnn = Conv2D(64, (3, 3), activation='relu', padding='same')(cnn)
+        # cnn = BatchNormalization()(cnn)
+        cnn = Conv2D(64, (3, 3), activation='relu', padding='same')(cnn)
+        # cnn = BatchNormalization()(cnn)
+        cnn = MaxPooling2D(pool_size=(2, 2))(cnn)
+
+        return cnn
+
+    @staticmethod
+    def __vgg2__(input_data):
         # convolution layer with kernel size (3,3)
         cnn = Conv2D(64, (3, 3), activation='relu', padding='same')(input_data)
         cnn = MaxPooling2D(pool_size=(2, 2), strides=2)(cnn)
