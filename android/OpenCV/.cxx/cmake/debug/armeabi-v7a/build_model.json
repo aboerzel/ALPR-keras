@@ -5,7 +5,6 @@
       "sdkFolder": "C:\\Users\\Andreas\\AppData\\Local\\Android\\Sdk",
       "isNativeCompilerSettingsCacheEnabled": false,
       "isBuildOnlyTargetAbiEnabled": true,
-      "ideBuildTargetAbi": "x86,armeabi-v7a,armeabi",
       "splitsAbiFilterSet": [],
       "intermediatesFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\build\\intermediates",
       "gradleModulePathName": ":OpenCV",
@@ -42,8 +41,10 @@
     "gradleBuildOutputFolder": "D:\\development\\tensorflow\\ANPR\\android\\OpenCV\\.cxx\\cxx\\debug",
     "isDebuggableEnabled": true,
     "validAbiList": [
+      "ARMEABI_V7A",
+      "ARM64_V8A",
       "X86",
-      "ARMEABI_V7A"
+      "X86_64"
     ],
     "buildTargetSet": [
       "opencv_jni_shared"
