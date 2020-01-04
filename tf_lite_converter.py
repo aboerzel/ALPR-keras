@@ -21,5 +21,4 @@ converter = TFLiteConverter.from_keras_model_file(MODEL_PATH)
 converter.experimental_new_converter = True
 tflite_model = converter.convert()
 
-open("output/adagrad/clpr-model.tflite", "wb").write(tflite_model)
-
+open(TFLITE_MODEL_PATH, "wb").write(tflite_model)
