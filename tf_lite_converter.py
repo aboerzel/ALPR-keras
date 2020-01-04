@@ -19,10 +19,10 @@ print("Optimizer:    {}".format(OPTIMIZER))
 print("Model path:   {}".format(MODEL_PATH))
 
 converter = TFLiteConverter.from_keras_model_file(MODEL_PATH)
-#converter = TFLiteConverter.from_saved_model(SAVED_MODEL_PATH)
+# converter = TFLiteConverter.from_saved_model(SAVED_MODEL_PATH)
 # converter = TFLiteConverter.from_keras_model(model)
 converter.experimental_new_converter = True
-converter.post_training_quantize = True
+# converter.post_training_quantize = True
 tflite_model = converter.convert()
 
 open(TFLITE_MODEL_PATH, "wb").write(tflite_model)
