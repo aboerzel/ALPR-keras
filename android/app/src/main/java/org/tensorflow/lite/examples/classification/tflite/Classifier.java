@@ -53,6 +53,7 @@ public abstract class Classifier {
   public enum Model {
     FLOAT,
     QUANTIZED,
+    GLPR
   }
 
   /** The runtime device type used for executing classification. */
@@ -111,9 +112,14 @@ public abstract class Classifier {
       throws IOException {
     if (model == Model.QUANTIZED) {
       return new ClassifierQuantizedMobileNet(activity, device, numThreads);
-    } else {
+    }
+    else if (model == Model.FLOAT){
       return new ClassifierFloatMobileNet(activity, device, numThreads);
     }
+    else if (model == Model.GLPR) {
+      return new ClassifierGLPR(activity, device, numThreads);
+    }
+    return null;
   }
 
   /** An immutable result returned by a Classifier describing what was recognized. */
