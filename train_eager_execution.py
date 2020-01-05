@@ -23,7 +23,7 @@ args = vars(ap.parse_args())
 
 OPTIMIZER = args["optimizer"]
 MODEL_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + ".h5"
-MODEL_WEIGHTS_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + '-weights.h5config'
+MODEL_WEIGHTS_PATH = os.path.join(config.OUTPUT_PATH, OPTIMIZER, config.MODEL_NAME) + '-weights.h5'
 
 print("Optimizer:    {}".format(OPTIMIZER))
 print("Weights path: {}".format(MODEL_WEIGHTS_PATH))
