@@ -6,10 +6,12 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from PIL import Image
 from tensorflow.keras.models import load_model
 
 from config import config
 from label_codec import LabelCodec
+from pyimagesearch.preprocessing import AspectAwarePreprocessor
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", default="DÜW-AS870.jpg", type=str, help="image to predict")
@@ -43,8 +45,10 @@ def load_image(filepath):
 
 model = load_model(MODEL_PATH, compile=False)
 
-image = load_image(img_filepath)
-image = cv2.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT), interpolation=cv2.INTER_AREA)
+aap = AspectAwarePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
+
+image = Image.open(img_filepath)
+image = aap.preprocess(image)
 image = image.astype(np.float32) / 255.
 image = np.expand_dims(image.T, -1)
 
