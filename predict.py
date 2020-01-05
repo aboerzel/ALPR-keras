@@ -1,11 +1,9 @@
 import argparse
 import os
 
-import cv2
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 from PIL import Image
 from tensorflow.keras.models import load_model
 
@@ -26,22 +24,6 @@ img_filepath = os.path.join(config.TEST_IMAGES, args["image"])
 label = args["label"]
 print("Image: {}".format(img_filepath))
 print("Label: {}".format(label))
-
-tf.compat.v1.disable_eager_execution()
-
-
-def load_image(filepath):
-    stream = open(filepath, "rb")
-    bytes = bytearray(stream.read())
-    numpyarray = np.asarray(bytes, dtype=np.uint8)
-    image = cv2.imdecode(numpyarray, cv2.IMREAD_UNCHANGED)
-
-    # convert image to grayscale, if it is not already a grayscale image
-    if len(image.shape) > 2:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    return image
-
 
 model = load_model(MODEL_PATH, compile=False)
 
