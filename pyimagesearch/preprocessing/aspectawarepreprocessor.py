@@ -1,28 +1,19 @@
 # import the necessary packages
-import imutils
-import cv2
+from PIL import Image
+import numpy as np
 
 
 class AspectAwarePreprocessor:
-    def __init__(self, width, height, inter=cv2.INTER_AREA):
-        # store the target image width, height, and interpolation method used when resizing
+    def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.inter = inter
 
     def preprocess(self, image):
-        (w, h) = image.shape[:2]
-        dW = 0
-        dH = 0
-
-        if w < h:
-            image = imutils.resize(image, width=self.width, inter=self.inter)
-            dH = int((image.shape[0] - self.height) / 2.0)
-        else:
-            image = imutils.resize(image, height=self.height, inter=self.inter)
-            dW = int((image.shape[1] - self.width) / 2.0)
-
-        (h, w) = image.shape[:2]
-        image = image[dH:h - dH, dW:w - dW]
-
-        return cv2.resize(image, (self.width, self.height), interpolation=self.inter)
+        ratio = float(self.width) / image.size[0]
+        new_size = tuple([int(x * ratio) for x in image.size])
+        image = image.resize(new_size, Image.LANCZOS)  # LANCZOS, ANTIALIAS, BILINEAR, BICUBIC, NEAREST
+        # create a new image and paste the resized on it
+        new_im = Image.new("F", (self.width, self.height))
+        y = (self.height - new_size[1]) // 2
+        new_im.paste(image, (0, y))
+        return np.array(new_im)
