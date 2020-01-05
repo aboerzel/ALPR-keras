@@ -32,9 +32,9 @@ class OCR:
 
         # RNN layer
         bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True), merge_mode="sum")(dense)
-        #bgru = BatchNormalization()(bgru)
+        bgru = BatchNormalization()(bgru)
         bgru = Bidirectional(GRU(units=rnn_size, return_sequences=True), merge_mode="concat")(bgru)
-        #bgru = BatchNormalization()(bgru)
+        bgru = BatchNormalization()(bgru)
 
         # transforms RNN output to character activations:
         dense = Dense(output_size, kernel_initializer='he_normal')(bgru)
