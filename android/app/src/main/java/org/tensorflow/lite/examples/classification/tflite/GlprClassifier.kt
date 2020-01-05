@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import kotlin.random.Random
 
 /**
  * This image classifier classifies each drawing as one of the 10 digits
@@ -17,6 +20,8 @@ import java.nio.channels.FileChannel
 class GlprClassifier @Throws(IOException::class)
 constructor(private val context: Context) {
 
+    private var inputImageBuffer: TensorImage
+    private var outputProbabilityBuffer: TensorBuffer
     // TensorFlow Lite interpreter for running inference with the tflite model
     private val interpreter: Interpreter
 
@@ -35,6 +40,19 @@ constructor(private val context: Context) {
         // Create & initialize TFLite interpreter
         interpreter = Interpreter(model, options)
 
+        // Reads type and shape of input and output tensors, respectively.
+        val imageTensorIndex = 0
+        val imageShape = interpreter.getInputTensor(imageTensorIndex).shape() // {1, height, width, 3}
+        val imageDataType = interpreter.getInputTensor(imageTensorIndex).dataType()
+        // Creates the input tensor.
+        inputImageBuffer = TensorImage(imageDataType)
+
+        val probabilityTensorIndex = 0
+        val probabilityShape = interpreter.getOutputTensor(probabilityTensorIndex).shape()
+        val probabilityDataType = interpreter.getOutputTensor(probabilityTensorIndex).dataType()
+
+        // Creates the output tensor and its processor.
+        outputProbabilityBuffer = TensorBuffer.createFixedSize(probabilityShape, probabilityDataType)
     }
 
     // Memory-map the model file in Assets
@@ -66,8 +84,10 @@ constructor(private val context: Context) {
         // 10 floats, each corresponds to the probability of each digit
         val outputArray = Array(DIM_BATCH_SIZE) { FloatArray(NUM_DIGITS) }
 
+        //inputImageBuffer.load(bitmap)
+
         // 2. Run inference
-        interpreter.run(inputByteBuffer, outputArray)
+        interpreter.run(inputByteBuffer, outputProbabilityBuffer.getBuffer().rewind())
 
         // 3. Post-processing
         return postprocess(outputArray)
@@ -79,7 +99,7 @@ constructor(private val context: Context) {
      * @param bitmap
      */
     private fun preprocess(bitmap: Bitmap): ByteBuffer {
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 28, 28, false)
+        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, DIM_INPUT_WIDTH, DIM_INPUT_HEIGHT, false)
         return convertBitmapToByteBuffer(scaledBitmap)
     }
 
@@ -93,8 +113,7 @@ constructor(private val context: Context) {
         byteBuffer.order(ByteOrder.nativeOrder())
 
         val imagePixels = IntArray(DIM_INPUT_WIDTH * DIM_INPUT_HEIGHT)
-        bitmap.getPixels(imagePixels, 0, bitmap.width, 0, 0,
-                bitmap.width, bitmap.height)
+        bitmap.getPixels(imagePixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
         var pixel = 0
         for (i in 0 until DIM_INPUT_WIDTH) {
@@ -113,7 +132,8 @@ constructor(private val context: Context) {
         val b = (color and 0xFF).toFloat()
 
         val grayscaleValue = (0.299f * r + 0.587f * g + 0.114f * b).toInt()
-        return grayscaleValue / 255.0f
+        // return grayscaleValue / 255.0f
+        return Random.nextDouble(0.0, 1.0).toFloat()
     }
 
     /**
