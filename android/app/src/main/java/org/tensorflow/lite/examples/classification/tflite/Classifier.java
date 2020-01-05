@@ -110,6 +110,7 @@ public abstract class Classifier {
    */
   public static Classifier create(Activity activity, Model model, Device device, int numThreads)
       throws IOException {
+/*
     if (model == Model.QUANTIZED) {
       return new ClassifierQuantizedMobileNet(activity, device, numThreads);
     }
@@ -120,6 +121,8 @@ public abstract class Classifier {
       return new ClassifierGLPR(activity, device, numThreads);
     }
     return null;
+*/
+    return new ClassifierGLPR(activity, device, numThreads);
   }
 
   /** An immutable result returned by a Classifier describing what was recognized. */
@@ -304,10 +307,11 @@ public abstract class Classifier {
     // TODO(b/143564309): Fuse ops inside ImageProcessor.
     ImageProcessor imageProcessor =
         new ImageProcessor.Builder()
-            .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-            .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.NEAREST_NEIGHBOR))
-            .add(new Rot90Op(numRoration))
-            .add(getPreprocessNormalizeOp())
+            //.add(new ResizeWithCropOrPadOp(cropSize, cropSize))
+            //.add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.NEAREST_NEIGHBOR))
+            //.add(new Rot90Op(numRoration))
+            .add(new GlprProprocessingOp(imageSizeX, imageSizeY))
+            //.add(getPreprocessNormalizeOp())
             .build();
     return imageProcessor.process(inputImageBuffer);
   }

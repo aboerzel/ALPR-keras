@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -42,6 +44,11 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.0.0'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
     implementation project(path: ':OpenCV')
+    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // Use local TensorFlow library
     // implementation 'org.tensorflow:tensorflow-lite-local:0.0.0'
+}
+repositories {
+    mavenCentral()
 }
