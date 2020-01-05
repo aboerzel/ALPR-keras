@@ -31,6 +31,7 @@ import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
+import org.tensorflow.lite.examples.classification.tflite.GlprClassifier;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -39,7 +40,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private Bitmap rgbFrameBitmap = null;
   private long lastProcessingTimeMs;
   private Integer sensorOrientation;
-  private Classifier classifier;
+  private GlprClassifier classifier;
   private BorderedText borderedText;
   /** Input image size of the model along x axis. */
   private int imageSizeX;
@@ -91,16 +92,17 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
           public void run() {
             if (classifier != null) {
               final long startTime = SystemClock.uptimeMillis();
-              final List<Classifier.Recognition> results =
-                  classifier.recognizeImage(rgbFrameBitmap, sensorOrientation);
+//              final List<Classifier.Recognition> results =
+//                  classifier.classify(rgbFrameBitmap, sensorOrientation);
+              String result = classifier.classify(rgbFrameBitmap);
               lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-              LOGGER.v("Detect: %s", results);
+              LOGGER.v("Detect: %s", result);
 
               runOnUiThread(
                   new Runnable() {
                     @Override
                     public void run() {
-                      showResultsInBottomSheet(results);
+                      showResultsInBottomSheet(result);
                       showFrameInfo(previewWidth + "x" + previewHeight);
                       showCropInfo(imageSizeX + "x" + imageSizeY);
                       showCameraResolution(cropSize + "x" + cropSize);
@@ -129,9 +131,10 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private void recreateClassifier(Model model, Device device, int numThreads) {
     if (classifier != null) {
       LOGGER.d("Closing classifier.");
-      classifier.close();
+      //classifier.close();
       classifier = null;
     }
+    /*
     if (device == Device.GPU && model == Model.QUANTIZED) {
       LOGGER.d("Not creating classifier: GPU doesn't support quantized models.");
       runOnUiThread(
@@ -140,17 +143,18 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
                 .show();
           });
       return;
-    }
+  }
+  */
+
     try {
-      LOGGER.d(
-          "Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
-      classifier = Classifier.create(this, model, device, numThreads);
+      LOGGER.d("Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
+      classifier = new GlprClassifier(this);
     } catch (IOException e) {
       LOGGER.e(e, "Failed to create classifier.");
     }
 
     // Updates the input image size.
-    imageSizeX = classifier.getImageSizeX();
-    imageSizeY = classifier.getImageSizeY();
+    //imageSizeX = classifier.getImageSizeX();
+    //imageSizeY = classifier.getImageSizeY();
   }
 }

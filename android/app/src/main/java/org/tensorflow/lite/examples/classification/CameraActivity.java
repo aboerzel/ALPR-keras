@@ -534,7 +534,8 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
   @UiThread
-  protected void showResultsInBottomSheet(List<Recognition> results) {
+  protected void showResultsInBottomSheet(String result) {
+    /*
     if (results != null && results.size() >= 3) {
       Recognition recognition = results.get(0);
       if (recognition != null) {
@@ -560,6 +561,8 @@ public abstract class CameraActivity extends AppCompatActivity
               String.format("%.2f", (100 * recognition2.getConfidence())) + "%");
       }
     }
+
+   */
   }
 
   protected void showFrameInfo(String frameInfo) {
