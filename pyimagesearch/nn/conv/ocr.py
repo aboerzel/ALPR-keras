@@ -68,13 +68,13 @@ class OCR:
         dense = Dense(time_dense_size, activation='relu', kernel_initializer='he_normal')(cnn)
 
         # RNN layer
-        bgru = Bidirectional(LSTM(units=rnn_size, return_sequences=True), merge_mode="sum")(dense)
-        bgru = BatchNormalization()(bgru)
-        bgru = Bidirectional(LSTM(units=rnn_size, return_sequences=True), merge_mode="concat")(bgru)
-        bgru = BatchNormalization()(bgru)
+        blsmt = Bidirectional(LSTM(units=rnn_size, return_sequences=True), merge_mode="sum")(dense)
+        blsmt = BatchNormalization()(blsmt)
+        blsmt = Bidirectional(LSTM(units=rnn_size, return_sequences=True), merge_mode="concat")(blsmt)
+        blsmt = BatchNormalization()(blsmt)
 
         # transforms RNN output to character activations:
-        dense = Dense(output_size, kernel_initializer='he_normal')(bgru)
+        dense = Dense(output_size, kernel_initializer='he_normal')(blsmt)
         output_data = Activation("softmax", name="output")(dense)
 
         return input_data, output_data
