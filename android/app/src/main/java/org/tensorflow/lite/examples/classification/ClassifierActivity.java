@@ -23,15 +23,14 @@ import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
 import android.util.Size;
 import android.util.TypedValue;
-import android.widget.Toast;
+
 import java.io.IOException;
-import java.util.List;
+
 import org.tensorflow.lite.examples.classification.env.BorderedText;
 import org.tensorflow.lite.examples.classification.env.Logger;
-import org.tensorflow.lite.examples.classification.tflite.Classifier;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
-import org.tensorflow.lite.examples.classification.tflite.GlprClassifier;
+import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -40,12 +39,8 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private Bitmap rgbFrameBitmap = null;
   private long lastProcessingTimeMs;
   private Integer sensorOrientation;
-  private GlprClassifier classifier;
+  private LicenseRecognizer classifier;
   private BorderedText borderedText;
-  /** Input image size of the model along x axis. */
-  private int imageSizeX;
-  /** Input image size of the model along y axis. */
-  private int imageSizeY;
 
   @Override
   protected int getLayoutId() {
@@ -87,33 +82,27 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     final int cropSize = Math.min(previewWidth, previewHeight);
 
     runInBackground(
-        new Runnable() {
-          @Override
-          public void run() {
-            if (classifier != null) {
-              final long startTime = SystemClock.uptimeMillis();
-//              final List<Classifier.Recognition> results =
-//                  classifier.classify(rgbFrameBitmap, sensorOrientation);
-              String result = classifier.classify(rgbFrameBitmap);
-              lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-              LOGGER.v("Detect: %s", result);
+            () -> {
+              if (classifier != null) {
+                final long startTime = SystemClock.uptimeMillis();
+  //              final List<Classifier.Recognition> results =
+  //                  classifier.classify(rgbFrameBitmap, sensorOrientation);
+                String result = classifier.classify(rgbFrameBitmap);
+                lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
+                LOGGER.v("Detect: %s", result);
 
-              runOnUiThread(
-                  new Runnable() {
-                    @Override
-                    public void run() {
-                      showResultsInBottomSheet(result);
-                      showFrameInfo(previewWidth + "x" + previewHeight);
-                      showCropInfo(imageSizeX + "x" + imageSizeY);
-                      showCameraResolution(cropSize + "x" + cropSize);
-                      showRotationInfo(String.valueOf(sensorOrientation));
-                      showInference(lastProcessingTimeMs + "ms");
-                    }
-                  });
-            }
-            readyForNextImage();
-          }
-        });
+                runOnUiThread(
+                        () -> {
+                          showResultsInBottomSheet(result);
+                          showFrameInfo(previewWidth + "x" + previewHeight);
+                          showCropInfo(128 + "x" + 64);
+                          showCameraResolution(cropSize + "x" + cropSize);
+                          showRotationInfo(String.valueOf(sensorOrientation));
+                          showInference(lastProcessingTimeMs + "ms");
+                        });
+              }
+              readyForNextImage();
+            });
   }
 
   @Override
@@ -131,30 +120,15 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private void recreateClassifier(Model model, Device device, int numThreads) {
     if (classifier != null) {
       LOGGER.d("Closing classifier.");
-      //classifier.close();
+      classifier.close();
       classifier = null;
     }
-    /*
-    if (device == Device.GPU && model == Model.QUANTIZED) {
-      LOGGER.d("Not creating classifier: GPU doesn't support quantized models.");
-      runOnUiThread(
-          () -> {
-            Toast.makeText(this, "GPU does not yet supported quantized models.", Toast.LENGTH_LONG)
-                .show();
-          });
-      return;
-  }
-  */
 
     try {
       LOGGER.d("Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
-      classifier = new GlprClassifier(this);
+      classifier = new LicenseRecognizer(this);
     } catch (IOException e) {
       LOGGER.e(e, "Failed to create classifier.");
     }
-
-    // Updates the input image size.
-    //imageSizeX = classifier.getImageSizeX();
-    //imageSizeY = classifier.getImageSizeY();
   }
 }
