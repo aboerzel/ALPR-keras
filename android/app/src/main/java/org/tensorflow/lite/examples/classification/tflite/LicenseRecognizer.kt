@@ -87,6 +87,8 @@ constructor(context: Context) {
         // 1. Pre-processing
         val inputByteBuffer = preprocess(bitmap)
 
+        val outputArray = Array(DIM_BATCH_SIZE) { Array(TEXT_LENGTH) { FloatArray(ALPHABET_LENGTH) } }
+
         // 2. Run inference
         interpreter.run(inputByteBuffer, outputProbabilityBuffer.getBuffer().rewind())
 
