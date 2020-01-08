@@ -33,7 +33,7 @@ p = AspectAwarePreprocessor(config.IMAGE_WIDTH, config.IMAGE_HEIGHT)
 image = Image.open(img_filepath)
 image = p.preprocess(image)
 image = image.astype(np.float32) / 255.
-image = np.expand_dims(image, axis=-1)
+image = np.expand_dims(image.T, axis=-1)
 
 # Load TFLite model and allocate tensors.
 interpreter = Interpreter(model_path=TFLITE_MODEL_PATH)
@@ -57,6 +57,6 @@ label = LabelCodec.decode_prediction(predictions[0])
 
 plt.axis("off")
 plt.title(label)
-plt.imshow(image[:, :, 0], cmap='gray')
+plt.imshow(image[:, :, 0].T, cmap='gray')
 plt.show()
 
