@@ -532,6 +532,9 @@ public abstract class CameraActivity extends AppCompatActivity
 
   @UiThread
   protected void showResultsInBottomSheet(String result) {
+
+    recognitionValueTextView.setText(result);
+
     /*
     if (results != null && results.size() >= 3) {
       Recognition recognition = results.get(0);

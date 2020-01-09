@@ -24,13 +24,15 @@ import android.os.SystemClock;
 import android.util.Size;
 import android.util.TypedValue;
 
-import java.io.IOException;
-
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 import org.tensorflow.lite.examples.classification.env.BorderedText;
 import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
 import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer;
+
+import java.io.IOException;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -81,13 +83,19 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
     final int cropSize = Math.min(previewWidth, previewHeight);
 
+    Mat image = null;
+    try {
+      image = Utils.loadResource(this, R.drawable.license);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    Mat finalImg = image;
     runInBackground(
             () -> {
               if (classifier != null) {
                 final long startTime = SystemClock.uptimeMillis();
-  //              final List<Classifier.Recognition> results =
-  //                  classifier.classify(rgbFrameBitmap, sensorOrientation);
-                String result = classifier.classify(rgbFrameBitmap);
+                String result = classifier.classify(finalImg);
                 lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
                 LOGGER.v("Detect: %s", result);
 

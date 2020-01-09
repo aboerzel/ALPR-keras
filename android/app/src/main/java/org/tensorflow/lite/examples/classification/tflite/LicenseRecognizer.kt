@@ -2,22 +2,21 @@ package org.tensorflow.lite.examples.classification.tflite
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.graphics.Bitmap
-import android.os.Build.VERSION_CODES.N
-import org.opencv.android.Utils
+import org.opencv.core.Core.BORDER_CONSTANT
+import org.opencv.core.Core.copyMakeBorder
 import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import kotlin.math.ceil
+
 
 /**
  * Extracts the license from an image of a car license plate as plain text
@@ -40,7 +39,12 @@ constructor(context: Context) {
 
         // Configure TFLite Interpreter options
         val options = Interpreter.Options()
-        options.setNumThreads(3)
+        options.setNumThreads(1)
+
+        //val gpuDelegate = GpuDelegate()
+        //options.addDelegate(gpuDelegate)
+        //options.setAllowBufferHandleOutput(true)
+        //options.setAllowFp16PrecisionForFp32(true)
         //options.setUseNNAPI(true)
 
         // Create & initialize TFLite interpreter
@@ -82,15 +86,13 @@ constructor(context: Context) {
      * @param bitmap
      * @return car licesne as plain text
      */
-    fun classify(bitmap: Bitmap): String {
+    fun classify(img: Mat): String {
 
         // 1. Pre-processing
-        val inputByteBuffer = preprocess(bitmap)
-
-        val outputArray = Array(DIM_BATCH_SIZE) { Array(TEXT_LENGTH) { FloatArray(ALPHABET_LENGTH) } }
+        val inputByteBuffer = preprocess(img)
 
         // 2. Run inference
-        interpreter.run(inputByteBuffer, outputProbabilityBuffer.getBuffer().rewind())
+        interpreter.run(inputByteBuffer, outputProbabilityBuffer.buffer.rewind())
 
         // 3. Post-processing
         return postprocess(outputProbabilityBuffer)
@@ -105,41 +107,40 @@ constructor(context: Context) {
      *
      * @param bitmap
      */
-    private fun preprocess(bitmap: Bitmap): ByteBuffer {
-
-        val rgb = Mat()
-        Utils.bitmapToMat(bitmap, rgb)
+    private fun preprocess(image: Mat): ByteBuffer {
 
         val resized = Mat()
-        Imgproc.resize(rgb, resized, Size(DIM_INPUT_WIDTH.toDouble(), DIM_INPUT_HEIGHT.toDouble()), 0.0, 0.0, Imgproc.INTER_LANCZOS4)
+        val ratio = DIM_INPUT_WIDTH.toDouble() / image.width()
+        val newSize = Size(ceil(image.width() * ratio), ceil(image.height() * ratio))
+        Imgproc.resize(image, resized, newSize, 0.0, 0.0, Imgproc.INTER_AREA)
+
+        val deltaH = DIM_INPUT_HEIGHT.toDouble() - resized.height()
+        val top = (deltaH / 2).toInt()
+        val bottom = DIM_INPUT_HEIGHT - resized.height() - top
+
+        copyMakeBorder(resized, resized, top, bottom, 0, 0, BORDER_CONSTANT)
 
         val gray = Mat()
         Imgproc.cvtColor(resized, gray, Imgproc.COLOR_BGR2GRAY)
 
-        val resultBitmap = Bitmap.createBitmap(gray.cols(), gray.rows(), Bitmap.Config.ARGB_8888)
+        //val resultBitmap = Bitmap.createBitmap(gray.rows(), gray.cols(), Bitmap.Config.ARGB_8888)
+        //Utils.matToBitmap(gray.t(), resultBitmap)
 
-        Utils.matToBitmap(gray, resultBitmap)
-
-        return convertBitmapToByteBuffer(resultBitmap)
+        return convertMattoTfLiteInput(gray.t())
     }
 
-    private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
-        // Create input image bytebuffer
-        val byteBuffer = ByteBuffer.allocateDirect(4
-                * DIM_BATCH_SIZE    // 1
-                * DIM_INPUT_WIDTH   // 128
-                * DIM_INPUT_HEIGHT  // 64
-                * DIM_INPUT_DEPTH)   // 1
-        byteBuffer.order(ByteOrder.nativeOrder())
+    private fun convertMattoTfLiteInput(image: Mat): ByteBuffer {
+        val imgData = ByteBuffer.allocateDirect(DIM_BATCH_SIZE * DIM_INPUT_WIDTH * DIM_INPUT_HEIGHT * DIM_INPUT_DEPTH * FLOAT_TYPE_SIZE)
+        imgData.order(ByteOrder.nativeOrder())
 
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val initialStream = ByteArrayInputStream(stream.toByteArray())
-        while (initialStream.available() > 0) {
-            byteBuffer.put(initialStream.read().toByte())
+        for (i in 0 until DIM_INPUT_WIDTH) {
+            for (j in 0 until DIM_INPUT_HEIGHT) {
+                val pixel = image[i, j][0].toFloat() / 255.0f
+                imgData.putFloat(pixel)
+            }
         }
 
-        return byteBuffer
+        return imgData
     }
 
     /**
@@ -149,21 +150,36 @@ constructor(context: Context) {
      */
     private fun postprocess(outputArray: TensorBuffer): String {
         val shape = outputArray.shape
-        val floatArray = outputArray.getFloatArray()
+        val floatArray = outputArray.floatArray
 
-        var best = IntArray(shape[1])
+        val bestChar = IntArray(shape[1])
         for (i in 0 until shape[1]) {
-            var max = -1
+            var maxIdx = -1
+            var maxVal = -1.0f
             for (j in 0 until shape[2]) {
-                if (floatArray[i+j] > max)
-                    max = j
+                val index = i * shape[2] + j
+                val f = floatArray[index]
+                if (f > maxVal) {
+                    maxVal = f
+                    maxIdx = j
+                }
             }
-            best[i] = max
+
+            bestChar[i] = maxIdx
         }
 
-        //out_best = [k for k, g in itertools.groupby(argmax)]
+        val res = mutableListOf<Int>()
+
+        for (c in bestChar)
+        {
+            if (res.isEmpty())
+                res.add(c)
+            else if (res.last() != c)
+                res.add(c)
+        }
+
         var result = ""
-        for (c in best) {
+        for (c in res) {
             if (c < ALPHABET.length && c >= 0) {
                 result += ALPHABET[c]
             }
@@ -186,6 +202,7 @@ constructor(context: Context) {
         private val DIM_INPUT_WIDTH = 128   // input image width
         private val DIM_INPUT_HEIGHT = 64   // input image height
         private val DIM_INPUT_DEPTH = 1     // 1 for gray scale & 3 for color images
+        private val FLOAT_TYPE_SIZE = 4
 
         /* Output*/
         private val TEXT_LENGTH = 32
