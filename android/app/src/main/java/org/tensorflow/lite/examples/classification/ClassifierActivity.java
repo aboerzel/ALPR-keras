@@ -28,8 +28,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.tensorflow.lite.examples.classification.env.BorderedText;
 import org.tensorflow.lite.examples.classification.env.Logger;
-import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
-import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
 import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer;
 
 import java.io.IOException;
@@ -42,7 +40,6 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private long lastProcessingTimeMs;
   private Integer sensorOrientation;
   private LicenseRecognizer classifier;
-  private BorderedText borderedText;
 
   @Override
   protected int getLayoutId() {
@@ -59,10 +56,10 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     final float textSizePx =
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
-    borderedText = new BorderedText(textSizePx);
+    BorderedText borderedText = new BorderedText(textSizePx);
     borderedText.setTypeface(Typeface.MONOSPACE);
 
-    recreateClassifier(getModel(), getDevice(), getNumThreads());
+    recreateClassifier(getNumThreads());
     if (classifier == null) {
       LOGGER.e("No classifier on preview!");
       return;
@@ -85,7 +82,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
     Mat image = null;
     try {
-      image = Utils.loadResource(this, R.drawable.license);
+      image = Utils.loadResource(this, R.drawable.license1);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -119,13 +116,11 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
       // Defer creation until we're getting camera frames.
       return;
     }
-    final Device device = getDevice();
-    final Model model = getModel();
     final int numThreads = getNumThreads();
-    runInBackground(() -> recreateClassifier(model, device, numThreads));
+    runInBackground(() -> recreateClassifier(numThreads));
   }
 
-  private void recreateClassifier(Model model, Device device, int numThreads) {
+  private void recreateClassifier(int numThreads) {
     if (classifier != null) {
       LOGGER.d("Closing classifier.");
       classifier.close();
@@ -133,7 +128,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     }
 
     try {
-      LOGGER.d("Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
+      LOGGER.d("Creating classifier (numThreads=%d)", numThreads);
       classifier = new LicenseRecognizer(this);
     } catch (IOException e) {
       LOGGER.e(e, "Failed to create classifier.");

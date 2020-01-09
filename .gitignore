@@ -108,3 +108,6 @@ output/
 /logs/
 /output/
 /android/.idea/
+android/.idea
+android/OpenCV/.cxx/cmake/debug
+android/OpenCV/.cxx/cmake/release

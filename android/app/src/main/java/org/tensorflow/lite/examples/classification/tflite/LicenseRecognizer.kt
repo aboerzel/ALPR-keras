@@ -126,16 +126,16 @@ constructor(context: Context) {
         //val resultBitmap = Bitmap.createBitmap(gray.rows(), gray.cols(), Bitmap.Config.ARGB_8888)
         //Utils.matToBitmap(gray.t(), resultBitmap)
 
-        return convertMattoTfLiteInput(gray.t())
+        return convertMatToTfLiteInput(gray.t())
     }
 
-    private fun convertMattoTfLiteInput(image: Mat): ByteBuffer {
+    private fun convertMatToTfLiteInput(image: Mat): ByteBuffer {
         val imgData = ByteBuffer.allocateDirect(DIM_BATCH_SIZE * DIM_INPUT_WIDTH * DIM_INPUT_HEIGHT * DIM_INPUT_DEPTH * FLOAT_TYPE_SIZE)
         imgData.order(ByteOrder.nativeOrder())
 
         for (i in 0 until DIM_INPUT_WIDTH) {
             for (j in 0 until DIM_INPUT_HEIGHT) {
-                val pixel = image[i, j][0].toFloat() / 255.0f
+                val pixel = image[i, j][0].toFloat() / 255.0f // normalize pixel value between 0.0 and 1.0
                 imgData.putFloat(pixel)
             }
         }
@@ -144,7 +144,7 @@ constructor(context: Context) {
     }
 
     /**
-     * Find digit prediction with the highest probability
+     * Find decode license from output
      *
      * @return
      */
@@ -185,27 +185,25 @@ constructor(context: Context) {
             }
         }
 
-        return result
+       return result
     }
 
     companion object {
 
-        private val LOG_TAG = LicenseRecognizer::class.java.simpleName
-
-        private val ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
+        private const val ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ0123456789- "
 
         // Name of the model file (under /assets folder)
-        private val MODEL_PATH = "glpr-model.tflite"
+        private const val MODEL_PATH = "glpr-model.tflite"
 
         // Input size
-        private val DIM_BATCH_SIZE = 1      // batch size
-        private val DIM_INPUT_WIDTH = 128   // input image width
-        private val DIM_INPUT_HEIGHT = 64   // input image height
-        private val DIM_INPUT_DEPTH = 1     // 1 for gray scale & 3 for color images
-        private val FLOAT_TYPE_SIZE = 4
+        private const val DIM_BATCH_SIZE = 1      // batch size
+        private const val DIM_INPUT_WIDTH = 128   // input image width
+        private const val DIM_INPUT_HEIGHT = 64   // input image height
+        private const val DIM_INPUT_DEPTH = 1     // 1 for gray scale & 3 for color images
+        private const val FLOAT_TYPE_SIZE = 4
 
         /* Output*/
-        private val TEXT_LENGTH = 32
-        private val ALPHABET_LENGTH = 42
+        private const val TEXT_LENGTH = 32
+        private const val ALPHABET_LENGTH = 42
     }
 }
