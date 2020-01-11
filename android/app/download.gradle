@@ -60,6 +60,6 @@ class DownloadUrlTask extends DefaultTask {
     }
 }
 
-preBuild.dependsOn unzipModelFloat
-preBuild.dependsOn unzipModelQuant
-preBuild.dependsOn cleanUnusedFiles
+//preBuild.dependsOn unzipModelFloat
+//preBuild.dependsOn unzipModelQuant
+//preBuild.dependsOn cleanUnusedFiles
