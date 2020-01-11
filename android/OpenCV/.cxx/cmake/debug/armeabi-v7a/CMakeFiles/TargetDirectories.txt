@@ -1,3 +1,0 @@
-D:/development/tensorflow/ANPR/android/OpenCV/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/opencv_jni_shared.dir
-D:/development/tensorflow/ANPR/android/OpenCV/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/edit_cache.dir
-D:/development/tensorflow/ANPR/android/OpenCV/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/rebuild_cache.dir
