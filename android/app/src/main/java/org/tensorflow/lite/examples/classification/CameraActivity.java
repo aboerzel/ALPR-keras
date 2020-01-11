@@ -36,23 +36,14 @@ import android.os.HandlerThread;
 import android.os.Trace;
 import android.util.Size;
 import android.view.Surface;
-import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.jetbrains.annotations.NotNull;
 import org.tensorflow.lite.examples.classification.env.ImageUtils;
@@ -62,10 +53,7 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public abstract class CameraActivity extends AppCompatActivity
-    implements OnImageAvailableListener,
-        Camera.PreviewCallback,
-        View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+    implements OnImageAvailableListener, Camera.PreviewCallback {
   private static final Logger LOGGER = new Logger();
 
   private static final int PERMISSIONS_REQUEST = 1;
@@ -82,18 +70,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private int yRowStride;
   private Runnable postInferenceCallback;
   private Runnable imageConverter;
-  private LinearLayout gestureLayout;
-  private BottomSheetBehavior sheetBehavior;
   protected TextView recognitionTextView;
-  protected TextView frameValueTextView,
-      cropValueTextView,
-      cameraResolutionTextView,
-      rotationTextView,
-      inferenceTimeTextView;
-  protected ImageView bottomSheetArrowImageView;
-  private Spinner modelSpinner;
-  private Spinner deviceSpinner;
-  private TextView threadsTextView;
   private int numThreads = -1;
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -114,73 +91,8 @@ public abstract class CameraActivity extends AppCompatActivity
       requestPermission();
     }
 
-    threadsTextView = findViewById(R.id.threads);
-    ImageView plusImageView = findViewById(R.id.plus);
-    ImageView minusImageView = findViewById(R.id.minus);
-    modelSpinner = findViewById(R.id.model_spinner);
-    deviceSpinner = findViewById(R.id.device_spinner);
-    LinearLayout bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
-    gestureLayout = findViewById(R.id.gesture_layout);
-    sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-    bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
-
-
-
-    ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
-    vto.addOnGlobalLayoutListener(
-        new ViewTreeObserver.OnGlobalLayoutListener() {
-          @Override
-          public void onGlobalLayout() {
-            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            // int width = bottomSheetLayout.getMeasuredWidth();
-            int height = gestureLayout.getMeasuredHeight();
-
-            sheetBehavior.setPeekHeight(height);
-          }
-        });
-    sheetBehavior.setHideable(false);
-
-    sheetBehavior.setBottomSheetCallback(
-        new BottomSheetBehavior.BottomSheetCallback() {
-          @Override
-          public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            switch (newState) {
-              case BottomSheetBehavior.STATE_HIDDEN:
-              case BottomSheetBehavior.STATE_HALF_EXPANDED:
-              case BottomSheetBehavior.STATE_DRAGGING:
-                break;
-              case BottomSheetBehavior.STATE_EXPANDED: {
-                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
-              }
-              break;
-              case BottomSheetBehavior.STATE_COLLAPSED: {
-                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-              }
-              break;
-              case BottomSheetBehavior.STATE_SETTLING:
-                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                break;
-            }
-          }
-
-          @Override
-          public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-        });
-
     recognitionTextView = findViewById(R.id.detected_item);
-    frameValueTextView = findViewById(R.id.frame_info);
-    cropValueTextView = findViewById(R.id.crop_info);
-    cameraResolutionTextView = findViewById(R.id.view_info);
-    rotationTextView = findViewById(R.id.rotation_info);
-    inferenceTimeTextView = findViewById(R.id.inference_info);
-
-    modelSpinner.setOnItemSelectedListener(this);
-    deviceSpinner.setOnItemSelectedListener(this);
-
-    plusImageView.setOnClickListener(this);
-    minusImageView.setOnClickListener(this);
-
-    numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
+    numThreads = 1;
   }
 
   protected int[] getRgbBytes() {
@@ -410,10 +322,15 @@ public abstract class CameraActivity extends AppCompatActivity
         // Fallback to camera1 API for internal cameras that don't have full support.
         // This should help with legacy situations where using the camera2 API causes
         // distorted or otherwise broken previews.
+        /*
         useCamera2API =
             (facing == CameraCharacteristics.LENS_FACING_EXTERNAL)
                 || isHardwareLevelSupported(
                     characteristics);
+        */
+
+        useCamera2API = true;
+
         LOGGER.i("Camera API lv2?: %s", useCamera2API);
         return cameraId;
       }
@@ -487,32 +404,8 @@ public abstract class CameraActivity extends AppCompatActivity
   @UiThread
   protected void showResultsInBottomSheet(String result) { recognitionTextView.setText(result); }
 
-  protected void showFrameInfo(String frameInfo) {
-    frameValueTextView.setText(frameInfo);
-  }
-
-  protected void showCropInfo(String cropInfo) {
-    cropValueTextView.setText(cropInfo);
-  }
-
-  protected void showCameraResolution(String cameraInfo) { cameraResolutionTextView.setText(cameraInfo); }
-
-  protected void showRotationInfo(String rotation) {
-    rotationTextView.setText(rotation);
-  }
-
-  protected void showInference(String inferenceTime) { inferenceTimeTextView.setText(inferenceTime); }
-
   protected int getNumThreads() {
     return numThreads;
-  }
-
-  private void setNumThreads(int numThreads) {
-    if (this.numThreads != numThreads) {
-      LOGGER.d("Updating  numThreads: " + numThreads);
-      this.numThreads = numThreads;
-      onInferenceConfigurationChanged();
-    }
   }
 
   protected abstract void processImage();
@@ -522,39 +415,4 @@ public abstract class CameraActivity extends AppCompatActivity
   protected abstract int getLayoutId();
 
   protected abstract Size getDesiredPreviewFrameSize();
-
-  protected abstract void onInferenceConfigurationChanged();
-
-  @Override
-  public void onClick(View v) {
-    if (v.getId() == R.id.plus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
-      if (numThreads >= 9) return;
-      setNumThreads(++numThreads);
-      threadsTextView.setText(String.valueOf(numThreads));
-    } else if (v.getId() == R.id.minus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
-      if (numThreads == 1) {
-        return;
-      }
-      setNumThreads(--numThreads);
-      threadsTextView.setText(String.valueOf(numThreads));
-    }
-  }
-
-  @Override
-  public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-    if (parent == modelSpinner) {
-      // setModel(Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
-    } else if (parent == deviceSpinner) {
-      // setDevice(Device.valueOf(parent.getItemAtPosition(pos).toString()));
-    }
-  }
-
-  @Override
-  public void onNothingSelected(AdapterView<?> parent) {
-    // Do nothing.
-  }
 }

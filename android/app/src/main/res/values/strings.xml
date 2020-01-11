@@ -18,6 +18,7 @@
     </string-array>
 
     <string name="device">Device:</string>
+    <string name="textview">TextView</string>
     <string-array name="devices">
         <item>CPU</item>
         <item>GPU</item>

@@ -559,12 +559,7 @@ public class CameraConnectionFragment extends Fragment {
           .setMessage(getArguments().getString(ARG_MESSAGE))
           .setPositiveButton(
               android.R.string.ok,
-              new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(final DialogInterface dialogInterface, final int i) {
-                  activity.finish();
-                }
-              })
+                  (dialogInterface, i) -> activity.finish())
           .create();
     }
   }

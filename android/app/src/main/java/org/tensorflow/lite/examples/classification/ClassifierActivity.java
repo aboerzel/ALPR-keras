@@ -16,6 +16,7 @@
 
 package org.tensorflow.lite.examples.classification;
 
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Typeface;
@@ -25,21 +26,24 @@ import android.util.Size;
 import android.util.TypedValue;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.tensorflow.lite.examples.classification.env.BorderedText;
 import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer;
 
 import java.io.IOException;
 
+import static java.lang.Math.round;
+
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
   private static final float TEXT_SIZE_DIP = 10;
   private Bitmap rgbFrameBitmap = null;
-  private long lastProcessingTimeMs;
-  private Integer sensorOrientation;
   private LicenseRecognizer classifier;
+  private long lastProcessingTimeMs;
 
   @Override
   protected int getLayoutId() {
@@ -48,6 +52,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
   @Override
   protected Size getDesiredPreviewFrameSize() {
+    int rot = getWindowManager().getDefaultDisplay().getRotation();
     return DESIRED_PREVIEW_SIZE;
   }
 
@@ -68,18 +73,27 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     previewWidth = size.getWidth();
     previewHeight = size.getHeight();
 
-    sensorOrientation = rotation - getScreenOrientation();
-    LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
-
     LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
     rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Config.ARGB_8888);
   }
 
   @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      //Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+      //Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  @Override
   protected void processImage() {
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-    final int cropSize = Math.min(previewWidth, previewHeight);
 
+    /*
     Mat image = null;
     try {
       image = Utils.loadResource(this, R.drawable.license1);
@@ -88,36 +102,39 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     }
 
     Mat finalImg = image;
+
+    */
+
+    int rot = getWindowManager().getDefaultDisplay().getRotation();
+    int sensorOrientation = getScreenOrientation();
+    LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
+
+    Mat image = new Mat();
+    Utils.bitmapToMat(rgbFrameBitmap, image);
+    Core.flip(image.t(), image, 1);
+
+    Bitmap bmp = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+    Utils.matToBitmap(image, bmp);
+
+    float ratio = 128.0f / image.width();
+    int height = round(64.0f / ratio);
+    int top = (image.height() - height) / 2;
+    Rect roi = new Rect(0, top, image.width(), height);
+    Mat cropped = new Mat(image, roi);
+
     runInBackground(
             () -> {
               if (classifier != null) {
                 final long startTime = SystemClock.uptimeMillis();
-                String result = classifier.classify(finalImg);
+                String result = classifier.classify(cropped);
                 lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
                 LOGGER.v("Detect: %s", result);
 
                 runOnUiThread(
-                        () -> {
-                          showResultsInBottomSheet(result);
-                          showFrameInfo(previewWidth + "x" + previewHeight);
-                          showCropInfo(128 + "x" + 64);
-                          showCameraResolution(cropSize + "x" + cropSize);
-                          showRotationInfo(String.valueOf(sensorOrientation));
-                          showInference(lastProcessingTimeMs + "ms");
-                        });
+                        () -> showResultsInBottomSheet(result));
               }
               readyForNextImage();
             });
-  }
-
-  @Override
-  protected void onInferenceConfigurationChanged() {
-    if (rgbFrameBitmap == null) {
-      // Defer creation until we're getting camera frames.
-      return;
-    }
-    final int numThreads = getNumThreads();
-    runInBackground(() -> recreateClassifier(numThreads));
   }
 
   private void recreateClassifier(int numThreads) {
