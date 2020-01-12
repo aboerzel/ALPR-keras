@@ -47,16 +47,7 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
 
     override fun processImage() {
         rgbFrameBitmap!!.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight)
-
-        /*
-        Mat image = null;
-        try {
-          image = Utils.loadResource(this, R.drawable.license1);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-        */
-
+        
         runInBackground(
                 Runnable {
                     if (licenseRecognizer != null) {
