@@ -16,18 +16,16 @@
 
 package org.tensorflow.lite.examples.classification;
 
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
 import android.util.Size;
 import android.util.TypedValue;
 
-import org.jetbrains.annotations.NotNull;
 import org.opencv.android.Utils;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.tensorflow.lite.examples.classification.env.BorderedText;
@@ -53,7 +51,6 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
   @Override
   protected Size getDesiredPreviewFrameSize() {
-    int rot = getWindowManager().getDefaultDisplay().getRotation();
     return DESIRED_PREVIEW_SIZE;
   }
 
@@ -79,18 +76,6 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   }
 
   @Override
-  public void onConfigurationChanged(@NotNull Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-
-    // Checks the orientation of the screen
-    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      //Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
-    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-      //Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
-    }
-  }
-
-  @Override
   protected void processImage() {
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
@@ -106,16 +91,16 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
     */
 
-    int rot = getWindowManager().getDefaultDisplay().getRotation();
-    int sensorOrientation = getScreenOrientation();
-    LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
+    int angle = 90 - getScreenOrientation();
+    Matrix matrix = new Matrix();
+    matrix.setRotate(angle);
+    rgbFrameBitmap = Bitmap.createBitmap(rgbFrameBitmap, 0, 0, rgbFrameBitmap.getWidth(), rgbFrameBitmap.getHeight(), matrix, true);
 
     Mat image = new Mat();
     Utils.bitmapToMat(rgbFrameBitmap, image);
-    Core.flip(image.t(), image, 1);
 
-    Bitmap bmp = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-    Utils.matToBitmap(image, bmp);
+    //Bitmap bmp = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+    //Utils.matToBitmap(image, bmp);
 
     float ratio = 128.0f / image.width();
     int height = round(64.0f / ratio);
@@ -130,6 +115,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
                 String result = classifier.classify(cropped);
                 lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
                 LOGGER.v("Detect: %s", result);
+                LOGGER.v("Processing time: %d ms", lastProcessingTimeMs);
 
                 runOnUiThread(
                         () -> showResultsInBottomSheet(result));

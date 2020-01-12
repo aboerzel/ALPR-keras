@@ -17,7 +17,6 @@
 package org.tensorflow.lite.examples.classification;
 
 import android.Manifest;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
@@ -260,7 +259,6 @@ public abstract class CameraActivity extends AppCompatActivity
     return android.hardware.camera2.CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL <= deviceLevel;
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   private String chooseCamera() {
     final CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
     try {
@@ -289,7 +287,6 @@ public abstract class CameraActivity extends AppCompatActivity
     return null;
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   protected void setFragment() {
     String cameraId = chooseCamera();
 

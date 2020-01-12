@@ -27,7 +27,6 @@ constructor(context: Context) {
     // TensorFlow Lite interpreter for running inference with the tflite model
     private var interpreter: Interpreter
 
-    private var inputImageBuffer: TensorBuffer
     private var outputProbabilityBuffer: TensorBuffer
 
     // Initialize TFLite interpreter
@@ -56,7 +55,7 @@ constructor(context: Context) {
         val imageDataType = interpreter.getInputTensor(imageTensorIndex).dataType()
 
         // Creates the input tensor.
-        inputImageBuffer = TensorBuffer.createFixedSize(imageShape, imageDataType)
+        //val inputImageBuffer = TensorBuffer.createFixedSize(imageShape, imageDataType)
 
         val outputTensorIndex = 0
         val outputShape = interpreter.getOutputTensor(outputTensorIndex).shape()
@@ -170,8 +169,7 @@ constructor(context: Context) {
 
         val res = mutableListOf<Int>()
 
-        for (c in bestChar)
-        {
+        for (c in bestChar) {
             if (res.isEmpty())
                 res.add(c)
             else if (res.last() != c)
@@ -185,7 +183,7 @@ constructor(context: Context) {
             }
         }
 
-       return result
+        return result
     }
 
     companion object {
