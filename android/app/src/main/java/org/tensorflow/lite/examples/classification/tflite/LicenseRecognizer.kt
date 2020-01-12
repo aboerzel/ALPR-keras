@@ -2,9 +2,12 @@ package org.tensorflow.lite.examples.classification.tflite
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.graphics.Bitmap
+import org.opencv.android.Utils
 import org.opencv.core.Core.BORDER_CONSTANT
 import org.opencv.core.Core.copyMakeBorder
 import org.opencv.core.Mat
+import org.opencv.core.Rect
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import org.tensorflow.lite.Interpreter
@@ -16,6 +19,7 @@ import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 
 /**
@@ -82,13 +86,13 @@ constructor(context: Context) {
      * 2. run inference with the model
      * 3. post-process the output result for displaying in UI
      *
-     * @param image
-     * @return car licesne as plain text
+     * @param bitmap
+     * @return car license as plain text
      */
-    fun classify(image: Mat): String {
+    fun recognize(bitmap: Bitmap): String {
 
         // 1. Pre-processing
-        val inputByteBuffer = preprocess(image)
+        val inputByteBuffer = preprocess(bitmap)
 
         // 2. Run inference
         interpreter.run(inputByteBuffer, outputProbabilityBuffer.buffer.rewind())
@@ -104,17 +108,26 @@ constructor(context: Context) {
     /**
      * Preprocess the bitmap by converting it to ByteBuffer & grayscale
      *
-     * @param image
+     * @param bitmap
      */
-    private fun preprocess(image: Mat): ByteBuffer {
+    private fun preprocess(bitmap: Bitmap): ByteBuffer {
+
+        val image = Mat()
+        Utils.bitmapToMat(bitmap, image)
+
+        val ratio = DIM_INPUT_WIDTH / image.width().toFloat()
+        val height = (DIM_INPUT_HEIGHT / ratio).roundToInt()
+        var top = (image.height() - height) / 2
+        val roi = Rect(0, top, image.width(), height)
+        val cropped = Mat(image, roi)
 
         val resized = Mat()
-        val ratio = DIM_INPUT_WIDTH.toDouble() / image.width()
-        val newSize = Size(ceil(image.width() * ratio), ceil(image.height() * ratio))
-        Imgproc.resize(image, resized, newSize, 0.0, 0.0, Imgproc.INTER_AREA)
+        val ratio1 = DIM_INPUT_WIDTH.toDouble() / cropped.width()
+        val newSize = Size(ceil(cropped.width() * ratio1), ceil(cropped.height() * ratio1))
+        Imgproc.resize(cropped, resized, newSize, 0.0, 0.0, Imgproc.INTER_AREA)
 
         val deltaH = DIM_INPUT_HEIGHT.toDouble() - resized.height()
-        val top = (deltaH / 2).toInt()
+        top = (deltaH / 2).toInt()
         val bottom = DIM_INPUT_HEIGHT - resized.height() - top
 
         copyMakeBorder(resized, resized, top, bottom, 0, 0, BORDER_CONSTANT)
@@ -122,8 +135,8 @@ constructor(context: Context) {
         val gray = Mat()
         Imgproc.cvtColor(resized, gray, Imgproc.COLOR_BGR2GRAY)
 
-        //val resultBitmap = Bitmap.createBitmap(gray.rows(), gray.cols(), Bitmap.Config.ARGB_8888)
-        //Utils.matToBitmap(gray.t(), resultBitmap)
+        val resultBitmap = Bitmap.createBitmap(gray.rows(), gray.cols(), Bitmap.Config.ARGB_8888)
+        Utils.matToBitmap(gray.t(), resultBitmap)
 
         return convertMatToTfLiteInput(gray.t())
     }

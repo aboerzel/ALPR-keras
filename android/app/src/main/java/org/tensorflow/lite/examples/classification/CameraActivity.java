@@ -68,7 +68,6 @@ public abstract class CameraActivity extends AppCompatActivity
   private Runnable postInferenceCallback;
   private Runnable imageConverter;
   protected TextView recognitionTextView;
-  private int numThreads = -1;
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
@@ -89,7 +88,6 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
     recognitionTextView = findViewById(R.id.detected_item);
-    numThreads = 1;
   }
 
   protected int[] getRgbBytes() {
@@ -292,11 +290,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
     CameraConnectionFragment camera2Fragment =
         CameraConnectionFragment.newInstance(
-                (size, rotation) -> {
-                  previewHeight = size.getHeight();
-                  previewWidth = size.getWidth();
-                  CameraActivity.this.onPreviewSizeChosen(size, rotation);
-                },
+                CameraActivity.this::onPreviewSizeChosen,
             this,
             getLayoutId(),
             getDesiredPreviewFrameSize());
@@ -340,11 +334,7 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
   @UiThread
-  protected void showResultsInBottomSheet(String result) { recognitionTextView.setText(result); }
-
-  protected int getNumThreads() {
-    return numThreads;
-  }
+  protected void showResult(String result) { recognitionTextView.setText(result); }
 
   protected abstract void processImage();
 
