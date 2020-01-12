@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.util.Size;
 import android.util.TypedValue;
 
+import org.jetbrains.annotations.NotNull;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -78,7 +79,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   }
 
   @Override
-  public void onConfigurationChanged(Configuration newConfig) {
+  public void onConfigurationChanged(@NotNull Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
 
     // Checks the orientation of the screen

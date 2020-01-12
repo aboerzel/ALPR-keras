@@ -83,13 +83,13 @@ constructor(context: Context) {
      * 2. run inference with the model
      * 3. post-process the output result for displaying in UI
      *
-     * @param bitmap
+     * @param image
      * @return car licesne as plain text
      */
-    fun classify(img: Mat): String {
+    fun classify(image: Mat): String {
 
         // 1. Pre-processing
-        val inputByteBuffer = preprocess(img)
+        val inputByteBuffer = preprocess(image)
 
         // 2. Run inference
         interpreter.run(inputByteBuffer, outputProbabilityBuffer.buffer.rewind())
@@ -105,7 +105,7 @@ constructor(context: Context) {
     /**
      * Preprocess the bitmap by converting it to ByteBuffer & grayscale
      *
-     * @param bitmap
+     * @param image
      */
     private fun preprocess(image: Mat): ByteBuffer {
 
@@ -146,7 +146,7 @@ constructor(context: Context) {
     /**
      * Find decode license from output
      *
-     * @return
+     * @return license
      */
     private fun postprocess(outputArray: TensorBuffer): String {
         val shape = outputArray.shape
