@@ -21,7 +21,6 @@ import android.content.pm.PackageManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CameraMetadata
 import android.media.Image
 import android.media.ImageReader
 import android.os.*
@@ -200,16 +199,6 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
             }
             requestPermissions(arrayOf(PERMISSION_CAMERA), PERMISSIONS_REQUEST)
         }
-    }
-
-    // Returns true if the device supports the required hardware level, or better.
-    private fun isHardwareLevelSupported(
-            characteristics: CameraCharacteristics): Boolean {
-        val deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-        return if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
-            false
-        } else CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL <= deviceLevel
-        // deviceLevel is not LEGACY, can use numerical sort
     }
 
     private fun chooseCamera(): String? {
