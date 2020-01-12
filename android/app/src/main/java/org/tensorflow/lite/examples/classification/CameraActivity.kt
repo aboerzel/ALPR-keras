@@ -51,7 +51,8 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
     private var yRowStride = 0
     private var postInferenceCallback: Runnable? = null
     private var imageConverter: Runnable? = null
-    private var recognitionTextView: TextView? = null
+
+    private lateinit var recognitionTextView: TextView
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,9 +166,7 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
 
     @Synchronized
     protected fun runInBackground(r: Runnable?) {
-        if (handler != null) {
-            handler!!.post(r)
-        }
+        handler?.post(r)
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -223,8 +222,8 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
                 if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
                     continue
                 }
-                val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                        ?: continue
+                //val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                //        ?: continue
                 return cameraId
             }
         } catch (e: CameraAccessException) {
@@ -235,7 +234,7 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
 
     private fun setFragment() {
         val cameraId = chooseCamera()
-        val camera2Fragment = CameraConnectionFragment.newInstance(CameraConnectionFragment.ConnectionCallback { size: Size?, rotation: Int -> onPreviewSizeChosen(size, rotation) },
+        val camera2Fragment = CameraConnectionFragment.newInstance(CameraConnectionFragment.ConnectionCallback { size: Size, rotation: Int -> onPreviewSizeChosen(size, rotation) },
                 this,
                 layoutId,
                 desiredPreviewFrameSize)
@@ -256,9 +255,7 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
     }
 
     protected fun readyForNextImage() {
-        if (postInferenceCallback != null) {
-            postInferenceCallback!!.run()
-        }
+        postInferenceCallback?.run()
     }
 
     protected val screenOrientation: Int
@@ -271,12 +268,12 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
         }
 
     @UiThread
-    protected fun showResult(result: String?) {
-        recognitionTextView!!.text = result
+    protected fun showResult(result: String) {
+        recognitionTextView.text = result
     }
 
     protected abstract fun processImage()
-    protected abstract fun onPreviewSizeChosen(size: Size?, rotation: Int)
+    protected abstract fun onPreviewSizeChosen(size: Size, rotation: Int)
     protected abstract val layoutId: Int
     protected abstract val desiredPreviewFrameSize: Size?
 
