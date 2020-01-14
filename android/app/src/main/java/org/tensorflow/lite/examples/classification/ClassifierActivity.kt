@@ -38,7 +38,7 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
         get() = Size(640, 480)
 
     private lateinit var trackingOverlay: OverlayView
-    private lateinit var roi: BoundingBox
+    private var roi: BoundingBox = BoundingBox(0, 0, 0, 0)
 
     public override fun onPreviewSizeChosen(size: Size, rotation: Int) {
         recreateClassifier()
@@ -50,8 +50,6 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
         previewHeight = size.height
         LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight)
         rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888)
-
-        roi = BoundingBox(0, 0, 0, 0)
 
         trackingOverlay = findViewById<View>(R.id.tracking_overlay) as OverlayView
 
