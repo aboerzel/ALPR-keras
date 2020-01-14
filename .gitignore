@@ -105,5 +105,9 @@ venv.bak/
 logs/
 output/
 
+# IDE
+.ideaa
+/.idea/
+
 /logs/
 /output/
