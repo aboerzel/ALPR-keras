@@ -23,6 +23,7 @@ import android.util.Size
 import org.tensorflow.lite.examples.classification.env.Logger
 import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer
 import java.io.IOException
+import kotlin.math.roundToInt
 
 class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListener {
     private var rgbFrameBitmap: Bitmap? = null
@@ -47,12 +48,16 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
 
     override fun processImage() {
         rgbFrameBitmap!!.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight)
-        
+
+        var bmp = correctImageOrientation(rgbFrameBitmap!!)
+        val roi = getROI(bmp)
+        bmp = cropROI(bmp, roi)
+
         runInBackground(
                 Runnable {
                     if (licenseRecognizer != null) {
                         val startTime = SystemClock.uptimeMillis()
-                        val result = licenseRecognizer!!.recognize(correctImageOrientation(rgbFrameBitmap!!))
+                        val result = licenseRecognizer!!.recognize(bmp)
                         lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime
                         LOGGER.v("Detect: %s", result)
                         LOGGER.v("Processing time: %d ms", lastProcessingTimeMs)
@@ -63,10 +68,24 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
     }
 
     private fun correctImageOrientation(bitmap: Bitmap): Bitmap {
-        val angle = 90 - screenOrientation
         val matrix = Matrix()
-        matrix.setRotate(angle.toFloat())
+        matrix.setRotate(screenOrientationCorrectionAngle)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, false)
+    }
+
+    private fun cropROI(bitmap: Bitmap, box: BoundingBox) : Bitmap {
+        return Bitmap.createBitmap(bitmap, box.X, box.Y, box.WIDTH, box.HEIGHT,null, false)
+    }
+
+    private fun getROI(bitmap: Bitmap) : BoundingBox
+    {
+        val marginX = 40
+        val width = bitmap.width - (2 * marginX)
+        val ratio = licenseRecognizer!!.getRatio()
+        val height = (width * ratio).roundToInt()
+        val top = (bitmap.height - height) / 2
+
+        return BoundingBox(marginX, top, width, height)
     }
 
     private fun recreateClassifier() {

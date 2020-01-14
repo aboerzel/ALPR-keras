@@ -234,8 +234,9 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
         fragmentManager.beginTransaction().replace(R.id.container, camera2Fragment).commit()
     }
 
-    private fun fillBytes(planes: Array<Image.Plane>, yuvBytes: Array<ByteArray?>) { // Because of the variable row stride it's not possible to know in
-// advance the actual necessary dimensions of the yuv planes.
+    private fun fillBytes(planes: Array<Image.Plane>, yuvBytes: Array<ByteArray?>) {
+        // Because of the variable row stride it's not possible to know in
+        // advance the actual necessary dimensions of the yuv planes.
         for (i in planes.indices) {
             val buffer = planes[i].buffer
             if (yuvBytes[i] == null) {
@@ -250,13 +251,13 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
         postInferenceCallback?.run()
     }
 
-    protected val screenOrientation: Int
+    protected val screenOrientationCorrectionAngle: Float
         get() = when (windowManager.defaultDisplay.rotation) {
-            Surface.ROTATION_270 -> 270
-            Surface.ROTATION_180 -> 180
-            Surface.ROTATION_90 -> 90
-            Surface.ROTATION_0 -> 0
-            else -> 0
+            Surface.ROTATION_270 -> 180.0f
+            Surface.ROTATION_180 -> -90.0f
+            Surface.ROTATION_90 -> 0.0f
+            Surface.ROTATION_0 -> 90.0f
+            else -> 0.0f
         }
 
     @UiThread

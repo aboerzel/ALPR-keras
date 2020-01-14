@@ -29,7 +29,7 @@ class LicenseRecognizer @Throws(IOException::class)
 constructor(context: Context) {
 
     // TensorFlow Lite interpreter for running inference with the tflite model
-    private var interpreter: Interpreter
+    private lateinit var interpreter: Interpreter
 
     private var outputProbabilityBuffer: TensorBuffer
 
@@ -51,7 +51,13 @@ constructor(context: Context) {
         //options.setUseNNAPI(true)
 
         // Create & initialize TFLite interpreter
-        interpreter = Interpreter(model, options)
+        try {
+            interpreter = Interpreter(model, options)
+        }
+        catch (e: Exception)
+        {
+            print(e.message)
+        }
 
         // Reads type and shape of input and output tensors, respectively.
         val imageTensorIndex = 0
@@ -103,6 +109,10 @@ constructor(context: Context) {
 
     fun close() {
         interpreter.close()
+    }
+
+    fun getRatio() : Float {
+        return DIM_INPUT_HEIGHT.toFloat() / DIM_INPUT_WIDTH.toFloat()
     }
 
     /**
