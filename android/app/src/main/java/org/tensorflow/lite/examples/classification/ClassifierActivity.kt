@@ -15,15 +15,18 @@
  */
 package org.tensorflow.lite.examples.classification
 
-import android.graphics.Bitmap
-import android.graphics.Matrix
+import android.graphics.*
 import android.media.ImageReader
 import android.os.SystemClock
 import android.util.Size
+import android.view.View
+import org.tensorflow.lite.examples.classification.customview.OverlayView
 import org.tensorflow.lite.examples.classification.env.Logger
 import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer
 import java.io.IOException
+import kotlin.math.min
 import kotlin.math.roundToInt
+
 
 class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListener {
     private var rgbFrameBitmap: Bitmap? = null
@@ -33,6 +36,9 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
         get() = R.layout.camera_connection_fragment
     override val desiredPreviewFrameSize: Size?
         get() = Size(640, 480)
+
+    private lateinit var trackingOverlay: OverlayView
+    private lateinit var roi: BoundingBox
 
     public override fun onPreviewSizeChosen(size: Size, rotation: Int) {
         recreateClassifier()
@@ -44,14 +50,36 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
         previewHeight = size.height
         LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight)
         rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888)
+
+        roi = BoundingBox(0, 0, 0, 0)
+
+        trackingOverlay = findViewById<View>(R.id.tracking_overlay) as OverlayView
+
+        trackingOverlay.addCallback { canvas ->
+
+            val boxPaint = Paint()
+            boxPaint.color = Color.RED
+            boxPaint.alpha = 200
+            boxPaint.style = Paint.Style.STROKE
+            boxPaint.strokeWidth = 4.0f
+
+            val r = canvas.width - 2 * roi.X
+            val b = canvas.height - roi.HEIGHT - roi.Y
+
+            val trackedPos = RectF(roi.X.toFloat(), roi.Y.toFloat(), r.toFloat(), b.toFloat())
+            val cornerSize = min(trackedPos.width(), trackedPos.height()) / 8.0f
+            canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint)
+        }
     }
 
     override fun processImage() {
         rgbFrameBitmap!!.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight)
 
         var bmp = correctImageOrientation(rgbFrameBitmap!!)
-        val roi = getROI(bmp)
+        roi = getROI(bmp)
         bmp = cropROI(bmp, roi)
+
+        trackingOverlay.postInvalidate()
 
         runInBackground(
                 Runnable {
