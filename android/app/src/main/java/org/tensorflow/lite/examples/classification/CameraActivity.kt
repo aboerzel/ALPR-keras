@@ -53,6 +53,10 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
 
     private lateinit var recognitionTextView: TextView
 
+    init {
+        System.loadLibrary("opencv_java4")
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         LOGGER.d("onCreate $this")
@@ -125,7 +129,6 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
     public override fun onStart() {
         LOGGER.d("onStart $this")
         super.onStart()
-        System.loadLibrary("opencv_java4")
     }
 
     @Synchronized
