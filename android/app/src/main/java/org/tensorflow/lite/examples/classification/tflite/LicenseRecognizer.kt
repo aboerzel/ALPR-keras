@@ -111,7 +111,7 @@ constructor(context: Context) {
         interpreter.close()
     }
 
-    fun getRatio() : Float {
+    fun getInputAspectRatio() : Float {
         return DIM_INPUT_HEIGHT.toFloat() / DIM_INPUT_WIDTH.toFloat()
     }
 

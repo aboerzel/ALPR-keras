@@ -25,7 +25,6 @@ import android.media.Image
 import android.media.ImageReader
 import android.os.*
 import android.util.Size
-import android.view.Surface
 import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
@@ -251,14 +250,8 @@ abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailabl
         postInferenceCallback?.run()
     }
 
-    protected val screenOrientationCorrectionAngle: Float
-        get() = when (windowManager.defaultDisplay.rotation) {
-            Surface.ROTATION_270 -> 180.0f
-            Surface.ROTATION_180 -> -90.0f
-            Surface.ROTATION_90 -> 0.0f
-            Surface.ROTATION_0 -> 90.0f
-            else -> 0.0f
-        }
+    val screenOrientation: Int
+        get() = windowManager.defaultDisplay.rotation
 
     @UiThread
     protected fun showResult(result: String) {

@@ -19,33 +19,51 @@ import android.graphics.*
 import android.media.ImageReader
 import android.os.SystemClock
 import android.util.Size
+import android.view.Surface
 import android.view.View
 import org.tensorflow.lite.examples.classification.customview.OverlayView
 import org.tensorflow.lite.examples.classification.env.Logger
 import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer
 import java.io.IOException
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 
 class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListener {
-    private var rgbFrameBitmap: Bitmap? = null
-    private var licenseRecognizer: LicenseRecognizer? = null
-    private var lastProcessingTimeMs: Long = 0
+
     override val layoutId: Int
         get() = R.layout.camera_connection_fragment
+
     override val desiredPreviewFrameSize: Size?
         get() = Size(640, 480)
 
+    private var licenseRecognizer: LicenseRecognizer? = null
+
+    private lateinit var rgbFrameBitmap: Bitmap
     private lateinit var trackingOverlay: OverlayView
-    private var roi: BoundingBox = BoundingBox(0, 0, 0, 0)
+    private lateinit var previewRoi: BoundingBox
+    private lateinit var trackingOverlayRoi: RectF
+
+    private val roiPaint = Paint()
+
+    init {
+        roiPaint.color = Color.GREEN
+        roiPaint.alpha = 200
+        roiPaint.style = Paint.Style.STROKE
+        roiPaint.strokeWidth = 6.0f
+    }
 
     public override fun onPreviewSizeChosen(size: Size, rotation: Int) {
-        recreateClassifier()
+
         if (licenseRecognizer == null) {
-            LOGGER.e("No licenseRecognizer on preview!")
-            return
+            try {
+                LOGGER.d("Creating licenseRecognizer")
+                licenseRecognizer = LicenseRecognizer(this)
+            } catch (e: IOException) {
+                LOGGER.e(e, "Failed to create licenseRecognizer.")
+                throw e
+            }
         }
+
         previewWidth = size.width
         previewHeight = size.height
         LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight)
@@ -53,47 +71,68 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
 
         trackingOverlay = findViewById<View>(R.id.tracking_overlay) as OverlayView
 
-        trackingOverlay.addCallback { canvas ->
+        previewRoi = if (screenOrientationPortrait)
+            getROI(previewHeight, previewWidth)
+        else
+            getROI(previewWidth, previewHeight)
 
-            val boxPaint = Paint()
-            boxPaint.color = Color.RED
-            boxPaint.alpha = 200
-            boxPaint.style = Paint.Style.STROKE
-            boxPaint.strokeWidth = 4.0f
+        val roi = transformToTrackingOverlay(previewRoi)
+        trackingOverlayRoi = RectF(roi.X.toFloat(), roi.Y.toFloat(), (roi.X + roi.WIDTH).toFloat(), (roi.Y + roi.HEIGHT).toFloat())
 
-            val r = canvas.width - 2 * roi.X
-            val b = canvas.height - roi.HEIGHT - roi.Y
+        trackingOverlay.addCallback { canvas -> canvas.drawRoundRect(trackingOverlayRoi, cornerSize, cornerSize, roiPaint) }
+    }
 
-            val trackedPos = RectF(roi.X.toFloat(), roi.Y.toFloat(), r.toFloat(), b.toFloat())
-            val cornerSize = min(trackedPos.width(), trackedPos.height()) / 8.0f
-            canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint)
-        }
+    private fun transformToTrackingOverlay(roi: BoundingBox) : BoundingBox {
+
+        val scale = if (screenOrientationPortrait)
+            trackingOverlay.width.toFloat() / previewHeight
+        else
+           trackingOverlay.width.toFloat() / previewWidth
+
+        val w = (roi.WIDTH * scale).roundToInt()
+        val x = ((trackingOverlay.width.toFloat() - w) / 2).roundToInt()
+        val h = (w * licenseRecognizer!!.getInputAspectRatio()).roundToInt()
+        val y = ((trackingOverlay.height.toFloat() - h) / 2).roundToInt()
+
+        return BoundingBox(x, y, w, h)
     }
 
     override fun processImage() {
-        rgbFrameBitmap!!.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight)
+        rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight)
 
-        var bmp = correctImageOrientation(rgbFrameBitmap!!)
-        roi = getROI(bmp)
-        bmp = cropROI(bmp, roi)
+        val plateBmp = cropROI(correctOrientation(rgbFrameBitmap), previewRoi)
 
         trackingOverlay.postInvalidate()
 
         runInBackground(
                 Runnable {
-                    if (licenseRecognizer != null) {
-                        val startTime = SystemClock.uptimeMillis()
-                        val result = licenseRecognizer!!.recognize(bmp)
-                        lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime
-                        LOGGER.v("Detect: %s", result)
-                        LOGGER.v("Processing time: %d ms", lastProcessingTimeMs)
-                        runOnUiThread { showResult(result) }
-                    }
+                    val startTime = SystemClock.uptimeMillis()
+                    val license = licenseRecognizer!!.recognize(plateBmp)
+                    val lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime
+                    LOGGER.v("Detected license: %s", license)
+                    LOGGER.v("Processing time: %d ms", lastProcessingTimeMs)
+                    runOnUiThread { showResult(license) }
                     readyForNextImage()
                 })
     }
 
-    private fun correctImageOrientation(bitmap: Bitmap): Bitmap {
+    private val screenOrientationPortrait: Boolean
+        get() = when (screenOrientation) {
+            Surface.ROTATION_180 -> true
+            Surface.ROTATION_0 -> true
+            else -> false
+        }
+
+    private val screenOrientationCorrectionAngle: Float
+        get() = when (screenOrientation) {
+            Surface.ROTATION_270 -> 180.0f
+            Surface.ROTATION_180 -> -90.0f
+            Surface.ROTATION_90 -> 0.0f
+            Surface.ROTATION_0 -> 90.0f
+            else -> 0.0f
+        }
+
+    private fun correctOrientation(bitmap: Bitmap): Bitmap {
         val matrix = Matrix()
         matrix.setRotate(screenOrientationCorrectionAngle)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, false)
@@ -103,32 +142,18 @@ class ClassifierActivity : CameraActivity(), ImageReader.OnImageAvailableListene
         return Bitmap.createBitmap(bitmap, box.X, box.Y, box.WIDTH, box.HEIGHT,null, false)
     }
 
-    private fun getROI(bitmap: Bitmap) : BoundingBox
+    private fun getROI(width: Int, height: Int) : BoundingBox
     {
-        val marginX = 40
-        val width = bitmap.width - (2 * marginX)
-        val ratio = licenseRecognizer!!.getRatio()
-        val height = (width * ratio).roundToInt()
-        val top = (bitmap.height - height) / 2
+        val x = 15
+        val w = width - (2 * x)
+        val h = (width * licenseRecognizer!!.getInputAspectRatio()).roundToInt()
+        val y = (height - h) / 2
 
-        return BoundingBox(marginX, top, width, height)
-    }
-
-    private fun recreateClassifier() {
-
-        LOGGER.d("Closing licenseRecognizer.")
-        licenseRecognizer?.close()
-        licenseRecognizer = null
-
-        try {
-            LOGGER.d("Creating licenseRecognizer")
-            licenseRecognizer = LicenseRecognizer(this)
-        } catch (e: IOException) {
-            LOGGER.e(e, "Failed to create licenseRecognizer.")
-        }
+        return BoundingBox(x, y, w, h)
     }
 
     companion object {
         private val LOGGER = Logger()
+        private const val cornerSize = 20.0f
     }
 }
