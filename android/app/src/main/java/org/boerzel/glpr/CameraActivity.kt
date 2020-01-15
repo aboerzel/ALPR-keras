@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tensorflow.lite.examples.classification
+package org.boerzel.glpr
 
 import android.Manifest
 import android.content.Context
@@ -32,8 +32,8 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import org.tensorflow.lite.examples.classification.env.ImageUtils
-import org.tensorflow.lite.examples.classification.env.Logger
+import org.boerzel.glpr.env.ImageUtils
+import org.boerzel.glpr.env.Logger
 import java.util.*
 
 abstract class CameraActivity : AppCompatActivity(), ImageReader.OnImageAvailableListener {

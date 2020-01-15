@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package org.tensorflow.lite.examples.classification.env;
+package org.boerzel.glpr.env;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
@@ -61,7 +61,7 @@ public class ImageUtils {
    */
   public static void saveBitmap(final Bitmap bitmap, final String filename) {
     final String root =
-        Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "tensorflow";
+        Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "glpr";
     LOGGER.i("Saving %dx%d bitmap to %s.", bitmap.getWidth(), bitmap.getHeight(), root);
     final File myDir = new File(root);
 

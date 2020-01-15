@@ -1,4 +1,4 @@
-package org.tensorflow.lite.examples.classification.tflite
+package org.boerzel.glpr.tflite
 
 import android.content.Context
 import android.content.res.AssetManager

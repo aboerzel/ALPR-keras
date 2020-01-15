@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.classification;
+package org.boerzel.glpr;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;

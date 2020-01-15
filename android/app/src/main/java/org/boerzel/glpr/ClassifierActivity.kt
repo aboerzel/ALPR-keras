@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tensorflow.lite.examples.classification
+package org.boerzel.glpr
 
 import android.graphics.*
 import android.media.ImageReader
@@ -21,9 +21,9 @@ import android.os.SystemClock
 import android.util.Size
 import android.view.Surface
 import android.view.View
-import org.tensorflow.lite.examples.classification.customview.OverlayView
-import org.tensorflow.lite.examples.classification.env.Logger
-import org.tensorflow.lite.examples.classification.tflite.LicenseRecognizer
+import org.boerzel.glpr.customview.OverlayView
+import org.boerzel.glpr.env.Logger
+import org.boerzel.glpr.tflite.LicenseRecognizer
 import java.io.IOException
 import kotlin.math.roundToInt
 

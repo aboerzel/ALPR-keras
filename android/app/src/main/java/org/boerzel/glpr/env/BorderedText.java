@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package org.tensorflow.lite.examples.classification.env;
+package org.boerzel.glpr.env;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

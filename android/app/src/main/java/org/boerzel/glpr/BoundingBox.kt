@@ -1,4 +1,4 @@
-package org.tensorflow.lite.examples.classification
+package org.boerzel.glpr
 
 class BoundingBox(x: Int, y: Int, width: Int, height: Int) {
 

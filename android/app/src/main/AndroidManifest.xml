@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.tensorflow.lite.examples.classification">
+    package="org.boerzel.glpr">
 
     <uses-sdk />
 
